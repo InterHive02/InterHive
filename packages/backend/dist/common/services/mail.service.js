@@ -101,8 +101,12 @@ let MailService = MailService_1 = class MailService {
     }
     async sendEmail(to, subject, html, from) {
         try {
+            const fromName = this.configService.get('mail.from.name') || 'InterHive Team';
+            const fromEmail = this.configService.get('mail.from.email') || 'interhive.info@gmail.com';
+            const defaultFrom = `"${fromName}" <${fromEmail}>`;
             const mailOptions = {
-                from: from || this.configService.get('mail.from.email') || 'interhive.info@gmail.com',
+                from: from || defaultFrom,
+                replyTo: fromEmail,
                 to: Array.isArray(to) ? to.join(', ') : to,
                 subject,
                 html,
@@ -333,6 +337,217 @@ let MailService = MailService_1 = class MailService {
       </div>
     `;
         return this.sendEmail(to, `🔑 ${otpCode} is your InterHive verification code`, html);
+    }
+    async sendCredentialDeliveryEmail(data) {
+        const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #4f46e5; margin: 0; font-size: 26px; font-weight: 800;">Welcome to InterHive 🎉</h1>
+          <p style="color: #64748b; font-size: 14px; margin-top: 6px;">From Intern to Industry Readiness</p>
+        </div>
+
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
+          Dear <strong>${data.fullName}</strong>,
+        </p>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.6;">
+          Congratulations! Your application has been officially accepted by the HR team. Your internal platform account has now been created.
+        </p>
+
+        <div style="background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; margin: 24px 0;">
+          <h3 style="margin-top: 0; color: #1e293b; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">🔐 Your Official Login Credentials</h3>
+          
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; width: 140px;"><strong>Internal ID:</strong></td>
+              <td style="padding: 6px 0; color: #0f172a; font-family: monospace; font-size: 15px;"><strong>${data.employeeId}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>Login Email:</strong></td>
+              <td style="padding: 6px 0; color: #2563eb; font-family: monospace;"><strong>${data.loginEmail}</strong></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>Temporary Password:</strong></td>
+              <td style="padding: 6px 0; color: #dc2626; font-family: monospace; font-size: 16px;"><strong>${data.temporaryPassword}</strong></td>
+            </tr>
+          </table>
+        </div>
+
+        <p style="font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px;">
+          ⚠️ <strong>Security Notice:</strong> You will be required to change this temporary password immediately upon your first login.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${data.loginUrl}" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; font-weight: bold; font-size: 15px; padding: 14px 32px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(79,70,229,0.3);">
+            Access Intern Portal →
+          </a>
+        </div>
+
+        <div style="background-color: #f8fafc; border-radius: 10px; padding: 16px; margin-top: 24px; font-size: 13px; color: #475569;">
+          <h4 style="margin: 0 0 8px 0; color: #1e293b;">Next Steps for Onboarding:</h4>
+          <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Log in using the temporary credentials above.</li>
+            <li>Set your secure personal password.</li>
+            <li>Review your assigned department, mentor details, and orientation tasks in your Intern Dashboard.</li>
+          </ol>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+          InterHive Inc. • Industry Readiness & Talent Connect Platform<br />
+          If you have questions, please reach out to <a href="mailto:interhive.info@gmail.com" style="color: #6366f1;">interhive.info@gmail.com</a>.
+        </p>
+      </div>
+    `;
+        return this.sendEmail(data.to, `🎉 Welcome to InterHive! Your Intern Login Credentials & Onboarding Details`, html);
+    }
+    async sendApplicationReceivedEmail(to, fullName) {
+        const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+        <h2 style="color: #4f46e5; margin-top: 0;">Application Received! 🚀</h2>
+        <p style="font-size: 14px; color: #334155;">Dear ${fullName},</p>
+        <p style="font-size: 14px; color: #334155; line-height: 1.6;">
+          Thank you for applying for an internship opportunity at <strong>InterHive</strong>. We have successfully received your application.
+        </p>
+        <p style="font-size: 14px; color: #334155; line-height: 1.6;">
+          Our HR and technical review team will review your qualifications, skills, and portfolio. If shortlisted, you will receive an invitation for an interview directly via email.
+        </p>
+        <div style="background-color: #f1f5f9; padding: 14px; border-radius: 8px; margin: 20px 0; font-size: 13px; color: #475569;">
+          <strong>Note:</strong> InterHive operates on a controlled-access model. Accounts are created directly by the HR team once candidate selection is finalized.
+        </div>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">InterHive Inc. • From Intern to Industry</p>
+      </div>
+    `;
+        return this.sendEmail(to, `Application Received - InterHive Internship Program`, html);
+    }
+    async sendApplicationInterviewEmail(data) {
+        const isOnline = data.mode === 'online';
+        const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #4f46e5; margin: 0; font-size: 26px; font-weight: 800;">Interview Invitation 📅</h1>
+          <p style="color: #64748b; font-size: 14px; margin-top: 6px;">InterHive Internship Technical Evaluation</p>
+        </div>
+
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
+          Dear <strong>${data.fullName}</strong>,
+        </p>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.6;">
+          Great news! Following a review of your application, our HR team has shortlisted you for an interview. Please find the confirmed schedule and session details below:
+        </p>
+
+        <div style="background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; margin: 24px 0;">
+          <h3 style="margin-top: 0; color: #1e293b; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">🗓️ Session Schedule</h3>
+          
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; width: 140px;"><strong>Date:</strong></td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${data.date}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>Time:</strong></td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${data.time}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>Mode:</strong></td>
+              <td style="padding: 6px 0; color: #4f46e5; font-weight: bold; text-transform: uppercase;">${data.mode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>${isOnline ? 'Meeting Link:' : 'Location:'}</strong></td>
+              <td style="padding: 6px 0; color: #2563eb; font-weight: bold;">
+                ${isOnline && data.linkOrLocation.startsWith('http')
+            ? `<a href="${data.linkOrLocation}" target="_blank" style="color: #2563eb; text-decoration: underline;">${data.linkOrLocation}</a>`
+            : data.linkOrLocation}
+              </td>
+            </tr>
+            ${data.interviewer ? `
+            <tr>
+              <td style="padding: 6px 0; color: #64748b;"><strong>Interviewer:</strong></td>
+              <td style="padding: 6px 0; color: #334155;">${data.interviewer}</td>
+            </tr>` : ''}
+          </table>
+
+          ${data.notes ? `
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 13px; color: #475569;">
+            <strong>Additional Notes / Instructions:</strong>
+            <p style="margin: 4px 0 0 0;">${data.notes}</p>
+          </div>` : ''}
+        </div>
+
+        ${isOnline && data.linkOrLocation.startsWith('http') ? `
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${data.linkOrLocation}" target="_blank" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; font-weight: bold; font-size: 15px; padding: 14px 32px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(79,70,229,0.3);">
+            Join Interview Session →
+          </a>
+        </div>` : ''}
+
+        <div style="background-color: #f8fafc; border-radius: 10px; padding: 16px; margin-top: 24px; font-size: 13px; color: #475569;">
+          <h4 style="margin: 0 0 8px 0; color: #1e293b;">Preparation Checklist:</h4>
+          <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Please join or arrive 5 minutes before the scheduled time.</li>
+            <li>Ensure a stable internet connection and functioning webcam/microphone.</li>
+            <li>Have your portfolio, GitHub repositories, and resume ready to share.</li>
+          </ul>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+          InterHive Inc. • From Intern to Industry<br />
+          If you need to reschedule, please contact <a href="mailto:interhive.info@gmail.com" style="color: #6366f1;">interhive.info@gmail.com</a>.
+        </p>
+      </div>
+    `;
+        return this.sendEmail(data.to, `📅 Interview Invitation: InterHive Internship Program with ${data.fullName}`, html);
+    }
+    async sendRejectionEmail(data) {
+        const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #4f46e5; margin: 0; font-size: 24px; font-weight: 800;">InterHive Internship Program</h1>
+          <p style="color: #64748b; font-size: 13px; margin-top: 6px;">From Intern to Industry Readiness</p>
+        </div>
+
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
+          Dear <strong>${data.fullName}</strong>,
+        </p>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.7;">
+          Thank you for taking the time to apply and participate in our internship selection process at <strong>InterHive</strong>. We truly appreciate your interest in joining our program.
+        </p>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.7;">
+          After careful consideration of all applicants, we regret to inform you that we are <strong>unable to move forward with your application</strong> at this time. This was a very competitive round, and the decision was not made lightly.
+        </p>
+
+        ${data.feedback ? `
+        <div style="background: #f8fafc; border-left: 4px solid #4f46e5; border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 14px; color: #475569; line-height: 1.6;">
+          <strong style="color: #1e293b;">Feedback from our HR team:</strong><br/>
+          ${data.feedback}
+        </div>` : ''}
+
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; border-radius: 14px; padding: 20px; margin: 24px 0;">
+          <h3 style="margin-top: 0; color: #166534; font-size: 15px;">💡 Keep Going — Your Journey Doesn't End Here</h3>
+          <ul style="margin: 0; padding-left: 18px; color: #15803d; font-size: 14px; line-height: 1.8;">
+            <li>Continue building your skills and portfolio with real-world projects.</li>
+            <li>InterHive runs new internship batches periodically — you're welcome to re-apply in the future.</li>
+            <li>Keep contributing to open-source projects and strengthening your GitHub profile.</li>
+          </ul>
+        </div>
+
+        <p style="font-size: 14px; color: #475569; line-height: 1.7;">
+          We wish you the very best in your career journey. We encourage you to keep learning and growing — many successful professionals faced similar setbacks early on. <strong>Better luck next time!</strong> 🌟
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+          InterHive Inc. • Industry Readiness &amp; Talent Connect Platform<br />
+          Questions? Reach us at <a href="mailto:interhive.info@gmail.com" style="color: #6366f1;">interhive.info@gmail.com</a>
+        </p>
+      </div>
+    `;
+        return this.sendEmail(data.to, `InterHive Internship Application — Update on Your Application`, html);
     }
 };
 exports.MailService = MailService;

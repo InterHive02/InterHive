@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useAttendance } from '../hooks/use-attendance';
 
 interface CheckInButtonProps {
@@ -26,7 +27,7 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({
 
   const getLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Geolocation is not supported by your browser');
       return;
     }
 
@@ -44,20 +45,22 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({
             longitude,
             address: data.display_name || 'Unknown location',
           });
+          toast.success('Location detected successfully');
         } catch (error) {
           setLocation({
             latitude,
             longitude,
-            address: 'Location detected',
+            address: 'Work / Remote Location',
           });
+          toast.success('Coordinates recorded');
         } finally {
           setIsGettingLocation(false);
         }
       },
       (error) => {
-        console.error('Geolocation error:', error);
+        console.warn('Geolocation access:', error);
         setIsGettingLocation(false);
-        alert('Failed to get location. Please enable location services.');
+        toast.error('Could not retrieve GPS coordinates. Location remains optional.');
       },
       {
         enableHighAccuracy: true,
@@ -157,7 +160,7 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({
         {!location && (
           <div className="flex items-center gap-2 text-sm text-yellow-600 dark:text-yellow-400">
             <AlertCircle className="w-4 h-4" />
-            <span>Location is required for check-in</span>
+            <span>Location is recommended for check-in (optional)</span>
           </div>
         )}
       </div>

@@ -94,6 +94,9 @@ let AssessmentsService = class AssessmentsService {
         };
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Assessment not found');
+        }
         const assessment = await this.assessmentModel
             .findById(id)
             .populate('createdBy', 'firstName lastName email')

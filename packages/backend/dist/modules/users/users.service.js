@@ -127,6 +127,9 @@ let UsersService = class UsersService {
         };
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('User not found');
+        }
         const user = await this.userModel
             .findById(id)
             .populate('department')

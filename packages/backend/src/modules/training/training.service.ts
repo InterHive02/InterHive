@@ -145,6 +145,10 @@ export class TrainingService {
   }
 
   async findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Training program not found');
+    }
+
     const program = await this.trainingProgramModel
       .findById(id)
       .populate('modules')

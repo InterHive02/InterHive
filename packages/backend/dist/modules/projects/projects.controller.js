@@ -44,6 +44,9 @@ let ProjectsController = class ProjectsController {
         }
         return this.projectsService.getMyProjects(userId, status);
     }
+    async getStats() {
+        return this.projectsService.getStats();
+    }
     async findById(id) {
         return this.projectsService.findById(id);
     }
@@ -82,9 +85,6 @@ let ProjectsController = class ProjectsController {
     }
     async deleteUpload(user, uploadId) {
         return this.projectsService.deleteUpload(user.id, uploadId);
-    }
-    async getStats() {
-        return this.projectsService.getStats();
     }
 };
 exports.ProjectsController = ProjectsController;
@@ -126,6 +126,16 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User, String]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "getMyProjects", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get project statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get project by ID' }),
@@ -279,16 +289,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User, String]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "deleteUpload", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get project statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "getStats", null);
 exports.ProjectsController = ProjectsController = __decorate([
     (0, swagger_1.ApiTags)('Projects'),
     (0, common_1.Controller)('projects'),

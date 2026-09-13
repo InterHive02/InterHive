@@ -16,9 +16,9 @@ export const useCompany = () => {
         }
         // Get current company profile
         const response = await companyApi.getAll({ page: 1, limit: 1 });
-        return response.data.data[0];
+        const list = (response.data as any)?.data || response.data || [];
+        return Array.isArray(list) ? list[0] : list;
       },
-      enabled: id !== undefined,
     });
 
   const useCompanies = (params: { page: number; limit: number; search?: string; industry?: string; status?: string }) =>

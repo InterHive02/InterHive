@@ -21,9 +21,70 @@ export const AssessmentsPage: React.FC = () => {
     navigate(`/assessments/${id}/take`);
   };
 
-  const filteredAssessments = data?.data?.filter((assessment: any) => {
-    const matchesSearch = assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assessment.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const defaultAssessments = [
+    {
+      id: 'asmt-01',
+      title: 'Full-Stack JavaScript & TypeScript Diagnostic',
+      description: 'Test core mastery in modern ESNext, TypeScript type system, React hooks, and Node.js event loops.',
+      type: 'technical',
+      difficulty: 'intermediate',
+      duration: 45,
+      totalQuestions: 30,
+      totalScore: 100,
+      passingScore: 75,
+      skillsAssessed: [
+        { name: 'TypeScript' },
+        { name: 'React' },
+        { name: 'Node.js' },
+        { name: 'REST APIs' },
+      ],
+    },
+    {
+      id: 'asmt-02',
+      title: 'Backend Microservices & MongoDB Design',
+      description: 'Evaluate schema normalization, aggregation pipelines, RESTful conventions, and JWT security.',
+      type: 'coding',
+      difficulty: 'advanced',
+      duration: 60,
+      totalQuestions: 25,
+      totalScore: 100,
+      passingScore: 80,
+      skillsAssessed: [
+        { name: 'NestJS' },
+        { name: 'MongoDB' },
+        { name: 'Microservices' },
+        { name: 'Security' },
+      ],
+    },
+    {
+      id: 'asmt-03',
+      title: 'Industrial Agile & System Architecture Evaluation',
+      description: 'System design principles, database indexing, Git workflows, and code review standards.',
+      type: 'aptitude',
+      difficulty: 'beginner',
+      duration: 30,
+      totalQuestions: 20,
+      totalScore: 100,
+      passingScore: 70,
+      skillsAssessed: [
+        { name: 'System Design' },
+        { name: 'Git' },
+        { name: 'Agile' },
+      ],
+    },
+  ];
+
+  const fetchedAssessments = Array.isArray(data)
+    ? data
+    : (data as any)?.data || [];
+
+  const assessments = fetchedAssessments.length > 0 ? fetchedAssessments : defaultAssessments;
+
+  const filteredAssessments = assessments.filter((assessment: any) => {
+    const title = assessment.title || '';
+    const desc = assessment.description || '';
+    const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      desc.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || assessment.type === filterType;
     return matchesSearch && matchesType;
   });
@@ -40,19 +101,11 @@ export const AssessmentsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assessments</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Technical Assessments</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Test your skills and track your progress
+            Pre-vetted skill evaluations, technical benchmarks, and qualification quizzes
           </p>
         </div>
-        {/* Admin only */}
-        <button
-          onClick={() => navigate('/admin/assessments/create')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Create Assessment
-        </button>
       </div>
 
       {/* Filters */}

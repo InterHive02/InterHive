@@ -26,6 +26,9 @@ import { InternDashboardPage } from './features/dashboard/pages/intern-dashboard
 import { CompanyDashboardPage } from './features/dashboard/pages/company-dashboard.page';
 import { ManagerDashboardPage } from './features/dashboard/pages/manager-dashboard.page';
 import { AdminDashboardPage } from './features/dashboard/pages/admin-dashboard.page';
+import { HrDashboardPage } from './features/dashboard/pages/hr-dashboard.page';
+import { HrApplicationsPage } from './features/admin/pages/hr-applications.page';
+import { HrLeadsPage } from './features/admin/pages/hr-leads.page';
 
 // Pages - Features
 import { ProfilePage } from './features/profile/pages/profile.page';
@@ -118,6 +121,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/:id" element={<TrainingDetailsPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects/create" element={<Navigate to="/projects" replace />} />
         <Route path="/projects/:id" element={<ProjectDetailsPage />} />
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/opportunities" element={<OpportunitiesPage />} />
@@ -136,6 +140,8 @@ export const AppRoutes: React.FC = () => {
         }
       >
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/applications" element={<HrApplicationsPage />} />
+        <Route path="/admin/leads" element={<HrLeadsPage />} />
         <Route path="/admin/interns" element={<AdminInternsPage />} />
         <Route path="/admin/companies" element={<AdminCompaniesPage />} />
         <Route path="/admin/assessments" element={<AdminAssessmentsPage />} />
@@ -152,7 +158,9 @@ export const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="/hr/dashboard" element={<ManagerDashboardPage />} />
+        <Route path="/hr/dashboard" element={<HrDashboardPage />} />
+        <Route path="/hr/applications" element={<HrApplicationsPage />} />
+        <Route path="/hr/leads" element={<HrLeadsPage />} />
         <Route path="/hr/interns" element={<AdminInternsPage />} />
         <Route path="/hr/companies" element={<AdminCompaniesPage />} />
         <Route path="/hr/assessments" element={<AdminAssessmentsPage />} />
@@ -176,14 +184,16 @@ export const AppRoutes: React.FC = () => {
       {/* Company Routes */}
       <Route
         element={
-          <ProtectedRoute allowedRoles={['company']}>
+          <ProtectedRoute allowedRoles={['company', 'admin']}>
             <MainLayout />
           </ProtectedRoute>
         }
       >
         <Route path="/company/dashboard" element={<CompanyDashboardPage />} />
         <Route path="/company/requirements" element={<CompanyRequirementsPage />} />
-        <Route path="/company/matches" element={<CompanyMatchesPage />} />
+        <Route path="/company/matches" element={<CompanyMatchesPage initialTab="matches" />} />
+        <Route path="/company/interviews" element={<CompanyMatchesPage initialTab="interviews" />} />
+        <Route path="/company/hires" element={<CompanyMatchesPage initialTab="hires" />} />
       </Route>
 
       {/* 404 */}

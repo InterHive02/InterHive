@@ -13,6 +13,7 @@ const companies_controller_1 = require("./companies.controller");
 const companies_service_1 = require("./companies.service");
 const company_schema_1 = require("./schemas/company.schema");
 const company_requirement_schema_1 = require("./schemas/company-requirement.schema");
+const company_lead_schema_1 = require("./schemas/company-lead.schema");
 const users_module_1 = require("../users/users.module");
 const redis_module_1 = require("../../common/redis/redis.module");
 const mail_module_1 = require("../../common/mail/mail.module");
@@ -25,6 +26,7 @@ exports.CompaniesModule = CompaniesModule = __decorate([
             mongoose_1.MongooseModule.forFeature([
                 { name: company_schema_1.Company.name, schema: company_schema_1.CompanySchema },
                 { name: company_requirement_schema_1.CompanyRequirement.name, schema: company_requirement_schema_1.CompanyRequirementSchema },
+                { name: company_lead_schema_1.CompanyLead.name, schema: company_lead_schema_1.CompanyLeadSchema },
             ]),
             users_module_1.UsersModule,
             redis_module_1.RedisModule,

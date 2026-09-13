@@ -73,10 +73,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, role = 'inter
           </p>
         </div>
         <span
-          className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg ${getStatusColor(project.status)}`}
+          className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg ${getStatusColor(project.status || 'in_progress')}`}
         >
-          {getStatusIcon(project.status)}
-          {project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
+          {getStatusIcon(project.status || 'in_progress')}
+          {(project.status || 'in_progress').charAt(0).toUpperCase() + (project.status || 'in_progress').slice(1).replace('_', ' ')}
         </span>
       </div>
 

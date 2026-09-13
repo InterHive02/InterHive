@@ -44,6 +44,42 @@ export const Header: React.FC<HeaderProps> = ({
     navigate('/login');
   };
 
+  const getUserDisplayName = () => {
+    if (user.firstName) return `${user.firstName} ${user.lastName || ''}`.trim();
+    switch (user.role) {
+      case 'admin':
+        return 'Alex Admin';
+      case 'hr':
+        return 'Hannah HR';
+      case 'manager':
+        return 'Michael Manager';
+      case 'company':
+        return 'TechCorp Rep';
+      case 'intern':
+      default:
+        return 'John Intern';
+    }
+  };
+
+  const getUserInitials = () => {
+    if (user.firstName) {
+      return `${user.firstName[0]}${user.lastName ? user.lastName[0] : ''}`.toUpperCase();
+    }
+    switch (user.role) {
+      case 'admin':
+        return 'AA';
+      case 'hr':
+        return 'HH';
+      case 'manager':
+        return 'MM';
+      case 'company':
+        return 'TC';
+      case 'intern':
+      default:
+        return 'JI';
+    }
+  };
+
   return (
     <header className="bg-white dark:bg-[#121526] border-b border-slate-200/80 dark:border-slate-800/80 sticky top-0 z-30 transition-colors">
       <div className="flex items-center justify-between px-4 lg:px-6 py-3">
@@ -77,8 +113,21 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right Section: Notifications + User Dropdown */}
         <div className="flex items-center gap-3">
           
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {mode === 'dark' ? (
+              <Moon className="w-5 h-5" />
+            ) : (
+              <Sun className="w-5 h-5" />
+            )}
+          </button>
+
           {/* Notifications Bell */}
-          <NotificationBell count={unreadCount || 3} />
+          <NotificationBell count={unreadCount ?? 3} />
 
           {/* User Profile Pill Dropdown */}
           <div className="relative">
@@ -89,17 +138,17 @@ export const Header: React.FC<HeaderProps> = ({
               {user.profilePhoto ? (
                 <img
                   src={user.profilePhoto}
-                  alt={`${user.firstName} ${user.lastName}`}
+                  alt={getUserDisplayName()}
                   className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
-                  {user.firstName ? user.firstName[0] : 'I'}{user.lastName ? user.lastName[0] : 'I'}
+                  {getUserInitials()}
                 </div>
               )}
               
               <span className="hidden md:inline-block font-extrabold text-xs text-slate-800 dark:text-white">
-                {user.firstName || 'Ian'} {user.lastName || 'Intern'}
+                {getUserDisplayName()}
               </span>
 
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
@@ -110,7 +159,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1A1D33] rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                   <p className="font-extrabold text-sm text-slate-900 dark:text-white">
-                    {user.firstName || 'Ian'} {user.lastName || 'Intern'}
+                    {getUserDisplayName()}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{user.email}</p>
                   <span className="inline-block px-2 py-0.5 mt-1.5 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 rounded-md capitalize">

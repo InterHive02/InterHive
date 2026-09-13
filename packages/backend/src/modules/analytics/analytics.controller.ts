@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Query,
@@ -90,12 +91,49 @@ export class AnalyticsController {
     return this.analyticsService.getTrendAnalytics(query);
   }
 
-  // This endpoint is now safe - returns empty array
   @Get('dashboard/activities')
   @ApiOperation({ summary: 'Get recent activities for dashboard' })
   @ApiResponse({ status: 200, description: 'Activities retrieved successfully' })
   async getDashboardActivities(@CurrentUser() user: User) {
-    return this.analyticsService.getDashboardActivities(user.id);
+    return this.analyticsService.getDashboardActivities(user?.id);
+  }
+
+  @Get('admin-dashboard')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get Super Administrator Central dashboard data' })
+  async getAdminDashboard() {
+    return this.analyticsService.getAdminDashboardData();
+  }
+
+  @Get('manager-dashboard')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Get Operations & Training Management dashboard data' })
+  async getManagerDashboard(@CurrentUser() user: User) {
+    return this.analyticsService.getManagerDashboardData(user?.id);
+  }
+
+  @Get('company-dashboard')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.COMPANY)
+  @ApiOperation({ summary: 'Get Company Dashboard data' })
+  async getCompanyDashboard(@CurrentUser() user: User) {
+    return this.analyticsService.getCompanyDashboardData(user?.id, user?.email);
+  }
+
+  @Patch('activity/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Approve or update platform activity status' })
+  async updateActivityStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+  ) {
+    return this.analyticsService.updateActivityStatus(id, body.status);
+  }
+
+  @Post('diagnostics')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Run live system health diagnostics' })
+  async runDiagnostics() {
+    return this.analyticsService.runDiagnostics();
   }
 
   @Get('export/readiness')

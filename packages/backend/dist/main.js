@@ -18,6 +18,8 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
     const logger = new common_1.Logger('Bootstrap');
+    app.use(require('express').json({ limit: '10mb' }));
+    app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
     app.use(helmet_1.default({
         contentSecurityPolicy: {
             directives: {

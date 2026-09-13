@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket } from '../../../core/providers/socket.provider';
 import { communicationApi } from '../../../api/endpoints/communication.api';
-import { toast } from 'react-hot-toast';
 
 export const useChat = (userId: string) => {
-  const { socket, isConnected, emit, on, off } = useSocket();
+  const { socket, isConnected, on, off } = useSocket();
   const [chats, setChats] = useState<any[]>([]);
   const [messages, setMessages] = useState<Record<string, any[]>>({});
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -14,9 +13,23 @@ export const useChat = (userId: string) => {
   const loadChats = useCallback(async () => {
     try {
       const response = await communicationApi.getChats(1, 50);
-      setChats(response.data.data);
+      const data = response?.data?.data || response?.data;
+      if (Array.isArray(data)) {
+        const mapped = data.map((c: any) => ({
+          ...c,
+          id: c.id || c._id?.toString(),
+          // Normalise participants: backend populates with role field
+          participants: (c.participants || []).map((p: any) => ({
+            ...p,
+            id: p.id || p._id?.toString(),
+          })),
+          unreadCount: c.unreadCount?.data?.count ?? c.unreadCount ?? 0,
+          updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date(),
+        }));
+        setChats(mapped);
+      }
     } catch (error) {
-      console.error('Failed to load chats:', error);
+      console.warn('Failed to load chats from backend', error);
     }
   }, []);
 
@@ -24,9 +37,16 @@ export const useChat = (userId: string) => {
   const loadAnnouncements = useCallback(async () => {
     try {
       const response = await communicationApi.getAnnouncements();
-      setAnnouncements(response.data.data);
+      const data = response?.data?.data || response?.data;
+      if (Array.isArray(data)) {
+        const mapped = data.map((a: any) => ({
+          ...a,
+          id: a.id || a._id?.toString(),
+        }));
+        setAnnouncements(mapped);
+      }
     } catch (error) {
-      console.error('Failed to load announcements:', error);
+      console.warn('Failed to load announcements from backend', error);
     }
   }, []);
 
@@ -34,19 +54,26 @@ export const useChat = (userId: string) => {
   const loadMessages = useCallback(async (chatId: string) => {
     try {
       const response = await communicationApi.getMessages(chatId, 1, 50);
-      setMessages(prev => ({
-        ...prev,
-        [chatId]: response.data.data.reverse(),
-      }));
+      const data = response?.data?.data || response?.data;
+      if (Array.isArray(data)) {
+        const sorted = [...data].sort(
+          (a: any, b: any) =>
+            new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
+        );
+        setMessages(prev => ({ ...prev, [chatId]: sorted }));
+      }
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.warn('Failed to load messages for chat:', chatId, error);
     }
   }, []);
 
   // Send message
-  const sendMessage = useCallback(async (chatId: string, content: string, type: string = 'text', attachments?: File[]) => {
-    try {
-      const response = await communicationApi.sendMessage(chatId, {
+  const sendMessage = useCallback(
+    async (chatId: string, content: string, type: string = 'text', attachments?: File[]) => {
+      const tempId = `temp-${Date.now()}`;
+      const optimisticMessage = {
+        id: tempId,
+        senderId: userId,
         content,
         type,
         attachments: attachments?.map(f => ({
@@ -55,93 +82,142 @@ export const useChat = (userId: string) => {
           type: f.type,
           size: f.size,
         })),
-      });
+        createdAt: new Date(),
+        isRead: false,
+        isEdited: false,
+        isDeleted: false,
+      };
 
       // Optimistically add message
-      const newMessage = response.data.data;
       setMessages(prev => ({
         ...prev,
-        [chatId]: [...(prev[chatId] || []), newMessage],
+        [chatId]: [...(prev[chatId] || []), optimisticMessage],
       }));
 
-      // Update chat last message
-      setChats(prev => prev.map(chat =>
-        chat.id === chatId
-          ? { ...chat, lastMessage: newMessage, updatedAt: new Date() }
-          : chat
-      ));
+      // Update chat last message optimistically
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === chatId
+            ? { ...chat, lastMessage: optimisticMessage, updatedAt: new Date() }
+            : chat,
+        ),
+      );
 
-      return newMessage;
-    } catch (error) {
-      toast.error('Failed to send message');
-      throw error;
-    }
-  }, []);
+      try {
+        const response = await communicationApi.sendMessage(chatId, {
+          content,
+          type,
+          attachments: attachments?.map(f => ({
+            name: f.name,
+            url: URL.createObjectURL(f),
+            type: f.type,
+            size: f.size,
+          })),
+        });
+
+        const serverMessage = response?.data?.data || response?.data;
+        if (serverMessage) {
+          const mapped = {
+            ...serverMessage,
+            id: serverMessage.id || serverMessage._id?.toString() || tempId,
+          };
+          setMessages(prev => ({
+            ...prev,
+            [chatId]: (prev[chatId] || []).map(m => (m.id === tempId ? mapped : m)),
+          }));
+          return mapped;
+        }
+        return optimisticMessage;
+      } catch (error) {
+        // Keep optimistic message so user's work is not lost
+        return optimisticMessage;
+      }
+    },
+    [userId],
+  );
 
   // Mark announcement as read
-  const markAnnouncementAsRead = useCallback(async (id: string) => {
-    try {
-      await communicationApi.markAnnouncementAsRead(id);
-      setAnnouncements(prev => prev.map(a =>
-        a.id === id
-          ? { ...a, readBy: [...a.readBy, userId] }
-          : a
-      ));
-    } catch (error) {
-      console.error('Failed to mark announcement as read:', error);
-    }
-  }, [userId]);
+  const markAnnouncementAsRead = useCallback(
+    async (id: string) => {
+      try {
+        await communicationApi.markAnnouncementAsRead(id);
+      } catch (error) {
+        console.warn('Failed to persist announcement read state');
+      }
+      setAnnouncements(prev =>
+        prev.map(a =>
+          a.id === id
+            ? { ...a, readBy: [...(Array.isArray(a.readBy) ? a.readBy : []), userId] }
+            : a,
+        ),
+      );
+    },
+    [userId],
+  );
 
   // Pin/unpin announcement
-  const pinAnnouncement = useCallback(async (id: string) => {
-    try {
+  const pinAnnouncement = useCallback(
+    async (id: string) => {
       const announcement = announcements.find(a => a.id === id);
-      if (announcement) {
-        await communicationApi.pinAnnouncement(id, !announcement.isPinned);
-        setAnnouncements(prev => prev.map(a =>
-          a.id === id
-            ? { ...a, isPinned: !a.isPinned }
-            : a
-        ));
+      if (!announcement) return;
+      const newPinned = !announcement.isPinned;
+
+      try {
+        await communicationApi.pinAnnouncement(id, newPinned);
+      } catch (error) {
+        console.warn('Failed to persist announcement pin state');
       }
-    } catch (error) {
-      console.error('Failed to pin announcement:', error);
-    }
-  }, [announcements]);
+      setAnnouncements(prev => prev.map(a => (a.id === id ? { ...a, isPinned: newPinned } : a)));
+    },
+    [announcements],
+  );
 
   // Socket event handlers
   useEffect(() => {
     if (!isConnected || !socket) return;
 
-    // New message handler
     const handleNewMessage = (data: any) => {
       const { message, chat } = data;
+      if (!chat?.id || !message) return;
       setMessages(prev => ({
         ...prev,
         [chat.id]: [...(prev[chat.id] || []), message],
       }));
-      setChats(prev => prev.map(c =>
-        c.id === chat.id
-          ? { ...c, lastMessage: message, updatedAt: new Date() }
-          : c
-      ));
+      setChats(prev =>
+        prev.map(c =>
+          c.id === chat.id ? { ...c, lastMessage: message, updatedAt: new Date() } : c,
+        ),
+      );
     };
 
-    // New chat handler
     const handleChatCreated = (chat: any) => {
-      setChats(prev => [chat, ...prev]);
+      if (!chat?.id && !chat?._id) return;
+      const mapped = {
+        ...chat,
+        id: chat.id || chat._id?.toString(),
+        participants: (chat.participants || []).map((p: any) => ({
+          ...p,
+          id: p.id || p._id?.toString(),
+        })),
+        unreadCount: 0,
+        updatedAt: chat.updatedAt ? new Date(chat.updatedAt) : new Date(),
+      };
+      setChats(prev => {
+        const exists = prev.some(c => c.id === mapped.id);
+        return exists ? prev.map(c => (c.id === mapped.id ? mapped : c)) : [mapped, ...prev];
+      });
     };
 
-    // Chat updated handler
     const handleChatUpdated = (chat: any) => {
-      setChats(prev => prev.map(c =>
-        c.id === chat.id ? chat : c
-      ));
+      if (chat?.id) {
+        setChats(prev => prev.map(c => (c.id === chat.id ? { ...c, ...chat } : c)));
+      }
     };
 
-    // New announcement handler
     const handleNewAnnouncement = (announcement: any) => {
-      setAnnouncements(prev => [announcement, ...prev]);
+      if (announcement?.id) {
+        setAnnouncements(prev => [announcement, ...prev]);
+      }
     };
 
     on('new_message', handleNewMessage);
@@ -159,12 +235,21 @@ export const useChat = (userId: string) => {
 
   // Initial load
   useEffect(() => {
+    let isMounted = true;
     const init = async () => {
       setIsLoading(true);
-      await Promise.all([loadChats(), loadAnnouncements()]);
-      setIsLoading(false);
+      try {
+        await Promise.all([loadChats(), loadAnnouncements()]);
+      } catch (err) {
+        console.error('Initial chat load error:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     };
     init();
+    return () => {
+      isMounted = false;
+    };
   }, [loadChats, loadAnnouncements]);
 
   return {

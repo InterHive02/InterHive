@@ -122,5 +122,14 @@ export const companyApi = {
     techStack?: string;
     internCount?: string;
     message?: string;
+    website?: string;
+    industry?: string;
+    additionalInfo?: string;
   }) => apiClient.post('/companies/inquiry', data),
+
+  getLeads: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
+    apiClient.get<any[]>('/companies/leads', { params }),
+
+  updateLead: (id: string, data: { status?: string; note?: string; assignedTo?: string }) =>
+    apiClient.patch(`/companies/leads/${id}`, data),
 };

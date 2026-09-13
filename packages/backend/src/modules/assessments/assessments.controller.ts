@@ -49,6 +49,30 @@ export class AssessmentsController {
     return this.assessmentsService.findAll({ page, limit, type, category, status });
   }
 
+  @Get('my-results')
+  @ApiOperation({ summary: 'Get all assessment results for current user' })
+  @ApiResponse({ status: 200, description: 'Results retrieved successfully' })
+  async getMyResults(@CurrentUser() user: User) {
+    return this.assessmentsService.getMyResults(user.id);
+  }
+
+  // Admin/Manager endpoints
+  @Get('results/:userId')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Get assessment results for a user' })
+  @ApiResponse({ status: 200, description: 'Results retrieved successfully' })
+  async getUserResults(@Param('userId') userId: string) {
+    return this.assessmentsService.getUserResults(userId);
+  }
+
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get assessment statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.assessmentsService.getStats();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get assessment by ID' })
   @ApiResponse({ status: 200, description: 'Assessment retrieved successfully' })
@@ -113,22 +137,6 @@ export class AssessmentsController {
     return this.assessmentsService.getResult(user.id, id);
   }
 
-  @Get('my-results')
-  @ApiOperation({ summary: 'Get all assessment results for current user' })
-  @ApiResponse({ status: 200, description: 'Results retrieved successfully' })
-  async getMyResults(@CurrentUser() user: User) {
-    return this.assessmentsService.getMyResults(user.id);
-  }
-
-  // Admin/Manager endpoints
-  @Get('results/:userId')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @ApiOperation({ summary: 'Get assessment results for a user' })
-  @ApiResponse({ status: 200, description: 'Results retrieved successfully' })
-  async getUserResults(@Param('userId') userId: string) {
-    return this.assessmentsService.getUserResults(userId);
-  }
-
   @Post(':id/evaluate')
   @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiOperation({ summary: 'Evaluate assessment manually' })
@@ -139,13 +147,5 @@ export class AssessmentsController {
     @Body('feedback') feedback: any,
   ) {
     return this.assessmentsService.evaluateAssessment(id, resultId, feedback);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get assessment statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.assessmentsService.getStats();
   }
 }

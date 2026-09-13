@@ -104,7 +104,11 @@ class ApiClient {
         // Handle other errors
         if (error.response) {
           const message = error.response.data?.message || 'An error occurred';
-          toast.error(message);
+          if (typeof message === 'string' && message.startsWith('Cannot ')) {
+            console.warn('API endpoint not found:', message);
+          } else {
+            toast.error(message);
+          }
         } else if (error.request) {
           toast.error('Network error. Please check your connection.');
         } else {

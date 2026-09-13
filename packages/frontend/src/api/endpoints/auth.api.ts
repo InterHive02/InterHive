@@ -82,4 +82,9 @@ export const authApi = {
 
   googleLogin: (data: { email: string; name?: string; googleId?: string; picture?: string }) =>
     apiClient.post<AuthResponse>('/auth/google', data),
+
+  changeFirstPassword: (newPassword: string) =>
+    apiClient.post<{ success: boolean; message: string }>('/auth/change-first-password', {
+      newPassword,
+    }),
 };

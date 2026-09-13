@@ -112,6 +112,10 @@ export class AssessmentsService {
   }
 
   async findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Assessment not found');
+    }
+
     const assessment = await this.assessmentModel
       .findById(id)
       .populate('createdBy', 'firstName lastName email')

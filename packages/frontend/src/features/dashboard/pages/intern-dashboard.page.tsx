@@ -76,7 +76,13 @@ export const InternDashboardPage: React.FC = () => {
             Intern Dashboard
           </h1>
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-            Welcome back, {profile?.personalInfo?.firstName || 'Intern'}!
+            Welcome back, {profile?.personalInfo?.firstName || 'Intern'}
+            {profile?.academicInfo?.currentEducation?.institution
+              ? ` · ${profile.academicInfo.currentEducation.institution}`
+              : ''}
+            {profile?.preferences?.preferredDomains?.length
+              ? ` · Interested in ${profile.preferences.preferredDomains.slice(0, 2).join(', ')}`
+              : ''}
           </p>
         </div>
 

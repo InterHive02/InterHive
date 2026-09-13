@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -47,6 +48,30 @@ export class CompaniesController {
     return this.companiesService.sendCompanyInquiry(body);
   }
 
+  @Get('leads')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get all company leads for HR and Admin' })
+  async getLeads(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.companiesService.getLeads({ page, limit, status, search });
+  }
+
+  @Patch('leads/:id')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Update company lead status and notes' })
+  async updateLead(
+    @Param('id') id: string,
+    @Body() body: { status?: string; note?: string; assignedTo?: string },
+    @CurrentUser() user: User,
+  ) {
+    const author = user ? `${user.firstName} ${user.lastName}`.trim() : 'HR Team';
+    return this.companiesService.updateLead(id, body, author);
+  }
+
   @Post()
   @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiOperation({ summary: 'Create company' })
@@ -71,6 +96,72 @@ export class CompaniesController {
     return this.companiesService.findAll({ page, limit, search, industry, status });
   }
 
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get company statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.companiesService.getStats();
+  }
+
+  // Company Requirements (Specific static/nested routes before wildcard :id)
+  @Post(':id/requirements')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.COMPANY)
+  @ApiOperation({ summary: 'Create company requirement' })
+  @ApiResponse({ status: 201, description: 'Requirement created successfully' })
+  @ApiResponse({ status: 404, description: 'Company not found' })
+  async createRequirement(
+    @Param('id') companyId: string,
+    @Body() createRequirementDto: CreateCompanyRequirementDto,
+  ) {
+    return this.companiesService.createRequirement(companyId, createRequirementDto);
+  }
+
+  @Get(':id/requirements')
+  @ApiOperation({ summary: 'Get company requirements' })
+  @ApiResponse({ status: 200, description: 'Requirements retrieved successfully' })
+  async getRequirements(
+    @Param('id') companyId: string,
+    @Query('status') status?: string,
+  ) {
+    return this.companiesService.getRequirements(companyId, status);
+  }
+
+  @Put('requirements/:requirementId')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.COMPANY)
+  @ApiOperation({ summary: 'Update company requirement' })
+  @ApiResponse({ status: 200, description: 'Requirement updated successfully' })
+  @ApiResponse({ status: 404, description: 'Requirement not found' })
+  async updateRequirement(
+    @Param('requirementId') requirementId: string,
+    @Body() updateRequirementDto: any,
+  ) {
+    return this.companiesService.updateRequirement(requirementId, updateRequirementDto);
+  }
+
+  @Delete('requirements/:requirementId')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.COMPANY)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete company requirement' })
+  @ApiResponse({ status: 204, description: 'Requirement deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Requirement not found' })
+  async deleteRequirement(@Param('requirementId') requirementId: string) {
+    await this.companiesService.deleteRequirement(requirementId);
+  }
+
+  // Matching
+  @Get(':id/matches')
+  @ApiOperation({ summary: 'Get matched interns for company' })
+  @ApiResponse({ status: 200, description: 'Matches retrieved successfully' })
+  async getMatches(
+    @Param('id') companyId: string,
+    @Query('requirementId') requirementId?: string,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.companiesService.getMatches(companyId, requirementId, limit);
+  }
+
+  // Company CRUD with wildcard :id
   @Get(':id')
   @ApiOperation({ summary: 'Get company by ID' })
   @ApiResponse({ status: 200, description: 'Company retrieved successfully' })
@@ -98,63 +189,6 @@ export class CompaniesController {
     await this.companiesService.delete(id);
   }
 
-  // Company Requirements
-  @Post(':id/requirements')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Create company requirement' })
-  @ApiResponse({ status: 201, description: 'Requirement created successfully' })
-  @ApiResponse({ status: 404, description: 'Company not found' })
-  async createRequirement(
-    @Param('id') companyId: string,
-    @Body() createRequirementDto: CreateCompanyRequirementDto,
-  ) {
-    return this.companiesService.createRequirement(companyId, createRequirementDto);
-  }
-
-  @Get(':id/requirements')
-  @ApiOperation({ summary: 'Get company requirements' })
-  @ApiResponse({ status: 200, description: 'Requirements retrieved successfully' })
-  async getRequirements(
-    @Param('id') companyId: string,
-    @Query('status') status?: string,
-  ) {
-    return this.companiesService.getRequirements(companyId, status);
-  }
-
-  @Put('requirements/:requirementId')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Update company requirement' })
-  @ApiResponse({ status: 200, description: 'Requirement updated successfully' })
-  @ApiResponse({ status: 404, description: 'Requirement not found' })
-  async updateRequirement(
-    @Param('requirementId') requirementId: string,
-    @Body() updateRequirementDto: any,
-  ) {
-    return this.companiesService.updateRequirement(requirementId, updateRequirementDto);
-  }
-
-  @Delete('requirements/:requirementId')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete company requirement' })
-  @ApiResponse({ status: 204, description: 'Requirement deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Requirement not found' })
-  async deleteRequirement(@Param('requirementId') requirementId: string) {
-    await this.companiesService.deleteRequirement(requirementId);
-  }
-
-  // Matching
-  @Get(':id/matches')
-  @ApiOperation({ summary: 'Get matched interns for company' })
-  @ApiResponse({ status: 200, description: 'Matches retrieved successfully' })
-  async getMatches(
-    @Param('id') companyId: string,
-    @Query('requirementId') requirementId?: string,
-    @Query('limit') limit: number = 10,
-  ) {
-    return this.companiesService.getMatches(companyId, requirementId, limit);
-  }
-
   // Collaboration
   @Post(':id/onboard')
   @Roles(UserRole.ADMIN, UserRole.HR)
@@ -162,13 +196,5 @@ export class CompaniesController {
   @ApiResponse({ status: 200, description: 'Company onboarded successfully' })
   async onboard(@Param('id') companyId: string) {
     return this.companiesService.onboard(companyId);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get company statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.companiesService.getStats();
   }
 }

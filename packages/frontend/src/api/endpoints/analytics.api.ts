@@ -46,4 +46,19 @@ export const analyticsApi = {
 
   refreshCache: () =>
     apiClient.post('/analytics/cache/refresh'),
+
+  getAdminDashboard: () =>
+    apiClient.get<any>('/analytics/admin-dashboard'),
+
+  getManagerDashboard: () =>
+    apiClient.get<any>('/analytics/manager-dashboard'),
+
+  getCompanyDashboard: () =>
+    apiClient.get<any>('/analytics/company-dashboard'),
+
+  updateActivityStatus: (id: string, status: string) =>
+    apiClient.patch(`/analytics/activity/${id}`, { status }),
+
+  runDiagnostics: () =>
+    apiClient.post<any>('/analytics/diagnostics'),
 };

@@ -32,6 +32,12 @@ let MatchingController = class MatchingController {
     async getMyMatches(user, status, page = 1, limit = 10) {
         return this.matchingService.getMyMatches(user.id, status, page, limit);
     }
+    async getStats() {
+        return this.matchingService.getStats();
+    }
+    async batchMatch(requirementId, internIds) {
+        return this.matchingService.batchMatch(requirementId, internIds);
+    }
     async getMatch(id) {
         return this.matchingService.getMatch(id);
     }
@@ -49,12 +55,6 @@ let MatchingController = class MatchingController {
     }
     async hireIntern(user, id) {
         return this.matchingService.hireIntern(user.id, id);
-    }
-    async getStats() {
-        return this.matchingService.getStats();
-    }
-    async batchMatch(requirementId, internIds) {
-        return this.matchingService.batchMatch(requirementId, internIds);
     }
 };
 exports.MatchingController = MatchingController;
@@ -83,6 +83,28 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User, String, Number, Number]),
     __metadata("design:returntype", Promise)
 ], MatchingController.prototype, "getMyMatches", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get matching statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MatchingController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Post)('batch-match'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Batch match multiple interns to a requirement' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Batch matching completed' }),
+    openapi.ApiResponse({ status: 201 }),
+    __param(0, (0, common_1.Body)('requirementId')),
+    __param(1, (0, common_1.Body)('internIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
+], MatchingController.prototype, "batchMatch", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get match by ID' }),
@@ -160,28 +182,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User, String]),
     __metadata("design:returntype", Promise)
 ], MatchingController.prototype, "hireIntern", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get matching statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], MatchingController.prototype, "getStats", null);
-__decorate([
-    (0, common_1.Post)('batch-match'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Batch match multiple interns to a requirement' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Batch matching completed' }),
-    openapi.ApiResponse({ status: 201 }),
-    __param(0, (0, common_1.Body)('requirementId')),
-    __param(1, (0, common_1.Body)('internIds')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], MatchingController.prototype, "batchMatch", null);
 exports.MatchingController = MatchingController = __decorate([
     (0, swagger_1.ApiTags)('Matching'),
     (0, common_1.Controller)('matching'),

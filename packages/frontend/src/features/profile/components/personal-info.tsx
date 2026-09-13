@@ -20,6 +20,8 @@ interface PersonalInfoProps {
 }
 
 export const PersonalInfo: React.FC<PersonalInfoProps> = ({ data }) => {
+  if (!data) return null;
+
   const formatDate = (date?: Date) => {
     if (!date) return 'Not provided';
     return new Date(date).toLocaleDateString('en-US', {
@@ -70,11 +72,17 @@ export const PersonalInfo: React.FC<PersonalInfoProps> = ({ data }) => {
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Address</p>
               <p className="font-medium text-gray-900 dark:text-white">
-                {data.address.street && `${data.address.street}, `}
-                {data.address.city && `${data.address.city}, `}
-                {data.address.state && `${data.address.state} `}
-                {data.address.zipCode && `${data.address.zipCode}`}
-                {data.address.country && `, ${data.address.country}`}
+                {typeof data.address === 'string'
+                  ? data.address
+                  : [
+                      data.address.street,
+                      data.address.city,
+                      data.address.state,
+                      data.address.zipCode,
+                      data.address.country,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
               </p>
             </div>
           </div>

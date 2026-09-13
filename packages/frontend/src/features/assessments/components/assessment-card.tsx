@@ -63,6 +63,14 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
     return null;
   };
 
+  const difficulty = assessment.difficulty || 'intermediate';
+  const formatDifficulty = (diff?: string) => {
+    if (!diff) return 'Intermediate';
+    return diff.charAt(0).toUpperCase() + diff.slice(1);
+  };
+
+  const skillsAssessed = Array.isArray(assessment.skillsAssessed) ? assessment.skillsAssessed : [];
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
@@ -70,11 +78,11 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {assessment.title}
+              {assessment.title || 'Technical Assessment'}
             </h3>
           </div>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-            {assessment.description}
+            {assessment.description || 'Comprehensive evaluation of domain proficiency.'}
           </p>
         </div>
         {getStatusBadge()}
@@ -82,33 +90,36 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <span
-          className={`px-2 py-1 text-xs rounded-lg ${getDifficultyColor(assessment.difficulty)}`}
+          className={`px-2 py-1 text-xs rounded-lg font-medium ${getDifficultyColor(difficulty)}`}
         >
-          {assessment.difficulty.charAt(0).toUpperCase() + assessment.difficulty.slice(1)}
+          {formatDifficulty(difficulty)}
         </span>
         <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <Clock className="w-4 h-4" />
-          {assessment.duration} min
+          {assessment.duration || 45} min
         </span>
         <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <Award className="w-4 h-4" />
-          Pass: {assessment.passingScore}%
+          Pass: {assessment.passingScore || 70}%
         </span>
       </div>
 
-      {assessment.skillsAssessed.length > 0 && (
+      {skillsAssessed.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">
-          {assessment.skillsAssessed.slice(0, 3).map((skill) => (
-            <span
-              key={skill.name}
-              className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs rounded-lg text-gray-600 dark:text-gray-300"
-            >
-              {skill.name}
-            </span>
-          ))}
-          {assessment.skillsAssessed.length > 3 && (
+          {skillsAssessed.slice(0, 3).map((skill: any, idx: number) => {
+            const skillName = typeof skill === 'string' ? skill : (skill?.name || `Skill ${idx + 1}`);
+            return (
+              <span
+                key={skillName + idx}
+                className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs rounded-lg text-gray-600 dark:text-gray-300"
+              >
+                {skillName}
+              </span>
+            );
+          })}
+          {skillsAssessed.length > 3 && (
             <span className="px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
-              +{assessment.skillsAssessed.length - 3} more
+              +{skillsAssessed.length - 3} more
             </span>
           )}
         </div>
@@ -116,7 +127,7 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
 
       <div className="mt-4 flex items-center justify-between">
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {assessment.totalScore} points
+          {assessment.totalScore ?? (assessment as any).totalQuestions ? ((assessment as any).totalQuestions * 10) : 100} points
         </span>
         {!isCompleted && !isLocked && onStart && (
           <button

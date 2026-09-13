@@ -93,6 +93,9 @@ let MatchingService = class MatchingService {
         };
     }
     async getMatch(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Match not found');
+        }
         const match = await this.matchModel
             .findById(id)
             .populate('internId', 'firstName lastName email employeeId profilePhoto')

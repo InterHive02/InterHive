@@ -31,51 +31,47 @@ let AuthService = class AuthService {
         this.mailService = mailService;
         this.redisService = redisService;
         this.cacheManager = cacheManager;
+        this.logger = new common_1.Logger('AuthService');
         this.otpMemoryMap = new Map();
     }
     async register(registerDto) {
-        const { email, employeeId, password, firstName, lastName, role } = registerDto;
-        const existingUser = await this.userModel.findOne({
-            $or: [{ email }, { employeeId }],
-        });
-        if (existingUser) {
-            throw new common_1.ConflictException('User already exists with this email or employee ID');
+        throw new common_1.ForbiddenException('Public registration is disabled. InterHive accounts are created exclusively by the HR/Admin team upon candidate selection.');
+    }
+    async firstLoginPasswordChange(userId, newPassword) {
+        if (!newPassword || newPassword.length < 8) {
+            throw new common_1.BadRequestException('Password must be at least 8 characters long');
         }
-        const user = new this.userModel({
-            email,
-            employeeId: employeeId || await this.generateEmployeeId(),
-            password,
-            firstName,
-            lastName,
-            role: role || shared_1.UserRole.INTERN,
-            isActive: true,
-            isVerified: false,
-        });
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        user.password = newPassword;
+        user.mustChangePassword = false;
         await user.save();
-        const verificationToken = this.jwtService.sign({ id: user.id, email: user.email }, { expiresIn: '24h' });
-        await this.redisService.set(`verify:${user.id}`, verificationToken, 86400);
-        await this.mailService.sendVerificationEmail(user.email, user.firstName, verificationToken);
-        const userData = user.toObject();
-        delete userData.password;
         return {
             success: true,
-            message: 'User registered successfully. Please verify your email.',
-            data: userData,
+            message: 'Password changed successfully. You now have full access to your account.',
         };
     }
     async login(loginDto) {
         const { email, password } = loginDto;
-        const user = await this.userModel.findOne({ email }).select('+password');
+        const normalizedEmail = (email || '').toLowerCase().trim();
+        this.logger.log(`🔑 Login attempt received for: "${normalizedEmail}"`);
+        const user = await this.userModel.findOne({ email: normalizedEmail }).select('+password');
         if (!user) {
+            this.logger.warn(`❌ Login rejected: User "${normalizedEmail}" not found in database`);
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         if (!user.isActive) {
+            this.logger.warn(`❌ Login rejected: Account "${normalizedEmail}" is deactivated`);
             throw new common_1.UnauthorizedException('Account is deactivated');
         }
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
+            this.logger.warn(`❌ Login rejected: Incorrect password provided for "${normalizedEmail}"`);
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        this.logger.log(`✅ Login successful for: "${normalizedEmail}" (Role: ${user.role})`);
         user.lastLogin = new Date();
         await user.save();
         const userIdStr = user._id ? user._id.toString() : user.id;

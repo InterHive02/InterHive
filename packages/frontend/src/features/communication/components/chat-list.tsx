@@ -1,25 +1,54 @@
 import React, { useState } from 'react';
-import { Search, Users, MessageSquare, MoreVertical, Pin, Bell, BellOff, CheckCircle, Circle, Clock } from 'lucide-react';
+import { Search, MessageSquare, MoreVertical, Pin, BellOff } from 'lucide-react';
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  hr: 'HR',
+  manager: 'Manager',
+  company: 'Company',
+  intern: 'Intern',
+};
+
+const ROLE_COLORS: Record<string, string> = {
+  admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  hr: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  manager: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  company: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  intern: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+};
+
+interface Participant {
+  id: string;
+  _id?: string;
+  firstName: string;
+  lastName: string;
+  profilePhoto?: string;
+  isOnline?: boolean;
+  role?: string;
+}
+
+interface Chat {
+  id: string;
+  name?: string;
+  isGroupChat: boolean;
+  avatar?: string;
+  participants: Participant[];
+  lastMessage?: {
+    content: string;
+    senderId: string;
+    createdAt: Date;
+    isRead: boolean;
+  };
+  unreadCount: number;
+  isPinned?: boolean;
+  isMuted?: boolean;
+  updatedAt: Date;
+}
 
 interface ChatListProps {
-  chats: {
-    id: string;
-    name: string;
-    isGroupChat: boolean;
-    avatar?: string;
-    participants: { id: string; firstName: string; lastName: string; profilePhoto?: string; isOnline?: boolean }[];
-    lastMessage?: {
-      content: string;
-      senderId: string;
-      createdAt: Date;
-      isRead: boolean;
-    };
-    unreadCount: number;
-    isPinned?: boolean;
-    isMuted?: boolean;
-    updatedAt: Date;
-  }[];
+  chats: Chat[];
   activeChatId?: string;
+  currentUserId: string;
   onChatSelect: (chatId: string) => void;
   onSearch?: (query: string) => void;
 }
@@ -27,6 +56,7 @@ interface ChatListProps {
 export const ChatList: React.FC<ChatListProps> = ({
   chats,
   activeChatId,
+  currentUserId,
   onChatSelect,
   onSearch,
 }) => {
@@ -37,31 +67,45 @@ export const ChatList: React.FC<ChatListProps> = ({
     onSearch?.(query);
   };
 
-  const getChatName = (chat: ChatListProps['chats'][0]) => {
-    if (chat.isGroupChat) {
-      return chat.name;
-    }
-    const otherParticipant = chat.participants.find(p => p.id !== 'current-user-id');
-    return otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Unknown User';
+  const getOtherParticipant = (chat: Chat): Participant | undefined => {
+    if (!Array.isArray(chat?.participants)) return undefined;
+    return chat.participants.find(
+      p => (p?.id || p?._id?.toString()) !== currentUserId,
+    );
   };
 
-  const getChatAvatar = (chat: ChatListProps['chats'][0]) => {
-    if (chat.avatar) return chat.avatar;
-    if (!chat.isGroupChat) {
-      const otherParticipant = chat.participants.find(p => p.id !== 'current-user-id');
-      return otherParticipant?.profilePhoto || '';
+  const getChatName = (chat: Chat) => {
+    if (chat?.isGroupChat) return chat.name || 'Group Chat';
+    const other = getOtherParticipant(chat);
+    return other
+      ? `${other.firstName || ''} ${other.lastName || ''}`.trim() || 'Team Member'
+      : chat?.name || 'Team Member';
+  };
+
+  const getChatAvatar = (chat: Chat) => {
+    if (chat?.avatar) return chat.avatar;
+    if (!chat?.isGroupChat) {
+      const other = getOtherParticipant(chat);
+      return other?.profilePhoto || '';
     }
     return '';
   };
 
-  const getInitials = (chat: ChatListProps['chats'][0]) => {
-    const name = getChatName(chat);
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const getInitials = (chat: Chat) => {
+    const name = getChatName(chat) || 'U';
+    return name
+      .split(' ')
+      .map((n: string) => n[0] || '')
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
   };
 
   const formatTime = (date: Date) => {
+    if (!date) return '';
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
+    const d = new Date(date);
+    const diff = now.getTime() - d.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
@@ -70,24 +114,27 @@ export const ChatList: React.FC<ChatListProps> = ({
     if (minutes < 60) return `${minutes}m`;
     if (hours < 24) return `${hours}h`;
     if (days < 7) return `${days}d`;
-    return date.toLocaleDateString();
+    return d.toLocaleDateString();
   };
 
+  const safeChats = Array.isArray(chats) ? chats : [];
   const filteredChats = searchQuery
-    ? chats.filter(chat => 
-        getChatName(chat).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chat.participants.some(p => 
-          `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+    ? safeChats.filter(
+        chat =>
+          getChatName(chat).toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (Array.isArray(chat?.participants) &&
+            chat.participants.some(p =>
+              `${p?.firstName || ''} ${p?.lastName || ''}`
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()),
+            )),
       )
-    : chats;
+    : safeChats;
 
   const sortedChats = [...filteredChats].sort((a, b) => {
-    // Pinned first
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    // Then by last message time
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    if (a?.isPinned && !b?.isPinned) return -1;
+    if (!a?.isPinned && b?.isPinned) return 1;
+    return new Date(b?.updatedAt || 0).getTime() - new Date(a?.updatedAt || 0).getTime();
   });
 
   return (
@@ -108,7 +155,7 @@ export const ChatList: React.FC<ChatListProps> = ({
             type="text"
             placeholder="Search conversations..."
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={e => handleSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none dark:text-white dark:placeholder-gray-400"
           />
         </div>
@@ -121,16 +168,18 @@ export const ChatList: React.FC<ChatListProps> = ({
             <MessageSquare className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
             <p className="text-gray-500 dark:text-gray-400">No conversations yet</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Start a new conversation with someone
+              Your role-based chats will appear here
             </p>
           </div>
         ) : (
-          sortedChats.map((chat) => {
+          sortedChats.map(chat => {
             const isActive = chat.id === activeChatId;
             const chatName = getChatName(chat);
             const avatar = getChatAvatar(chat);
             const initials = getInitials(chat);
-            const otherParticipant = chat.participants.find(p => p.id !== 'current-user-id');
+            const otherParticipant = getOtherParticipant(chat);
+            const unread =
+              typeof chat.unreadCount === 'number' ? chat.unreadCount : 0;
 
             return (
               <button
@@ -155,17 +204,28 @@ export const ChatList: React.FC<ChatListProps> = ({
                     </div>
                   )}
                   {!chat.isGroupChat && otherParticipant?.isOnline && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
                   )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">
-                      {chatName}
-                    </p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className="font-medium text-gray-900 dark:text-white truncate">
+                        {chatName}
+                      </p>
+                      {!chat.isGroupChat && otherParticipant?.role && (
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                            ROLE_COLORS[otherParticipant.role] || 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {ROLE_LABELS[otherParticipant.role] || otherParticipant.role}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                       {chat.lastMessage ? formatTime(chat.lastMessage.createdAt) : ''}
                     </span>
                   </div>
@@ -174,7 +234,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate flex-1">
                       {chat.lastMessage ? (
                         <>
-                          {chat.lastMessage.senderId === 'current-user-id' ? 'You: ' : ''}
+                          {chat.lastMessage.senderId === currentUserId ? 'You: ' : ''}
                           {chat.lastMessage.content}
                         </>
                       ) : (
@@ -183,15 +243,11 @@ export const ChatList: React.FC<ChatListProps> = ({
                     </p>
 
                     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                      {chat.isPinned && (
-                        <Pin className="w-3 h-3 text-gray-400" />
-                      )}
-                      {chat.isMuted && (
-                        <BellOff className="w-3 h-3 text-gray-400" />
-                      )}
-                      {chat.unreadCount > 0 && (
+                      {chat.isPinned && <Pin className="w-3 h-3 text-gray-400" />}
+                      {chat.isMuted && <BellOff className="w-3 h-3 text-gray-400" />}
+                      {unread > 0 && (
                         <span className="w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center">
-                          {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                          {unread > 9 ? '9+' : unread}
                         </span>
                       )}
                     </div>

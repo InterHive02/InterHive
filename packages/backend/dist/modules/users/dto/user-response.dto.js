@@ -24,6 +24,7 @@ class UserResponseDto {
         this.position = user.position;
         this.phone = user.phone;
         this.address = user.address;
+        this.profilePhoto = user.profilePhoto;
         this.dateOfBirth = user.dateOfBirth;
         this.gender = user.gender;
         this.employmentType = user.employmentType;
@@ -37,7 +38,7 @@ class UserResponseDto {
         this.updatedAt = user.updatedAt;
     }
     static _OPENAPI_METADATA_FACTORY() {
-        return { id: { required: true, type: () => String }, employeeId: { required: true, type: () => String }, firstName: { required: true, type: () => String }, lastName: { required: true, type: () => String }, email: { required: true, type: () => String }, role: { required: true, enum: require("../../../../../shared/dist/types/index").UserRole }, position: { required: false, type: () => String }, phone: { required: false, type: () => String }, address: { required: false, type: () => String }, dateOfBirth: { required: false, type: () => Date }, gender: { required: false, enum: require("../../../../../shared/dist/types/index").Gender }, employmentType: { required: true, enum: require("../../../../../shared/dist/types/index").EmploymentType }, department: { required: false, type: () => String }, manager: { required: false, type: () => String }, isActive: { required: true, type: () => Boolean }, isVerified: { required: true, type: () => Boolean }, lastLogin: { required: true, type: () => Date }, skills: { required: true, type: () => [String] }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date } };
+        return { id: { required: true, type: () => String }, employeeId: { required: true, type: () => String }, firstName: { required: true, type: () => String }, lastName: { required: true, type: () => String }, email: { required: true, type: () => String }, role: { required: true, enum: require("../../../../../shared/dist/types/index").UserRole }, position: { required: false, type: () => String }, phone: { required: false, type: () => String }, address: { required: false, type: () => String }, dateOfBirth: { required: false, type: () => Date }, gender: { required: false, enum: require("../../../../../shared/dist/types/index").Gender }, employmentType: { required: true, enum: require("../../../../../shared/dist/types/index").EmploymentType }, department: { required: false, type: () => String }, manager: { required: false, type: () => String }, isActive: { required: true, type: () => Boolean }, isVerified: { required: true, type: () => Boolean }, lastLogin: { required: true, type: () => Date }, skills: { required: true, type: () => [String] }, profilePhoto: { required: false, type: () => String }, createdAt: { required: true, type: () => Date }, updatedAt: { required: true, type: () => Date } };
     }
 }
 exports.UserResponseDto = UserResponseDto;
@@ -178,6 +179,14 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], UserResponseDto.prototype, "skills", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'https://example.com/photo.jpg',
+        description: 'Profile photo URL or base64 data URL',
+        required: false,
+    }),
+    __metadata("design:type", String)
+], UserResponseDto.prototype, "profilePhoto", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: '2024-01-01T00:00:00.000Z',

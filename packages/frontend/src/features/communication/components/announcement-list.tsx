@@ -10,8 +10,8 @@ interface AnnouncementListProps {
     priority: 'low' | 'medium' | 'high' | 'urgent';
     isPinned?: boolean;
     createdBy: { firstName: string; lastName: string; profilePhoto?: string };
-    createdAt: Date;
-    expiresAt?: Date;
+    createdAt: Date | string;
+    expiresAt?: Date | string;
     readBy: string[];
     attachments?: { name: string; url: string }[];
   }[];
@@ -56,9 +56,13 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date: Date | string | undefined | null) => {
+    if (!date) return 'Recently';
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return 'Recently';
+
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
+    const diff = now.getTime() - d.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
@@ -67,26 +71,27 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
+    return d.toLocaleDateString();
   };
 
   const isRead = (announcement: any) => {
-    return announcement.readBy.includes(userId);
+    return Array.isArray(announcement?.readBy) ? announcement.readBy.includes(userId) : false;
   };
 
-  const sortedAnnouncements = [...announcements].sort((a, b) => {
+  const list = Array.isArray(announcements) ? announcements : [];
+  const sortedAnnouncements = [...list].sort((a, b) => {
     // Pinned first
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     // Then by priority
     const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-    if (priorityOrder[a.priority as keyof typeof priorityOrder] !== 
-        priorityOrder[b.priority as keyof typeof priorityOrder]) {
-      return priorityOrder[a.priority as keyof typeof priorityOrder] - 
-             priorityOrder[b.priority as keyof typeof priorityOrder];
+    const pA = priorityOrder[a.priority as keyof typeof priorityOrder] ?? 2;
+    const pB = priorityOrder[b.priority as keyof typeof priorityOrder] ?? 2;
+    if (pA !== pB) {
+      return pA - pB;
     }
     // Then by date
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
   });
 
   return (
@@ -150,19 +155,19 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2">
-                    {announcement.createdBy.profilePhoto ? (
+                    {announcement?.createdBy?.profilePhoto ? (
                       <img
                         src={announcement.createdBy.profilePhoto}
-                        alt={`${announcement.createdBy.firstName} ${announcement.createdBy.lastName}`}
+                        alt={`${announcement.createdBy.firstName || ''} ${announcement.createdBy.lastName || ''}`.trim() || 'Author'}
                         className="w-6 h-6 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-400">
-                        {announcement.createdBy.firstName[0]}{announcement.createdBy.lastName[0]}
+                      <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-600 dark:text-indigo-300">
+                        {(announcement?.createdBy?.firstName?.[0] || 'I')}{(announcement?.createdBy?.lastName?.[0] || 'H')}
                       </div>
                     )}
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {announcement.createdBy.firstName} {announcement.createdBy.lastName}
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {announcement?.createdBy?.firstName ? `${announcement.createdBy.firstName} ${announcement.createdBy.lastName || ''}`.trim() : 'Operations Lead'}
                     </span>
                   </div>
 

@@ -122,6 +122,9 @@ let TrainingService = class TrainingService {
         };
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Training program not found');
+        }
         const program = await this.trainingProgramModel
             .findById(id)
             .populate('modules')

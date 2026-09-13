@@ -56,6 +56,42 @@ export class TrainingController {
     return this.trainingService.getAvailable(user.id);
   }
 
+  @Get('my-enrollments')
+  @ApiOperation({ summary: 'Get my training enrollments' })
+  @ApiResponse({ status: 200, description: 'Enrollments retrieved successfully' })
+  async getMyEnrollments(@CurrentUser() user: User) {
+    return this.trainingService.getMyEnrollments(user.id);
+  }
+
+  @Get('enrollments/all')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Get all enrollments' })
+  @ApiResponse({ status: 200, description: 'Enrollments retrieved successfully' })
+  async getAllEnrollments(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('status') status?: string,
+    @Query('programId') programId?: string,
+  ) {
+    return this.trainingService.getAllEnrollments({ page, limit, status, programId });
+  }
+
+  @Get('enrollments/:enrollmentId')
+  @ApiOperation({ summary: 'Get enrollment details' })
+  @ApiResponse({ status: 200, description: 'Enrollment details retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Enrollment not found' })
+  async getEnrollment(@CurrentUser() user: User, @Param('enrollmentId') enrollmentId: string) {
+    return this.trainingService.getEnrollment(user.id, enrollmentId);
+  }
+
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get training statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.trainingService.getStats();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get training program by ID' })
   @ApiResponse({ status: 200, description: 'Training program retrieved successfully' })
@@ -104,21 +140,6 @@ export class TrainingController {
     return this.trainingService.enroll(user.id, id, enrollTrainingDto);
   }
 
-  @Get('my-enrollments')
-  @ApiOperation({ summary: 'Get my training enrollments' })
-  @ApiResponse({ status: 200, description: 'Enrollments retrieved successfully' })
-  async getMyEnrollments(@CurrentUser() user: User) {
-    return this.trainingService.getMyEnrollments(user.id);
-  }
-
-  @Get('enrollments/:enrollmentId')
-  @ApiOperation({ summary: 'Get enrollment details' })
-  @ApiResponse({ status: 200, description: 'Enrollment details retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Enrollment not found' })
-  async getEnrollment(@CurrentUser() user: User, @Param('enrollmentId') enrollmentId: string) {
-    return this.trainingService.getEnrollment(user.id, enrollmentId);
-  }
-
   @Post('enrollments/:enrollmentId/progress')
   @ApiOperation({ summary: 'Update enrollment progress' })
   @ApiResponse({ status: 200, description: 'Progress updated successfully' })
@@ -143,27 +164,5 @@ export class TrainingController {
   @ApiResponse({ status: 200, description: 'Withdrawn successfully' })
   async withdrawEnrollment(@CurrentUser() user: User, @Param('enrollmentId') enrollmentId: string) {
     return this.trainingService.withdrawEnrollment(user.id, enrollmentId);
-  }
-
-  // Admin/Manager endpoints
-  @Get('enrollments/all')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @ApiOperation({ summary: 'Get all enrollments' })
-  @ApiResponse({ status: 200, description: 'Enrollments retrieved successfully' })
-  async getAllEnrollments(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('status') status?: string,
-    @Query('programId') programId?: string,
-  ) {
-    return this.trainingService.getAllEnrollments({ page, limit, status, programId });
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get training statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.trainingService.getStats();
   }
 }

@@ -26,8 +26,8 @@ export const AdminCompaniesPage: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-750">
               {companies.length > 0 ? (
-                companies.map((c: any) => (
-                  <tr key={c.id} className="hover:bg-gray-50/50">
+                companies.map((c: any, idx: number) => (
+                  <tr key={c.id || c._id || `company-${idx}`} className="hover:bg-gray-50/50">
                     <td className="py-3 font-medium text-gray-900 dark:text-white">{c.name || 'Company Partner'}</td>
                     <td className="py-3 text-xs text-gray-500">{c.industry || 'Technology'}</td>
                     <td className="py-3">

@@ -27,6 +27,15 @@ let CommunicationController = class CommunicationController {
     constructor(communicationService) {
         this.communicationService = communicationService;
     }
+    async getAnnouncements(user) {
+        return this.communicationService.getAnnouncements(user?.id);
+    }
+    async markAnnouncementAsRead(user, id) {
+        return this.communicationService.markAnnouncementAsRead(user?.id, id);
+    }
+    async pinAnnouncement(id, isPinned) {
+        return this.communicationService.pinAnnouncement(id, isPinned);
+    }
     async createChat(user, createChatDto) {
         return this.communicationService.createChat(user.id, createChatDto);
     }
@@ -74,6 +83,39 @@ let CommunicationController = class CommunicationController {
     }
 };
 exports.CommunicationController = CommunicationController;
+__decorate([
+    (0, common_1.Get)('announcements'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all announcements' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Announcements retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], CommunicationController.prototype, "getAnnouncements", null);
+__decorate([
+    (0, common_1.Post)('announcements/:id/read'),
+    (0, swagger_1.ApiOperation)({ summary: 'Mark announcement as read' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Announcement marked as read' }),
+    openapi.ApiResponse({ status: 201, type: Object }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User, String]),
+    __metadata("design:returntype", Promise)
+], CommunicationController.prototype, "markAnnouncementAsRead", null);
+__decorate([
+    (0, common_1.Patch)('announcements/:id/pin'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Pin or unpin announcement' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Announcement pin status updated' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('isPinned')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", Promise)
+], CommunicationController.prototype, "pinAnnouncement", null);
 __decorate([
     (0, common_1.Post)('chats'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new chat' }),

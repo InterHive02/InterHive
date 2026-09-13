@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -26,6 +27,35 @@ import { User } from '../users/schemas/user.schema';
 @ApiBearerAuth()
 export class CommunicationController {
   constructor(private readonly communicationService: CommunicationService) {}
+
+  // Announcements
+  @Get('announcements')
+  @ApiOperation({ summary: 'Get all announcements' })
+  @ApiResponse({ status: 200, description: 'Announcements retrieved successfully' })
+  async getAnnouncements(@CurrentUser() user: User) {
+    return this.communicationService.getAnnouncements(user?.id);
+  }
+
+  @Post('announcements/:id/read')
+  @ApiOperation({ summary: 'Mark announcement as read' })
+  @ApiResponse({ status: 200, description: 'Announcement marked as read' })
+  async markAnnouncementAsRead(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+  ) {
+    return this.communicationService.markAnnouncementAsRead(user?.id, id);
+  }
+
+  @Patch('announcements/:id/pin')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Pin or unpin announcement' })
+  @ApiResponse({ status: 200, description: 'Announcement pin status updated' })
+  async pinAnnouncement(
+    @Param('id') id: string,
+    @Body('isPinned') isPinned: boolean,
+  ) {
+    return this.communicationService.pinAnnouncement(id, isPinned);
+  }
 
   // Chats
   @Post('chats')

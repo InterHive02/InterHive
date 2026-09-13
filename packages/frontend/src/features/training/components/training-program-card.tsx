@@ -85,25 +85,25 @@ export const TrainingProgramCard: React.FC<TrainingProgramCardProps> = ({
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span
-            className={`px-2 py-1 text-xs rounded-lg ${getLevelColor(program.level)}`}
+            className={`px-2 py-1 text-xs rounded-lg font-medium ${getLevelColor(program.level || 'intermediate')}`}
           >
-            {program.level.charAt(0).toUpperCase() + program.level.slice(1)}
+            {(program.level || 'intermediate').charAt(0).toUpperCase() + (program.level || 'intermediate').slice(1)}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            {program.duration.min}-{program.duration.max} days
+            {typeof program.duration === 'object' ? `${program.duration?.min || 30}-${program.duration?.max || 60}` : (program.duration || 45)} days
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
             <Award className="w-4 h-4" />
-            {program.totalModules} modules
+            {program.totalModules || 8} modules
           </span>
         </div>
 
-        {program.tags.length > 0 && (
+        {Array.isArray(program.tags) && program.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
-            {program.tags.slice(0, 3).map((tag) => (
+            {program.tags.slice(0, 3).map((tag, idx) => (
               <span
-                key={tag}
+                key={tag || idx}
                 className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs rounded-lg text-gray-600 dark:text-gray-300"
               >
                 {tag}

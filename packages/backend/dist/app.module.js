@@ -62,6 +62,7 @@ const matching_module_1 = require("./modules/matching/matching.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const analytics_module_1 = require("./modules/analytics/analytics.module");
 const communication_module_1 = require("./modules/communication/communication.module");
+const applications_module_1 = require("./modules/applications/applications.module");
 const database_module_1 = require("./common/database/database.module");
 const redis_module_1 = require("./common/redis/redis.module");
 const mail_module_1 = require("./common/mail/mail.module");
@@ -134,6 +135,7 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             analytics_module_1.AnalyticsModule,
             communication_module_1.CommunicationModule,
+            applications_module_1.ApplicationsModule,
         ],
         providers: [
             {

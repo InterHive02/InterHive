@@ -16,6 +16,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
+  // Increase body size limit to allow base64-encoded profile photos
+  app.use(require('express').json({ limit: '10mb' }));
+  app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
+
   // Global middleware
   app.use((helmet as any)({
     contentSecurityPolicy: {

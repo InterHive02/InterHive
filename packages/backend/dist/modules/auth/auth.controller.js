@@ -80,6 +80,12 @@ let AuthController = class AuthController {
         }
         return this.authService.getProfile(user.id);
     }
+    async changeFirstPassword(user, newPassword) {
+        if (!user) {
+            throw new common_2.UnauthorizedException('User not authenticated');
+        }
+        return this.authService.firstLoginPasswordChange(user.id, newPassword);
+    }
     async verifyEmail(token) {
         return this.authService.verifyEmail(token);
     }
@@ -212,6 +218,18 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Post)('change-first-password'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Change temporary password on first login' }),
+    openapi.ApiResponse({ status: common_1.HttpStatus.OK }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)('newPassword')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User, String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "changeFirstPassword", null);
 __decorate([
     (0, common_1.Post)('verify-email'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

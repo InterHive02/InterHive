@@ -126,6 +126,10 @@ export class NotificationsService {
   }
 
   async findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Notification not found');
+    }
+
     const notification = await this.notificationModel.findById(id);
     if (!notification) {
       throw new NotFoundException('Notification not found');

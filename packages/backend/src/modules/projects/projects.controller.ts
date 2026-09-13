@@ -70,6 +70,14 @@ export class ProjectsController {
     return this.projectsService.getMyProjects(userId, status);
   }
 
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get project statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.projectsService.getStats();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get project by ID' })
   @ApiResponse({ status: 200, description: 'Project retrieved successfully' })
@@ -197,13 +205,5 @@ export class ProjectsController {
     @Param('uploadId') uploadId: string,
   ) {
     return this.projectsService.deleteUpload(user.id, uploadId);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get project statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.projectsService.getStats();
   }
 }

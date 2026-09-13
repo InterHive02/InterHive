@@ -14,6 +14,10 @@ interface EducationSectionProps {
 }
 
 export const EducationSection: React.FC<EducationSectionProps> = ({ education }) => {
+  if (!education || (!education.degree && !education.institution)) {
+    return null;
+  }
+
   const formatDate = (date?: Date) => {
     if (!date) return 'Present';
     return new Date(date).toLocaleDateString('en-US', {

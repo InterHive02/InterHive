@@ -41,34 +41,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
+  const participants = Array.isArray(chat?.participants) ? chat.participants : [];
+
   const getChatName = () => {
-    if (chat.isGroupChat) {
-      return chat.name;
+    if (chat?.isGroupChat) {
+      return chat.name || 'Group Chat';
     }
-    const otherParticipant = chat.participants.find(p => p.id !== currentUserId);
-    return otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Unknown User';
+    const otherParticipant = participants.find(p => p.id !== currentUserId);
+    return otherParticipant ? `${otherParticipant.firstName || ''} ${otherParticipant.lastName || ''}`.trim() : (chat?.name || 'User');
   };
 
   const getChatAvatar = () => {
-    if (chat.avatar) return chat.avatar;
-    if (!chat.isGroupChat) {
-      const otherParticipant = chat.participants.find(p => p.id !== currentUserId);
+    if (chat?.avatar) return chat.avatar;
+    if (!chat?.isGroupChat) {
+      const otherParticipant = participants.find(p => p.id !== currentUserId);
       return otherParticipant?.profilePhoto || '';
     }
     return '';
   };
 
   const getInitials = () => {
-    const name = getChatName();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const name = getChatName() || 'U';
+    return name.split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2) || 'U';
   };
 
   const getOnlineStatus = () => {
-    if (chat.isGroupChat) {
-      const online = chat.participants.filter(p => p.isOnline && p.id !== currentUserId);
+    if (chat?.isGroupChat) {
+      const online = participants.filter(p => p.isOnline && p.id !== currentUserId);
       return online.length > 0 ? `${online.length} online` : '';
     }
-    const otherParticipant = chat.participants.find(p => p.id !== currentUserId);
+    const otherParticipant = participants.find(p => p.id !== currentUserId);
     return otherParticipant?.isOnline ? 'Online' : 'Offline';
   };
 
@@ -167,7 +169,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 {getInitials()}
               </div>
             )}
-            {!chat.isGroupChat && chat.participants.find(p => p.id !== currentUserId)?.isOnline && (
+            {!chat?.isGroupChat && participants.find(p => p.id !== currentUserId)?.isOnline && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
             )}
           </div>
@@ -178,7 +180,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {getOnlineStatus()}
-              {chat.isGroupChat && ` • ${chat.participants.length} members`}
+              {chat?.isGroupChat && ` • ${participants.length} members`}
             </p>
           </div>
         </div>
@@ -210,7 +212,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
             {group.messages.map((message) => {
               const isOwn = isOwnMessage(message.senderId);
-              const sender = chat.participants.find(p => p.id === message.senderId);
+              const sender = participants.find(p => p.id === message.senderId);
 
               return (
                 <div
@@ -222,12 +224,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                       {sender?.profilePhoto ? (
                         <img
                           src={sender.profilePhoto}
-                          alt={`${sender.firstName} ${sender.lastName}`}
+                          alt={`${sender?.firstName || ''} ${sender?.lastName || ''}`.trim() || 'User'}
                           className="w-8 h-8 rounded-full object-cover"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-400">
-                          {sender ? `${sender.firstName[0]}${sender.lastName[0]}` : 'U'}
+                          {sender ? `${sender.firstName?.[0] || 'U'}${sender.lastName?.[0] || ''}` : 'U'}
                         </div>
                       )}
                     </div>
@@ -236,9 +238,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   <div
                     className={`max-w-[70%] ${isOwn ? 'order-1' : ''}`}
                   >
-                    {!isOwn && !chat.isGroupChat && (
+                    {!chat?.isGroupChat && sender && (
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">
-                        {sender?.firstName} {sender?.lastName}
+                        {`${sender.firstName || ''} ${sender.lastName || ''}`.trim()}
                       </p>
                     )}
                     <div

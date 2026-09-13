@@ -51,7 +51,22 @@ let AnalyticsController = class AnalyticsController {
         return this.analyticsService.getTrendAnalytics(query);
     }
     async getDashboardActivities(user) {
-        return this.analyticsService.getDashboardActivities(user.id);
+        return this.analyticsService.getDashboardActivities(user?.id);
+    }
+    async getAdminDashboard() {
+        return this.analyticsService.getAdminDashboardData();
+    }
+    async getManagerDashboard(user) {
+        return this.analyticsService.getManagerDashboardData(user?.id);
+    }
+    async getCompanyDashboard(user) {
+        return this.analyticsService.getCompanyDashboardData(user?.id, user?.email);
+    }
+    async updateActivityStatus(id, body) {
+        return this.analyticsService.updateActivityStatus(id, body.status);
+    }
+    async runDiagnostics() {
+        return this.analyticsService.runDiagnostics();
     }
     async exportReadinessData(response) {
         const data = await this.analyticsService.exportReadinessData();
@@ -163,12 +178,61 @@ __decorate([
     (0, common_1.Get)('dashboard/activities'),
     (0, swagger_1.ApiOperation)({ summary: 'Get recent activities for dashboard' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Activities retrieved successfully' }),
-    openapi.ApiResponse({ status: 200, type: [Object] }),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], AnalyticsController.prototype, "getDashboardActivities", null);
+__decorate([
+    (0, common_1.Get)('admin-dashboard'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get Super Administrator Central dashboard data' }),
+    openapi.ApiResponse({ status: 200, type: Object }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "getAdminDashboard", null);
+__decorate([
+    (0, common_1.Get)('manager-dashboard'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get Operations & Training Management dashboard data' }),
+    openapi.ApiResponse({ status: 200, type: Object }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "getManagerDashboard", null);
+__decorate([
+    (0, common_1.Get)('company-dashboard'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.COMPANY),
+    (0, swagger_1.ApiOperation)({ summary: 'Get Company Dashboard data' }),
+    openapi.ApiResponse({ status: 200, type: Object }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "getCompanyDashboard", null);
+__decorate([
+    (0, common_1.Patch)('activity/:id'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: 'Approve or update platform activity status' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "updateActivityStatus", null);
+__decorate([
+    (0, common_1.Post)('diagnostics'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN),
+    (0, swagger_1.ApiOperation)({ summary: 'Run live system health diagnostics' }),
+    openapi.ApiResponse({ status: 201 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AnalyticsController.prototype, "runDiagnostics", null);
 __decorate([
     (0, common_1.Get)('export/readiness'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),

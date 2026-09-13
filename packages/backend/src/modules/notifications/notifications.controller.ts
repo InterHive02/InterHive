@@ -70,6 +70,27 @@ export class NotificationsController {
     return this.notificationsService.getUnreadCount(userId);
   }
 
+  @Post('broadcast')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Broadcast notification to all users' })
+  @ApiResponse({ status: 200, description: 'Broadcast sent successfully' })
+  async broadcast(
+    @Body('title') title: string,
+    @Body('message') message: string,
+    @Body('type') type: string,
+    @Body('roles') roles?: string[],
+  ) {
+    return this.notificationsService.broadcast({ title, message, type, roles });
+  }
+
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get notification statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.notificationsService.getStats();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get notification by ID' })
   @ApiResponse({ status: 200, description: 'Notification retrieved successfully' })
@@ -120,26 +141,5 @@ export class NotificationsController {
       throw new UnauthorizedException('User not found');
     }
     await this.notificationsService.deleteAll(user.id);
-  }
-
-  @Post('broadcast')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Broadcast notification to all users' })
-  @ApiResponse({ status: 200, description: 'Broadcast sent successfully' })
-  async broadcast(
-    @Body('title') title: string,
-    @Body('message') message: string,
-    @Body('type') type: string,
-    @Body('roles') roles?: string[],
-  ) {
-    return this.notificationsService.broadcast({ title, message, type, roles });
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get notification statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.notificationsService.getStats();
   }
 }

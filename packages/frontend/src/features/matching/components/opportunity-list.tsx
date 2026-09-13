@@ -127,9 +127,9 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
                     {opportunity.location}
                   </span>
                   <span
-                    className={`px-2 py-0.5 text-xs rounded-lg ${getTypeColor(opportunity.type)}`}
+                    className={`px-2 py-0.5 text-xs rounded-lg ${getTypeColor(opportunity.type || 'hybrid')}`}
                   >
-                    {opportunity.type.charAt(0).toUpperCase() + opportunity.type.slice(1)}
+                    {(opportunity.type || 'hybrid').charAt(0).toUpperCase() + (opportunity.type || 'hybrid').slice(1)}
                   </span>
                   <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                     <Briefcase className="w-4 h-4" />

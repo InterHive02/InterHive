@@ -47,6 +47,25 @@ export class MatchingController {
     return this.matchingService.getMyMatches(user.id, status, page, limit);
   }
 
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get matching statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.matchingService.getStats();
+  }
+
+  @Post('batch-match')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Batch match multiple interns to a requirement' })
+  @ApiResponse({ status: 200, description: 'Batch matching completed' })
+  async batchMatch(
+    @Body('requirementId') requirementId: string,
+    @Body('internIds') internIds: string[],
+  ) {
+    return this.matchingService.batchMatch(requirementId, internIds);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get match by ID' })
   @ApiResponse({ status: 200, description: 'Match retrieved successfully' })
@@ -120,24 +139,5 @@ export class MatchingController {
     @Param('id') id: string,
   ) {
     return this.matchingService.hireIntern(user.id, id);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get matching statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.matchingService.getStats();
-  }
-
-  @Post('batch-match')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Batch match multiple interns to a requirement' })
-  @ApiResponse({ status: 200, description: 'Batch matching completed' })
-  async batchMatch(
-    @Body('requirementId') requirementId: string,
-    @Body('internIds') internIds: string[],
-  ) {
-    return this.matchingService.batchMatch(requirementId, internIds);
   }
 }

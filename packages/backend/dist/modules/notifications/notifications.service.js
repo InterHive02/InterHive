@@ -106,6 +106,9 @@ let NotificationsService = class NotificationsService {
         }
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Notification not found');
+        }
         const notification = await this.notificationModel.findById(id);
         if (!notification) {
             throw new common_1.NotFoundException('Notification not found');

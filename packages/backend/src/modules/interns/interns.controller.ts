@@ -157,6 +157,14 @@ export class InternsController {
     return this.internsService.findAll({ page, limit, status, search });
   }
 
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get intern statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.internsService.getStats();
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
   @ApiOperation({ summary: 'Get intern by ID' })
@@ -202,13 +210,5 @@ export class InternsController {
   @ApiResponse({ status: 200, description: 'Resume deleted successfully' })
   async deleteResume(@CurrentUser() user: User) {
     return this.internsService.deleteResume(user.id);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get intern statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.internsService.getStats();
   }
 }

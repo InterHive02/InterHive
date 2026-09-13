@@ -169,7 +169,6 @@ export class AttendanceController {
   }
 
   @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiOperation({ summary: 'Get overall attendance statistics' })
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
   async getOverallStats() {

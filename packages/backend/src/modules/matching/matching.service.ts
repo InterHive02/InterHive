@@ -97,6 +97,10 @@ export class MatchingService {
   }
 
   async getMatch(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Match not found');
+    }
+
     const match = await this.matchModel
       .findById(id)
       .populate('internId', 'firstName lastName email employeeId profilePhoto')

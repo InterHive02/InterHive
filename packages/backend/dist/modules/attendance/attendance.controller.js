@@ -210,7 +210,6 @@ __decorate([
 ], AttendanceController.prototype, "correctAttendance", null);
 __decorate([
     (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
     (0, swagger_1.ApiOperation)({ summary: 'Get overall attendance statistics' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
     openapi.ApiResponse({ status: 200 }),

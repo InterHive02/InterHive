@@ -68,6 +68,9 @@ let InternsController = class InternsController {
     async findAll(page = 1, limit = 10, status, search) {
         return this.internsService.findAll({ page, limit, status, search });
     }
+    async getStats() {
+        return this.internsService.getStats();
+    }
     async findById(id) {
         return this.internsService.findById(id);
     }
@@ -82,9 +85,6 @@ let InternsController = class InternsController {
     }
     async deleteResume(user) {
         return this.internsService.deleteResume(user.id);
-    }
-    async getStats() {
-        return this.internsService.getStats();
     }
 };
 exports.InternsController = InternsController;
@@ -224,6 +224,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InternsController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get intern statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], InternsController.prototype, "getStats", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
     (0, swagger_1.ApiOperation)({ summary: 'Get intern by ID' }),
@@ -281,16 +291,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], InternsController.prototype, "deleteResume", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get intern statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], InternsController.prototype, "getStats", null);
 exports.InternsController = InternsController = __decorate([
     (0, swagger_1.ApiTags)('Interns'),
     (0, common_1.Controller)('interns'),

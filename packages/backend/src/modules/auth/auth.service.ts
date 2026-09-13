@@ -4,7 +4,9 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  ForbiddenException,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -25,6 +27,7 @@ import { UserRole } from '@interhive/shared';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger('AuthService');
   private otpMemoryMap = new Map<string, { code: string; expiresAt: number }>();
 
   constructor(
@@ -37,77 +40,58 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, employeeId, password, firstName, lastName, role } = registerDto;
+    throw new ForbiddenException(
+      'Public registration is disabled. InterHive accounts are created exclusively by the HR/Admin team upon candidate selection.',
+    );
+  }
 
-    // Check if user already exists
-    const existingUser = await this.userModel.findOne({
-      $or: [{ email }, { employeeId }],
-    });
-
-    if (existingUser) {
-      throw new ConflictException('User already exists with this email or employee ID');
+  async firstLoginPasswordChange(userId: string, newPassword: string) {
+    if (!newPassword || newPassword.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters long');
     }
 
-    // Create new user
-    const user = new this.userModel({
-      email,
-      employeeId: employeeId || await this.generateEmployeeId(),
-      password,
-      firstName,
-      lastName,
-      role: role || UserRole.INTERN,
-      isActive: true,
-      isVerified: false,
-    });
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
+    user.password = newPassword; // Will be hashed by UserSchema.pre('save')
+    user.mustChangePassword = false;
     await user.save();
-
-    // Generate verification token
-    const verificationToken = this.jwtService.sign(
-      { id: user.id, email: user.email },
-      { expiresIn: '24h' },
-    );
-
-    // Store verification token
-    await this.redisService.set(
-      `verify:${user.id}`,
-      verificationToken,
-      86400, // 24 hours
-    );
-
-    // Send verification email
-    await this.mailService.sendVerificationEmail(user.email, user.firstName, verificationToken);
-
-    // Remove sensitive data
-    const userData = user.toObject();
-    delete userData.password;
 
     return {
       success: true,
-      message: 'User registered successfully. Please verify your email.',
-      data: userData,
+      message: 'Password changed successfully. You now have full access to your account.',
     };
   }
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
+    const normalizedEmail = (email || '').toLowerCase().trim();
+
+    this.logger.log(`🔑 Login attempt received for: "${normalizedEmail}"`);
 
     // Find user by email
-    const user = await this.userModel.findOne({ email }).select('+password');
+    const user = await this.userModel.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
+      this.logger.warn(`❌ Login rejected: User "${normalizedEmail}" not found in database`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Check if user is active
     if (!user.isActive) {
+      this.logger.warn(`❌ Login rejected: Account "${normalizedEmail}" is deactivated`);
       throw new UnauthorizedException('Account is deactivated');
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      this.logger.warn(`❌ Login rejected: Incorrect password provided for "${normalizedEmail}"`);
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    this.logger.log(`✅ Login successful for: "${normalizedEmail}" (Role: ${user.role})`);
 
     // Update last login
     user.lastLogin = new Date();

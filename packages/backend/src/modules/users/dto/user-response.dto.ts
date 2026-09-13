@@ -122,6 +122,13 @@ export class UserResponseDto {
   skills: string[];
 
   @ApiProperty({
+    example: 'https://example.com/photo.jpg',
+    description: 'Profile photo URL or base64 data URL',
+    required: false,
+  })
+  profilePhoto?: string;
+
+  @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
     description: 'Created at timestamp',
   })
@@ -143,6 +150,7 @@ export class UserResponseDto {
     this.position = user.position;
     this.phone = user.phone;
     this.address = user.address;
+    this.profilePhoto = user.profilePhoto;
     this.dateOfBirth = user.dateOfBirth;
     this.gender = user.gender;
     this.employmentType = user.employmentType;

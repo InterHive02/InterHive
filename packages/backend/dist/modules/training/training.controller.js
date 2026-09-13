@@ -36,6 +36,18 @@ let TrainingController = class TrainingController {
     async getAvailable(user) {
         return this.trainingService.getAvailable(user.id);
     }
+    async getMyEnrollments(user) {
+        return this.trainingService.getMyEnrollments(user.id);
+    }
+    async getAllEnrollments(page = 1, limit = 10, status, programId) {
+        return this.trainingService.getAllEnrollments({ page, limit, status, programId });
+    }
+    async getEnrollment(user, enrollmentId) {
+        return this.trainingService.getEnrollment(user.id, enrollmentId);
+    }
+    async getStats() {
+        return this.trainingService.getStats();
+    }
     async findById(id) {
         return this.trainingService.findById(id);
     }
@@ -51,12 +63,6 @@ let TrainingController = class TrainingController {
     async enroll(user, id, enrollTrainingDto) {
         return this.trainingService.enroll(user.id, id, enrollTrainingDto);
     }
-    async getMyEnrollments(user) {
-        return this.trainingService.getMyEnrollments(user.id);
-    }
-    async getEnrollment(user, enrollmentId) {
-        return this.trainingService.getEnrollment(user.id, enrollmentId);
-    }
     async updateProgress(user, enrollmentId, moduleId, progress) {
         return this.trainingService.updateProgress(user.id, enrollmentId, moduleId, progress);
     }
@@ -65,12 +71,6 @@ let TrainingController = class TrainingController {
     }
     async withdrawEnrollment(user, enrollmentId) {
         return this.trainingService.withdrawEnrollment(user.id, enrollmentId);
-    }
-    async getAllEnrollments(page = 1, limit = 10, status, programId) {
-        return this.trainingService.getAllEnrollments({ page, limit, status, programId });
-    }
-    async getStats() {
-        return this.trainingService.getStats();
     }
 };
 exports.TrainingController = TrainingController;
@@ -110,6 +110,52 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], TrainingController.prototype, "getAvailable", null);
+__decorate([
+    (0, common_1.Get)('my-enrollments'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get my training enrollments' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollments retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], TrainingController.prototype, "getMyEnrollments", null);
+__decorate([
+    (0, common_1.Get)('enrollments/all'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all enrollments' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollments retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('status')),
+    __param(3, (0, common_1.Query)('programId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, String, String]),
+    __metadata("design:returntype", Promise)
+], TrainingController.prototype, "getAllEnrollments", null);
+__decorate([
+    (0, common_1.Get)('enrollments/:enrollmentId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get enrollment details' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollment details retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Enrollment not found' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('enrollmentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User, String]),
+    __metadata("design:returntype", Promise)
+], TrainingController.prototype, "getEnrollment", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get training statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], TrainingController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get training program by ID' }),
@@ -172,28 +218,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TrainingController.prototype, "enroll", null);
 __decorate([
-    (0, common_1.Get)('my-enrollments'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get my training enrollments' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollments retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_schema_1.User]),
-    __metadata("design:returntype", Promise)
-], TrainingController.prototype, "getMyEnrollments", null);
-__decorate([
-    (0, common_1.Get)('enrollments/:enrollmentId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get enrollment details' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollment details retrieved successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Enrollment not found' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Param)('enrollmentId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_schema_1.User, String]),
-    __metadata("design:returntype", Promise)
-], TrainingController.prototype, "getEnrollment", null);
-__decorate([
     (0, common_1.Post)('enrollments/:enrollmentId/progress'),
     (0, swagger_1.ApiOperation)({ summary: 'Update enrollment progress' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Progress updated successfully' }),
@@ -228,30 +252,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User, String]),
     __metadata("design:returntype", Promise)
 ], TrainingController.prototype, "withdrawEnrollment", null);
-__decorate([
-    (0, common_1.Get)('enrollments/all'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all enrollments' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Enrollments retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, common_1.Query)('page')),
-    __param(1, (0, common_1.Query)('limit')),
-    __param(2, (0, common_1.Query)('status')),
-    __param(3, (0, common_1.Query)('programId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, String, String]),
-    __metadata("design:returntype", Promise)
-], TrainingController.prototype, "getAllEnrollments", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get training statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], TrainingController.prototype, "getStats", null);
 exports.TrainingController = TrainingController = __decorate([
     (0, swagger_1.ApiTags)('Training'),
     (0, common_1.Controller)('training'),

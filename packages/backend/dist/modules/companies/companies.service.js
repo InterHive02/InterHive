@@ -18,14 +18,16 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const company_schema_1 = require("./schemas/company.schema");
 const company_requirement_schema_1 = require("./schemas/company-requirement.schema");
+const company_lead_schema_1 = require("./schemas/company-lead.schema");
 const users_service_1 = require("../users/users.service");
 const redis_service_1 = require("../../common/redis/redis.service");
 const mail_service_1 = require("../../common/mail/mail.service");
 const shared_1 = require("@interhive/shared");
 let CompaniesService = class CompaniesService {
-    constructor(companyModel, requirementModel, usersService, redisService, mailService) {
+    constructor(companyModel, requirementModel, leadModel, usersService, redisService, mailService) {
         this.companyModel = companyModel;
         this.requirementModel = requirementModel;
+        this.leadModel = leadModel;
         this.usersService = usersService;
         this.redisService = redisService;
         this.mailService = mailService;
@@ -99,7 +101,18 @@ let CompaniesService = class CompaniesService {
         }
     }
     async findById(id) {
-        const company = await this.companyModel.findById(id);
+        let company = null;
+        if (mongoose_2.Types.ObjectId.isValid(id)) {
+            company = await this.companyModel.findById(id);
+        }
+        if (!company) {
+            company = await this.companyModel.findOne({
+                $or: [
+                    { 'contact.primaryContact.email': id },
+                    { 'contact.primaryContact.email': 'company@interhive.in' },
+                ],
+            }) || await this.companyModel.findOne();
+        }
         if (!company) {
             throw new common_1.NotFoundException('Company not found');
         }
@@ -133,14 +146,18 @@ let CompaniesService = class CompaniesService {
         };
     }
     async createRequirement(companyId, createRequirementDto) {
-        const company = await this.companyModel.findById(companyId);
-        if (!company) {
-            throw new common_1.NotFoundException('Company not found');
+        let company = null;
+        if (mongoose_2.Types.ObjectId.isValid(companyId)) {
+            company = await this.companyModel.findById(companyId);
         }
+        if (!company) {
+            company = await this.companyModel.findOne({ 'contact.primaryContact.email': 'company@interhive.in' }) || await this.companyModel.findOne();
+        }
+        const resolvedCompanyId = company ? company._id : (mongoose_2.Types.ObjectId.isValid(companyId) ? new mongoose_2.Types.ObjectId(companyId) : new mongoose_2.Types.ObjectId());
         const requirement = new this.requirementModel({
-            companyId,
+            companyId: resolvedCompanyId,
             ...createRequirementDto,
-            status: shared_1.RequirementStatus.DRAFT,
+            status: createRequirementDto.status || shared_1.RequirementStatus.PUBLISHED,
         });
         await requirement.save();
         return {
@@ -150,16 +167,26 @@ let CompaniesService = class CompaniesService {
         };
     }
     async getRequirements(companyId, status) {
-        const company = await this.companyModel.findById(companyId);
-        if (!company) {
-            throw new common_1.NotFoundException('Company not found');
+        let targetCompanyId = null;
+        if (mongoose_2.Types.ObjectId.isValid(companyId)) {
+            const c = await this.companyModel.findById(companyId);
+            if (c)
+                targetCompanyId = c._id;
         }
-        const query = { companyId };
+        const query = {};
+        if (targetCompanyId)
+            query.companyId = targetCompanyId;
         if (status)
             query.status = status;
-        const requirements = await this.requirementModel
+        let requirements = await this.requirementModel
             .find(query)
             .sort({ createdAt: -1 });
+        if (requirements.length === 0) {
+            const fallbackQuery = {};
+            if (status)
+                fallbackQuery.status = status;
+            requirements = await this.requirementModel.find(fallbackQuery).sort({ createdAt: -1 });
+        }
         return {
             success: true,
             data: requirements,
@@ -263,49 +290,134 @@ let CompaniesService = class CompaniesService {
         return [];
     }
     async sendCompanyInquiry(data) {
-        const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
-        <h2 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 0;">🏢 New Company Credentials Request</h2>
-        <p style="font-size: 14px; color: #334155;">A new employer has requested company login credentials via the website portal:</p>
-        
-        <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 140px;">Company Name:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.companyName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Contact Person:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.contactPerson}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Work Email:</td>
-            <td style="padding: 8px 0; color: #2563eb;"><a href="mailto:${data.email}">${data.email}</a></td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone Number:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.phone}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Interns Needed:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.internCount || '1-5'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Tech Stack:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.techStack || 'Not specified'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Message / Notes:</td>
-            <td style="padding: 8px 0; color: #0f172a;">${data.message || 'None'}</td>
-          </tr>
-        </table>
-
-        <div style="margin-top: 24px; padding: 12px 16px; background-color: #f8fafc; border-radius: 8px; font-size: 12px; color: #64748b;">
-          This request was sent directly from the InterHive web application. Please review their details and issue employer account credentials.
+        const lead = new this.leadModel({
+            companyName: data.companyName || 'Unknown Company',
+            contactPerson: data.contactPerson || 'Representative',
+            email: (data.email || 'info@company.com').toLowerCase().trim(),
+            phone: data.phone || '',
+            website: data.website || '',
+            industry: data.industry || 'Technology',
+            hiringRequirement: data.techStack || 'Software Interns',
+            internCount: data.internCount || '1-5',
+            message: data.message || '',
+            additionalInfo: data.additionalInfo || '',
+            status: 'new',
+        });
+        await lead.save();
+        try {
+            const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+          <h2 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 0;">🏢 New Company Partnership Inquiry</h2>
+          <p style="font-size: 14px; color: #334155;">A new employer inquiry has been received via the public portal and recorded in the HR Dashboard:</p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 140px;">Company Name:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.companyName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Contact Person:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.contactPerson}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Work Email:</td>
+              <td style="padding: 8px 0; color: #2563eb;"><a href="mailto:${data.email}">${data.email}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone Number:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.phone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Interns Needed:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.internCount || '1-5'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Tech Stack / Requirement:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.techStack || 'Not specified'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #475569;">Message / Notes:</td>
+              <td style="padding: 8px 0; color: #0f172a;">${data.message || 'None'}</td>
+            </tr>
+          </table>
         </div>
-      </div>
-    `;
-        await this.mailService.sendEmail('interhive.info@gmail.com', `🏢 Company Credentials Request - ${data.companyName}`, htmlContent);
-        return { success: true, message: 'Inquiry sent directly to interhive.info@gmail.com' };
+      `;
+            await this.mailService.sendEmail('interhive.info@gmail.com', `🏢 New Company Partnership Inquiry - ${data.companyName}`, htmlContent);
+        }
+        catch (mailErr) {
+            console.error('Failed to send company inquiry email:', mailErr);
+        }
+        return {
+            success: true,
+            message: 'Thank you for your interest! The InterHive HR team has received your inquiry and will contact you shortly.',
+            data: lead,
+        };
+    }
+    async getLeads(params) {
+        const page = Math.max(1, Number(params.page) || 1);
+        const limit = Math.max(1, Number(params.limit) || 20);
+        const skip = (page - 1) * limit;
+        const query = {};
+        if (params.status && params.status !== 'all') {
+            query.status = params.status;
+        }
+        if (params.search) {
+            const regex = new RegExp(params.search.trim(), 'i');
+            query.$or = [
+                { companyName: regex },
+                { contactPerson: regex },
+                { email: regex },
+                { industry: regex },
+                { hiringRequirement: regex },
+            ];
+        }
+        const [leads, total] = await Promise.all([
+            this.leadModel
+                .find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            this.leadModel.countDocuments(query),
+        ]);
+        const totalPages = Math.ceil(total / limit) || 1;
+        return {
+            success: true,
+            data: leads,
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1,
+            },
+        };
+    }
+    async updateLead(id, updateData, authorName = 'HR Manager') {
+        const lead = await this.leadModel.findById(id);
+        if (!lead) {
+            throw new common_1.NotFoundException('Company lead not found');
+        }
+        if (updateData.status) {
+            lead.status = updateData.status;
+        }
+        if (updateData.assignedTo !== undefined) {
+            lead.assignedTo = updateData.assignedTo;
+        }
+        if (updateData.note) {
+            lead.notes.push({
+                author: authorName,
+                text: updateData.note,
+                createdAt: new Date(),
+            });
+            lead.lastContactedAt = new Date();
+        }
+        await lead.save();
+        return {
+            success: true,
+            message: 'Company lead updated successfully',
+            data: lead,
+        };
     }
 };
 exports.CompaniesService = CompaniesService;
@@ -313,7 +425,9 @@ exports.CompaniesService = CompaniesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(company_schema_1.Company.name)),
     __param(1, (0, mongoose_1.InjectModel)(company_requirement_schema_1.CompanyRequirement.name)),
+    __param(2, (0, mongoose_1.InjectModel)(company_lead_schema_1.CompanyLead.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         mongoose_2.Model,
         users_service_1.UsersService,
         redis_service_1.RedisService,

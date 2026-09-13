@@ -102,12 +102,43 @@ let InternsService = class InternsService {
         if (!profile) {
             throw new common_1.NotFoundException('Intern profile not found');
         }
-        Object.assign(profile, updateProfileDto);
-        await profile.save();
+        const setOps = {};
+        const flattenInto = (obj, prefix) => {
+            for (const [key, val] of Object.entries(obj)) {
+                if (val === undefined)
+                    continue;
+                const path = `${prefix}.${key}`;
+                if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+                    flattenInto(val, path);
+                }
+                else {
+                    setOps[path] = val;
+                }
+            }
+        };
+        if (updateProfileDto.personalInfo) {
+            flattenInto(updateProfileDto.personalInfo, 'personalInfo');
+        }
+        if (updateProfileDto.contact) {
+            flattenInto(updateProfileDto.contact, 'contact');
+        }
+        if (updateProfileDto.academicInfo) {
+            flattenInto(updateProfileDto.academicInfo, 'academicInfo');
+        }
+        if (updateProfileDto.professionalInfo) {
+            flattenInto(updateProfileDto.professionalInfo, 'professionalInfo');
+        }
+        if (updateProfileDto.preferences) {
+            flattenInto(updateProfileDto.preferences, 'preferences');
+        }
+        let updated = profile;
+        if (Object.keys(setOps).length > 0) {
+            updated = await this.internProfileModel.findOneAndUpdate({ userId }, { $set: setOps }, { new: true, runValidators: false });
+        }
         return {
             success: true,
             message: 'Profile updated successfully',
-            data: profile,
+            data: updated,
         };
     }
     async getReadiness(userId) {
@@ -315,6 +346,9 @@ let InternsService = class InternsService {
         };
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Intern not found');
+        }
         const profile = await this.internProfileModel
             .findById(id)
             .populate('userId', 'firstName lastName email role');

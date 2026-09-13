@@ -43,7 +43,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-500 dark:text-gray-400">
-                {user.firstName[0]}{user.lastName[0]}
+                {(user?.firstName?.[0] || 'U')}{(user?.lastName?.[0] || '')}
               </div>
             )}
           </div>

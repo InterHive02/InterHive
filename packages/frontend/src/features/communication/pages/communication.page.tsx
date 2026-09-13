@@ -23,6 +23,7 @@ export const CommunicationPage: React.FC = () => {
     markAnnouncementAsRead,
     pinAnnouncement,
     isLoading,
+    loadMessages,
   } = useChat(user?.id || '');
 
   // Auto-select first chat if available and no active chat
@@ -37,6 +38,7 @@ export const CommunicationPage: React.FC = () => {
 
   const handleChatSelect = (chatId: string) => {
     setActiveChatId(chatId);
+    loadMessages(chatId);
   };
 
   const handleSendMessage = (content: string, type?: string, attachments?: File[]) => {
@@ -68,9 +70,9 @@ export const CommunicationPage: React.FC = () => {
           >
             <MessageSquare className="w-4 h-4" />
             Chats
-            {chats.reduce((acc, chat) => acc + chat.unreadCount, 0) > 0 && (
+            {(chats || []).reduce((acc, chat) => acc + (chat?.unreadCount || 0), 0) > 0 && (
               <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
-                {chats.reduce((acc, chat) => acc + chat.unreadCount, 0)}
+                {(chats || []).reduce((acc, chat) => acc + (chat?.unreadCount || 0), 0)}
               </span>
             )}
           </button>
@@ -84,9 +86,9 @@ export const CommunicationPage: React.FC = () => {
           >
             <Megaphone className="w-4 h-4" />
             Announcements
-            {announcements.filter(a => !a.readBy.includes(user?.id || '')).length > 0 && (
+            {(announcements || []).filter(a => Array.isArray(a?.readBy) ? !a.readBy.includes(user?.id || '') : true).length > 0 && (
               <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
-                {announcements.filter(a => !a.readBy.includes(user?.id || '')).length}
+                {(announcements || []).filter(a => Array.isArray(a?.readBy) ? !a.readBy.includes(user?.id || '') : true).length}
               </span>
             )}
           </button>
@@ -102,6 +104,7 @@ export const CommunicationPage: React.FC = () => {
               <ChatList
                 chats={chats}
                 activeChatId={activeChatId || undefined}
+                currentUserId={user?.id || ''}
                 onChatSelect={handleChatSelect}
               />
             </div>

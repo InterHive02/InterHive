@@ -63,6 +63,51 @@ export class UsersController {
     });
   }
 
+  @Get('me/profile')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
+  async getProfile(@CurrentUser() user: User) {
+    return this.usersService.findById(user.id);
+  }
+
+  @Get('stats/overview')
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @ApiOperation({ summary: 'Get user statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getStats() {
+    return this.usersService.getStats();
+  }
+
+  @Get('department/:departmentId')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Get users by department' })
+  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
+  async findByDepartment(@Param('departmentId') departmentId: string) {
+    return this.usersService.findByDepartment(departmentId);
+  }
+
+  @Get('search/:query')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Search users' })
+  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
+  async search(@Param('query') query: string) {
+    return this.usersService.search(query);
+  }
+
+  @Get('me/profile')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Current profile retrieved successfully' })
+  async getMyProfile(@CurrentUser() user: any) {
+    return this.usersService.findById(user.id || user._id);
+  }
+
+  @Put('me/profile')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  async updateProfile(@CurrentUser() user: any, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(user.id || user._id, updateUserDto);
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
   @ApiOperation({ summary: 'Get user by ID' })
@@ -72,13 +117,6 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  @Get('me/profile')
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
-  async getProfile(@CurrentUser() user: User) {
-    return this.usersService.findById(user.id);
-  }
-
   @Put(':id')
   @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiOperation({ summary: 'Update user' })
@@ -86,13 +124,6 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
-  }
-
-  @Put('me/profile')
-  @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
-  async updateProfile(@CurrentUser() user: User, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(user.id, updateUserDto);
   }
 
   @Delete(':id')
@@ -146,29 +177,5 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Avatar deleted successfully' })
   async deleteAvatar(@CurrentUser() user: User) {
     return this.usersService.deleteAvatar(user.id);
-  }
-
-  @Get('department/:departmentId')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @ApiOperation({ summary: 'Get users by department' })
-  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-  async findByDepartment(@Param('departmentId') departmentId: string) {
-    return this.usersService.findByDepartment(departmentId);
-  }
-
-  @Get('search/:query')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @ApiOperation({ summary: 'Search users' })
-  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
-  async search(@Param('query') query: string) {
-    return this.usersService.search(query);
-  }
-
-  @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.HR)
-  @ApiOperation({ summary: 'Get user statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats() {
-    return this.usersService.getStats();
   }
 }

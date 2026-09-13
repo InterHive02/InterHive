@@ -33,6 +33,15 @@ let AssessmentsController = class AssessmentsController {
     async findAll(page = 1, limit = 10, type, category, status) {
         return this.assessmentsService.findAll({ page, limit, type, category, status });
     }
+    async getMyResults(user) {
+        return this.assessmentsService.getMyResults(user.id);
+    }
+    async getUserResults(userId) {
+        return this.assessmentsService.getUserResults(userId);
+    }
+    async getStats() {
+        return this.assessmentsService.getStats();
+    }
     async findById(id) {
         return this.assessmentsService.findById(id);
     }
@@ -54,17 +63,8 @@ let AssessmentsController = class AssessmentsController {
     async getResult(user, id) {
         return this.assessmentsService.getResult(user.id, id);
     }
-    async getMyResults(user) {
-        return this.assessmentsService.getMyResults(user.id);
-    }
-    async getUserResults(userId) {
-        return this.assessmentsService.getUserResults(userId);
-    }
     async evaluateAssessment(id, resultId, feedback) {
         return this.assessmentsService.evaluateAssessment(id, resultId, feedback);
-    }
-    async getStats() {
-        return this.assessmentsService.getStats();
     }
 };
 exports.AssessmentsController = AssessmentsController;
@@ -94,6 +94,37 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, String, String, String]),
     __metadata("design:returntype", Promise)
 ], AssessmentsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('my-results'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all assessment results for current user' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Results retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], AssessmentsController.prototype, "getMyResults", null);
+__decorate([
+    (0, common_1.Get)('results/:userId'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get assessment results for a user' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Results retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AssessmentsController.prototype, "getUserResults", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get assessment statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AssessmentsController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get assessment by ID' }),
@@ -180,27 +211,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AssessmentsController.prototype, "getResult", null);
 __decorate([
-    (0, common_1.Get)('my-results'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all assessment results for current user' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Results retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_schema_1.User]),
-    __metadata("design:returntype", Promise)
-], AssessmentsController.prototype, "getMyResults", null);
-__decorate([
-    (0, common_1.Get)('results/:userId'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Get assessment results for a user' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Results retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, common_1.Param)('userId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AssessmentsController.prototype, "getUserResults", null);
-__decorate([
     (0, common_1.Post)(':id/evaluate'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
     (0, swagger_1.ApiOperation)({ summary: 'Evaluate assessment manually' }),
@@ -213,16 +223,6 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], AssessmentsController.prototype, "evaluateAssessment", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get assessment statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], AssessmentsController.prototype, "getStats", null);
 exports.AssessmentsController = AssessmentsController = __decorate([
     (0, swagger_1.ApiTags)('Assessments'),
     (0, common_1.Controller)('assessments'),

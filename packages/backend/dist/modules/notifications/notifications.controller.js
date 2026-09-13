@@ -49,6 +49,12 @@ let NotificationsController = class NotificationsController {
         }
         return this.notificationsService.getUnreadCount(userId);
     }
+    async broadcast(title, message, type, roles) {
+        return this.notificationsService.broadcast({ title, message, type, roles });
+    }
+    async getStats() {
+        return this.notificationsService.getStats();
+    }
     async findById(id) {
         return this.notificationsService.findById(id);
     }
@@ -75,12 +81,6 @@ let NotificationsController = class NotificationsController {
             throw new common_1.UnauthorizedException('User not found');
         }
         await this.notificationsService.deleteAll(user.id);
-    }
-    async broadcast(title, message, type, roles) {
-        return this.notificationsService.broadcast({ title, message, type, roles });
-    }
-    async getStats() {
-        return this.notificationsService.getStats();
     }
 };
 exports.NotificationsController = NotificationsController;
@@ -120,6 +120,30 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "getUnreadCount", null);
+__decorate([
+    (0, common_1.Post)('broadcast'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Broadcast notification to all users' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Broadcast sent successfully' }),
+    openapi.ApiResponse({ status: 201 }),
+    __param(0, (0, common_1.Body)('title')),
+    __param(1, (0, common_1.Body)('message')),
+    __param(2, (0, common_1.Body)('type')),
+    __param(3, (0, common_1.Body)('roles')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, Array]),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "broadcast", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get notification statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get notification by ID' }),
@@ -177,30 +201,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "deleteAll", null);
-__decorate([
-    (0, common_1.Post)('broadcast'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Broadcast notification to all users' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Broadcast sent successfully' }),
-    openapi.ApiResponse({ status: 201 }),
-    __param(0, (0, common_1.Body)('title')),
-    __param(1, (0, common_1.Body)('message')),
-    __param(2, (0, common_1.Body)('type')),
-    __param(3, (0, common_1.Body)('roles')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Array]),
-    __metadata("design:returntype", Promise)
-], NotificationsController.prototype, "broadcast", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get notification statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], NotificationsController.prototype, "getStats", null);
 exports.NotificationsController = NotificationsController = __decorate([
     (0, swagger_1.ApiTags)('Notifications'),
     (0, common_1.Controller)('notifications'),

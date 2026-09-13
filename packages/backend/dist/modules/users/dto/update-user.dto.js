@@ -17,7 +17,7 @@ const class_transformer_1 = require("class-transformer");
 const shared_1 = require("@interhive/shared");
 class UpdateUserDto {
     static _OPENAPI_METADATA_FACTORY() {
-        return { email: { required: false, type: () => String }, firstName: { required: false, type: () => String, minLength: 2, maxLength: 50 }, lastName: { required: false, type: () => String, minLength: 2, maxLength: 50 }, employeeId: { required: false, type: () => String }, password: { required: false, type: () => String, minLength: 8, maxLength: 50 }, role: { required: false, enum: require("../../../../../shared/dist/types/index").UserRole }, position: { required: false, type: () => String }, phone: { required: false, type: () => String }, address: { required: false, type: () => String }, dateOfBirth: { required: false, type: () => Date }, gender: { required: false, enum: require("../../../../../shared/dist/types/index").Gender }, employmentType: { required: false, enum: require("../../../../../shared/dist/types/index").EmploymentType }, department: { required: false, type: () => String }, manager: { required: false, type: () => String }, isActive: { required: false, type: () => Boolean }, isVerified: { required: false, type: () => Boolean }, skills: { required: false, type: () => [String] } };
+        return { email: { required: false, type: () => String }, firstName: { required: false, type: () => String, minLength: 2, maxLength: 50 }, lastName: { required: false, type: () => String, minLength: 2, maxLength: 50 }, employeeId: { required: false, type: () => String }, password: { required: false, type: () => String, minLength: 8, maxLength: 50 }, role: { required: false, enum: require("../../../../../shared/dist/types/index").UserRole }, position: { required: false, type: () => String }, phone: { required: false, type: () => String }, profilePhoto: { required: false, type: () => String }, address: { required: false, type: () => Object }, dateOfBirth: { required: false, type: () => Date }, gender: { required: false, enum: require("../../../../../shared/dist/types/index").Gender }, employmentType: { required: false, enum: require("../../../../../shared/dist/types/index").EmploymentType }, department: { required: false, type: () => String }, manager: { required: false, type: () => String }, isActive: { required: false, type: () => Boolean }, isVerified: { required: false, type: () => Boolean }, skills: { required: false, type: () => [String] } };
     }
 }
 exports.UpdateUserDto = UpdateUserDto;
@@ -110,13 +110,22 @@ __decorate([
 ], UpdateUserDto.prototype, "phone", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: '123 Main St, New York, NY 10001',
-        description: 'Address',
+        example: 'https://example.com/photo.jpg',
+        description: 'Profile photo URL or base64 data URL',
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], UpdateUserDto.prototype, "profilePhoto", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '123 Main St, New York, NY 10001',
+        description: 'Address string or address object',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
 ], UpdateUserDto.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({

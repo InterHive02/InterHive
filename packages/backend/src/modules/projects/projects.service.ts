@@ -152,6 +152,10 @@ export class ProjectsService {
   }
 
   async findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Project not found');
+    }
+
     const project = await this.projectModel
       .findById(id)
       .populate('companyId', 'companyInfo.name companyInfo.logo companyInfo.description')

@@ -128,6 +128,9 @@ let ProjectsService = class ProjectsService {
         };
     }
     async findById(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.NotFoundException('Project not found');
+        }
         const project = await this.projectModel
             .findById(id)
             .populate('companyId', 'companyInfo.name companyInfo.logo companyInfo.description')

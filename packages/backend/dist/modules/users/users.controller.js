@@ -41,17 +41,29 @@ let UsersController = class UsersController {
             isActive,
         });
     }
-    async findById(id) {
-        return this.usersService.findById(id);
-    }
     async getProfile(user) {
         return this.usersService.findById(user.id);
     }
-    async update(id, updateUserDto) {
-        return this.usersService.update(id, updateUserDto);
+    async getStats() {
+        return this.usersService.getStats();
+    }
+    async findByDepartment(departmentId) {
+        return this.usersService.findByDepartment(departmentId);
+    }
+    async search(query) {
+        return this.usersService.search(query);
+    }
+    async getMyProfile(user) {
+        return this.usersService.findById(user.id || user._id);
     }
     async updateProfile(user, updateUserDto) {
-        return this.usersService.update(user.id, updateUserDto);
+        return this.usersService.update(user.id || user._id, updateUserDto);
+    }
+    async findById(id) {
+        return this.usersService.findById(id);
+    }
+    async update(id, updateUserDto) {
+        return this.usersService.update(id, updateUserDto);
     }
     async delete(id) {
         await this.usersService.delete(id);
@@ -70,15 +82,6 @@ let UsersController = class UsersController {
     }
     async deleteAvatar(user) {
         return this.usersService.deleteAvatar(user.id);
-    }
-    async findByDepartment(departmentId) {
-        return this.usersService.findByDepartment(departmentId);
-    }
-    async search(query) {
-        return this.usersService.search(query);
-    }
-    async getStats() {
-        return this.usersService.getStats();
     }
 };
 exports.UsersController = UsersController;
@@ -112,6 +115,69 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('me/profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_schema_1.User]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)('stats/overview'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
+    (0, swagger_1.ApiOperation)({ summary: 'Get user statistics' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Get)('department/:departmentId'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get users by department' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Users retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Param)('departmentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findByDepartment", null);
+__decorate([
+    (0, common_1.Get)('search/:query'),
+    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
+    (0, swagger_1.ApiOperation)({ summary: 'Search users' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Search results retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, common_1.Param)('query')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "search", null);
+__decorate([
+    (0, common_1.Get)('me/profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Current profile retrieved successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getMyProfile", null);
+__decorate([
+    (0, common_1.Put)('me/profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update current user profile' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile updated successfully' }),
+    openapi.ApiResponse({ status: 200 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateProfile", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
     (0, swagger_1.ApiOperation)({ summary: 'Get user by ID' }),
@@ -123,16 +189,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findById", null);
-__decorate([
-    (0, common_1.Get)('me/profile'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_schema_1.User]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
@@ -146,17 +202,6 @@ __decorate([
     __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
-__decorate([
-    (0, common_1.Put)('me/profile'),
-    (0, swagger_1.ApiOperation)({ summary: 'Update current user profile' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile updated successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_schema_1.User, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "updateProfile", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN),
@@ -227,38 +272,6 @@ __decorate([
     __metadata("design:paramtypes", [user_schema_1.User]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "deleteAvatar", null);
-__decorate([
-    (0, common_1.Get)('department/:departmentId'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Get users by department' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Users retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, common_1.Param)('departmentId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "findByDepartment", null);
-__decorate([
-    (0, common_1.Get)('search/:query'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR, shared_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({ summary: 'Search users' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Search results retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __param(0, (0, common_1.Param)('query')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "search", null);
-__decorate([
-    (0, common_1.Get)('stats/overview'),
-    (0, roles_decorator_1.Roles)(shared_1.UserRole.ADMIN, shared_1.UserRole.HR),
-    (0, swagger_1.ApiOperation)({ summary: 'Get user statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
-    openapi.ApiResponse({ status: 200 }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "getStats", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, common_1.Controller)('users'),

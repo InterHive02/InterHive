@@ -112,13 +112,52 @@ export class InternsService {
       throw new NotFoundException('Intern profile not found');
     }
 
-    Object.assign(profile, updateProfileDto);
-    await profile.save();
+    // Build a flat $set object using dot-notation paths.
+    // This only touches the specific fields sent in the DTO,
+    // leaving required fields like contact.email untouched.
+    const setOps: Record<string, any> = {};
+
+    const flattenInto = (obj: Record<string, any>, prefix: string) => {
+      for (const [key, val] of Object.entries(obj)) {
+        if (val === undefined) continue;
+        const path = `${prefix}.${key}`;
+        if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+          flattenInto(val, path);
+        } else {
+          setOps[path] = val;
+        }
+      }
+    };
+
+    if (updateProfileDto.personalInfo) {
+      flattenInto(updateProfileDto.personalInfo as any, 'personalInfo');
+    }
+    if (updateProfileDto.contact) {
+      flattenInto(updateProfileDto.contact as any, 'contact');
+    }
+    if (updateProfileDto.academicInfo) {
+      flattenInto(updateProfileDto.academicInfo as any, 'academicInfo');
+    }
+    if (updateProfileDto.professionalInfo) {
+      flattenInto(updateProfileDto.professionalInfo as any, 'professionalInfo');
+    }
+    if (updateProfileDto.preferences) {
+      flattenInto(updateProfileDto.preferences as any, 'preferences');
+    }
+
+    let updated = profile;
+    if (Object.keys(setOps).length > 0) {
+      updated = await this.internProfileModel.findOneAndUpdate(
+        { userId },
+        { $set: setOps },
+        { new: true, runValidators: false },
+      );
+    }
 
     return {
       success: true,
       message: 'Profile updated successfully',
-      data: profile,
+      data: updated,
     };
   }
 
@@ -389,6 +428,10 @@ export class InternsService {
   }
 
   async findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Intern not found');
+    }
+
     const profile = await this.internProfileModel
       .findById(id)
       .populate('userId', 'firstName lastName email role');

@@ -131,6 +131,20 @@ export class AuthController {
     return this.authService.getProfile(user.id);
   }
 
+  @Post('change-first-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change temporary password on first login' })
+  async changeFirstPassword(
+    @CurrentUser() user: User,
+    @Body('newPassword') newPassword: string,
+  ) {
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    return this.authService.firstLoginPasswordChange(user.id, newPassword);
+  }
+
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @Public()

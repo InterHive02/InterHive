@@ -93,13 +93,21 @@ export class UpdateUserDto {
   phone?: string;
 
   @ApiProperty({
-    example: '123 Main St, New York, NY 10001',
-    description: 'Address',
+    example: 'https://example.com/photo.jpg',
+    description: 'Profile photo URL or base64 data URL',
     required: false,
   })
   @IsOptional()
   @IsString()
-  address?: string;
+  profilePhoto?: string;
+
+  @ApiProperty({
+    example: '123 Main St, New York, NY 10001',
+    description: 'Address string or address object',
+    required: false,
+  })
+  @IsOptional()
+  address?: any;
 
   @ApiProperty({
     example: '1990-01-01',

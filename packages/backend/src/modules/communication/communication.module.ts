@@ -4,16 +4,21 @@ import { CommunicationController } from './communication.controller';
 import { CommunicationService } from './communication.service';
 import { Chat, ChatSchema } from './schemas/chat.schema';
 import { Message, MessageSchema } from './schemas/message.schema';
+import { Announcement, AnnouncementSchema } from './schemas/announcement.schema';
 import { ChatGateway } from './gateways/chat.gateway';
 import { UsersModule } from '../users/users.module';
 import { AuthModule } from '../auth/auth.module';
 import { RedisModule } from '../../common/redis/redis.module';
+
+import { User, UserSchema } from '../users/schemas/user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Chat.name, schema: ChatSchema },
       { name: Message.name, schema: MessageSchema },
+      { name: Announcement.name, schema: AnnouncementSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     UsersModule,
     AuthModule,

@@ -128,8 +128,30 @@ export const useIntern = () => {
     },
   });
 
+  const useInterns = (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+    return useQuery({
+      queryKey: ['interns', 'all', params],
+      queryFn: async () => {
+        const response = await internApi.getAll(params || { page: 1, limit: 50 });
+        return response.data;
+      },
+    });
+  };
+
+  const useInternStats = () => {
+    return useQuery({
+      queryKey: ['interns', 'stats'],
+      queryFn: async () => {
+        const response = await internApi.getStats();
+        return response.data;
+      },
+    });
+  };
+
   return {
     useProfile,
+    useInterns,
+    useInternStats,
     createProfile: createProfileMutation.mutate,
     isCreatingProfile: createProfileMutation.isLoading,
     updateProfile: updateProfileMutation.mutate,

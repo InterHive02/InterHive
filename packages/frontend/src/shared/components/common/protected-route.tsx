@@ -23,7 +23,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     const localUser = localUserStr ? JSON.parse(localUserStr) : null;
     const userRole = localUser?.role || 'intern';
 
-    if (!allowedRoles.includes(userRole)) {
+    // Super Administrator has universal access across all modules
+    if (userRole !== 'admin' && !allowedRoles.includes(userRole)) {
       return <Navigate to="/dashboard" replace />;
     }
   }

@@ -13,10 +13,12 @@ const communication_controller_1 = require("./communication.controller");
 const communication_service_1 = require("./communication.service");
 const chat_schema_1 = require("./schemas/chat.schema");
 const message_schema_1 = require("./schemas/message.schema");
+const announcement_schema_1 = require("./schemas/announcement.schema");
 const chat_gateway_1 = require("./gateways/chat.gateway");
 const users_module_1 = require("../users/users.module");
 const auth_module_1 = require("../auth/auth.module");
 const redis_module_1 = require("../../common/redis/redis.module");
+const user_schema_1 = require("../users/schemas/user.schema");
 let CommunicationModule = class CommunicationModule {
 };
 exports.CommunicationModule = CommunicationModule;
@@ -26,6 +28,8 @@ exports.CommunicationModule = CommunicationModule = __decorate([
             mongoose_1.MongooseModule.forFeature([
                 { name: chat_schema_1.Chat.name, schema: chat_schema_1.ChatSchema },
                 { name: message_schema_1.Message.name, schema: message_schema_1.MessageSchema },
+                { name: announcement_schema_1.Announcement.name, schema: announcement_schema_1.AnnouncementSchema },
+                { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
             ]),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
