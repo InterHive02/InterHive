@@ -1,0 +1,1285 @@
+openapi: 3.0.3
+info:
+  title: InterHive API
+  description: InterHive - Industry Readiness & Talent Connect Platform API
+  version: 1.0.0
+  contact:
+    name: InterHive Team
+    email: support@interhive.in
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.interhive.in/api/v1
+    description: Production Server
+  - url: https://staging-api.interhive.in/api/v1
+    description: Staging Server
+  - url: http://localhost:3000/api/v1
+    description: Development Server
+
+tags:
+  - name: Auth
+    description: Authentication & Authorization
+  - name: Users
+    description: User management
+  - name: Interns
+    description: Intern profile & management
+  - name: Companies
+    description: Company profile & management
+  - name: Assessments
+    description: Skill assessments
+  - name: Training
+    description: Training programs
+  - name: Projects
+    description: Project management
+  - name: Matching
+    description: Smart matching & hiring
+  - name: Attendance
+    description: Attendance tracking
+  - name: Analytics
+    description: Analytics & reporting
+  - name: Communication
+    description: Chat & messaging
+  - name: Notifications
+    description: Notifications
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Common
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    # Auth
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          minLength: 8
+          example: SecurePass123!
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+          minLength: 2
+        lastName:
+          type: string
+          minLength: 2
+        password:
+          type: string
+          minLength: 8
+        role:
+          type: string
+          enum: [intern, company]
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+            expiresIn:
+              type: string
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, hr, manager, intern, company]
+        department:
+          type: string
+        position:
+          type: string
+        phone:
+          type: string
+        profilePhoto:
+          type: string
+        isActive:
+          type: boolean
+        isVerified:
+          type: boolean
+        lastLogin:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Intern
+    InternProfile:
+      type: object
+      required:
+        - personalInfo
+        - contact
+        - academicInfo
+        - preferences
+      properties:
+        personalInfo:
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            dateOfBirth:
+              type: string
+              format: date
+            gender:
+              type: string
+              enum: [male, female, other]
+            nationality:
+              type: string
+            profilePhoto:
+              type: string
+        contact:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+            alternatePhone:
+              type: string
+            address:
+              type: object
+              properties:
+                street:
+                  type: string
+                city:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                zipCode:
+                  type: string
+            socialMedia:
+              type: object
+              properties:
+                linkedin:
+                  type: string
+                github:
+                  type: string
+                portfolio:
+                  type: string
+        academicInfo:
+          type: object
+          properties:
+            currentEducation:
+              type: object
+              properties:
+                institution:
+                  type: string
+                degree:
+                  type: string
+                field:
+                  type: string
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                isCurrent:
+                  type: boolean
+                grade:
+                  type: string
+            cgpa:
+              type: number
+              minimum: 0
+              maximum: 10
+            graduationYear:
+              type: integer
+        preferences:
+          type: object
+          properties:
+            preferredDomains:
+              type: array
+              items:
+                type: string
+            preferredLocation:
+              type: array
+              items:
+                type: string
+            preferredWorkType:
+              type: array
+              items:
+                type: string
+                enum: [remote, hybrid, onsite]
+            expectedStipend:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+
+    ReadinessScore:
+      type: object
+      properties:
+        overall:
+          type: integer
+          minimum: 0
+          maximum: 100
+        breakdown:
+          type: object
+          properties:
+            technicalSkills:
+              type: integer
+            projects:
+              type: integer
+            communication:
+              type: integer
+            problemSolving:
+              type: integer
+            industryWorkflow:
+              type: integer
+            teamCollaboration:
+              type: integer
+            leadership:
+              type: integer
+            adaptability:
+              type: integer
+        lastUpdated:
+          type: string
+          format: date-time
+
+    # Company
+    Company:
+      type: object
+      required:
+        - companyInfo
+        - contact
+      properties:
+        companyInfo:
+          type: object
+          properties:
+            name:
+              type: string
+            legalName:
+              type: string
+            registrationNumber:
+              type: string
+            industry:
+              type: array
+              items:
+                type: string
+            size:
+              type: integer
+            foundedYear:
+              type: integer
+            website:
+              type: string
+            description:
+              type: string
+            logo:
+              type: string
+        contact:
+          type: object
+          properties:
+            primaryContact:
+              type: object
+              properties:
+                email:
+                  type: string
+                phone:
+                  type: string
+                address:
+                  type: object
+                  properties:
+                    street:
+                      type: string
+                    city:
+                      type: string
+                    state:
+                      type: string
+                    country:
+                      type: string
+                    zipCode:
+                      type: string
+
+    # Assessment
+    Assessment:
+      type: object
+      required:
+        - title
+        - type
+        - questions
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [technical, soft_skills, aptitude, behavioral, coding, project]
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced, expert]
+        duration:
+          type: integer
+        passingScore:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssessmentQuestion'
+
+    AssessmentQuestion:
+      type: object
+      required:
+        - type
+        - text
+        - points
+      properties:
+        type:
+          type: string
+          enum: [multiple_choice, multiple_select, coding, essay, practical]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        category:
+          type: string
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              text:
+                type: string
+              isCorrect:
+                type: boolean
+        points:
+          type: integer
+        codeSnippet:
+          type: string
+
+    # Match
+    Match:
+      type: object
+      properties:
+        id:
+          type: string
+        matchScore:
+          type: integer
+        breakdown:
+          type: object
+          properties:
+            skillMatch:
+              type: integer
+            readinessMatch:
+              type: integer
+            experienceMatch:
+              type: integer
+            preferenceMatch:
+              type: integer
+        status:
+          type: string
+          enum: [pending, accepted, rejected, interview_scheduled, interview_completed, offer_made, offer_accepted, offer_rejected, hired, expired]
+
+  responses:
+    UnauthorizedError:
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+          example:
+            success: false
+            message: Unauthorized
+            timestamp: '2024-01-01T00:00:00.000Z'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+          example:
+            success: false
+            message: Resource not found
+            timestamp: '2024-01-01T00:00:00.000Z'
+
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+          example:
+            success: false
+            message: Validation failed
+            timestamp: '2024-01-01T00:00:00.000Z'
+
+paths:
+  # Auth
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: User registered successfully
+        409:
+          description: User already exists
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Token refreshed successfully
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User profile retrieved
+
+  # Interns
+  /interns/profile:
+    get:
+      tags: [Interns]
+      summary: Get intern profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile retrieved
+        404:
+          description: Profile not found
+
+    post:
+      tags: [Interns]
+      summary: Create intern profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternProfile'
+      responses:
+        201:
+          description: Profile created
+
+    put:
+      tags: [Interns]
+      summary: Update intern profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternProfile'
+      responses:
+        200:
+          description: Profile updated
+
+  /interns/readiness:
+    get:
+      tags: [Interns]
+      summary: Get readiness score
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Readiness score retrieved
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ReadinessScore'
+
+  /interns/applications:
+    post:
+      tags: [Interns]
+      summary: Apply for program
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                programId:
+                  type: string
+                coverLetter:
+                  type: string
+      responses:
+        201:
+          description: Application submitted
+
+  /interns/opportunities:
+    get:
+      tags: [Interns]
+      summary: Get matched opportunities
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: Opportunities retrieved
+
+  # Companies
+  /companies:
+    post:
+      tags: [Companies]
+      summary: Create company profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Company'
+      responses:
+        201:
+          description: Company created
+
+    get:
+      tags: [Companies]
+      summary: Get all companies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: industry
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, verified, active, suspended, inactive]
+      responses:
+        200:
+          description: Companies retrieved
+
+  /companies/{id}:
+    get:
+      tags: [Companies]
+      summary: Get company by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Company retrieved
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Companies]
+      summary: Update company
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Company'
+      responses:
+        200:
+          description: Company updated
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+  /companies/{id}/requirements:
+    post:
+      tags: [Companies]
+      summary: Create talent requirement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - position
+                - count
+                - skills
+              properties:
+                position:
+                  type: string
+                department:
+                  type: string
+                count:
+                  type: integer
+                skills:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      category:
+                        type: string
+                      level:
+                        type: string
+                stipend:
+                  type: object
+                  properties:
+                    min:
+                      type: number
+                    max:
+                      type: number
+                    currency:
+                      type: string
+                    period:
+                      type: string
+                      enum: [monthly, hourly, stipend]
+                workType:
+                  type: string
+                  enum: [remote, hybrid, onsite]
+                location:
+                  type: string
+                duration:
+                  type: object
+                  properties:
+                    min:
+                      type: integer
+                    max:
+                      type: integer
+                startDate:
+                  type: string
+                  format: date
+                applicationDeadline:
+                  type: string
+                  format: date
+      responses:
+        201:
+          description: Requirement created
+
+  # Assessments
+  /assessments:
+    get:
+      tags: [Assessments]
+      summary: Get all assessments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, active, archived]
+      responses:
+        200:
+          description: Assessments retrieved
+
+    post:
+      tags: [Assessments]
+      summary: Create assessment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assessment'
+      responses:
+        201:
+          description: Assessment created
+
+  /assessments/{id}:
+    get:
+      tags: [Assessments]
+      summary: Get assessment by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Assessment retrieved
+
+  /assessments/{id}/start:
+    post:
+      tags: [Assessments]
+      summary: Start assessment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Assessment started
+
+  /assessments/{id}/submit:
+    post:
+      tags: [Assessments]
+      summary: Submit assessment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - resultId
+                - answers
+              properties:
+                resultId:
+                  type: string
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId:
+                        type: string
+                      answer:
+                        type: string
+      responses:
+        200:
+          description: Assessment submitted
+
+  # Matching
+  /matching/find-matches:
+    post:
+      tags: [Matching]
+      summary: Find matches
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                minScore:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                limit:
+                  type: integer
+      responses:
+        200:
+          description: Matches found
+
+  /matching/my-matches:
+    get:
+      tags: [Matching]
+      summary: Get my matches
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, accepted, rejected, interview_scheduled, interview_completed, offer_made, offer_accepted, offer_rejected, hired, expired]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: Matches retrieved
+
+  /matching/{id}/accept:
+    post:
+      tags: [Matching]
+      summary: Accept match
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Match accepted
+
+  /matching/{id}/reject:
+    post:
+      tags: [Matching]
+      summary: Reject match
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Match rejected
+
+  /matching/{id}/schedule-interview:
+    post:
+      tags: [Matching]
+      summary: Schedule interview
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - interviewDate
+                - interviewType
+              properties:
+                interviewDate:
+                  type: string
+                  format: date-time
+                interviewType:
+                  type: string
+                meetingLink:
+                  type: string
+      responses:
+        200:
+          description: Interview scheduled
+
+  # Attendance
+  /attendance/check-in:
+    post:
+      tags: [Attendance]
+      summary: Check in
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location:
+                  type: object
+                  properties:
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                    address:
+                      type: string
+                notes:
+                  type: string
+      responses:
+        200:
+          description: Check in successful
+
+  /attendance/check-out:
+    post:
+      tags: [Attendance]
+      summary: Check out
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location:
+                  type: object
+                  properties:
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                    address:
+                      type: string
+                notes:
+                  type: string
+      responses:
+        200:
+          description: Check out successful
+
+  /attendance/history:
+    get:
+      tags: [Attendance]
+      summary: Get attendance history
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: History retrieved
+
+  # Analytics
+  /analytics/dashboard:
+    get:
+      tags: [Analytics]
+      summary: Get dashboard analytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Dashboard analytics retrieved
+
+  /analytics/readiness:
+    get:
+      tags: [Analytics]
+      summary: Get readiness analytics
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Readiness analytics retrieved
+
+  # Communication
+  /communication/chats:
+    get:
+      tags: [Communication]
+      summary: Get user chats
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Chats retrieved
+
+    post:
+      tags: [Communication]
+      summary: Create new chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - participants
+              properties:
+                participants:
+                  type: array
+                  items:
+                    type: string
+                name:
+                  type: string
+                isGroupChat:
+                  type: boolean
+      responses:
+        201:
+          description: Chat created
+
+  /communication/chats/{chatId}/messages:
+    get:
+      tags: [Communication]
+      summary: Get chat messages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        200:
+          description: Messages retrieved
+
+    post:
+      tags: [Communication]
+      summary: Send message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                type:
+                  type: string
+                  enum: [text, image, file, audio, video]
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      url:
+                        type: string
+                      type:
+                        type: string
+                      size:
+                        type: integer
+      responses:
+        201:
+          description: Message sent

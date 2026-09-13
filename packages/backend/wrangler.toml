@@ -1,0 +1,25 @@
+name = "interhive-backend"
+main = "dist/main.js"
+compatibility_date = "2024-12-18"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+MONGODB_URI = "mongodb+srv://interhiveinfo_db_user:7q5eh4jMiFJew8fa@interhive.cis5dtl.mongodb.net/interhive?retryWrites=true&w=majority&appName=interhive"
+REDIS_HOST = "localhost"
+REDIS_PORT = "6379"
+JWT_SECRET = "7acb450d0a8f8a8579252b1c913759cf4c9804497f7b4c1c45168f3d2d9220046636e0116e6eca4e3bf2855c0d7cbaa49e9e8f6aeaf8902e4bef9f2f3a277a7e"
+JWT_REFRESH_SECRET = "876088cafeafd1a2e0b8d4f5e0eb3d494be2c8236e711aef504ef2516df4fd7f5d532a340fc9290c2b0b7ea55697100c3e733393e9756d5d1f5953bef9450ec1"
+JWT_EXPIRES_IN = "7d"
+JWT_REFRESH_EXPIRES_IN = "30d"
+
+# Routes (custom domain)
+[[routes]]
+pattern = "api.interhive.in/*"
+zone_id = "f12c56071057fd9fb8fea1e81c0b1f40"
+
+# Production environment
+[env.production]
+vars = { NODE_ENV = "production" }
+routes = [{ pattern = "api.interhive.in/*", zone_id = "f12c56071057fd9fb8fea1e81c0b1f40" }]

@@ -1,0 +1,31 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@interhive/shared/(.*)$": "<rootDir>/../shared/src/$1",
+    "^@interhive/shared$": "<rootDir>/../shared/src"
+  },
+  "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
+  "coverageDirectory": "../coverage/e2e",
+  "collectCoverageFrom": [
+    "../src/**/*.ts",
+    "!../src/**/*.spec.ts",
+    "!../src/**/*.module.ts",
+    "!../src/main.ts",
+    "!../src/seeders/**/*.ts"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "branches": 70,
+      "functions": 80,
+      "lines": 80,
+      "statements": 80
+    }
+  },
+  "verbose": true
+}

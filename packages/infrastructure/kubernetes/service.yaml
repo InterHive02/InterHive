@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: interhive-backend
+  namespace: interhive
+  labels:
+    app: interhive
+    component: backend
+spec:
+  selector:
+    app: interhive
+    component: backend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interhive-frontend
+  namespace: interhive
+  labels:
+    app: interhive
+    component: frontend
+spec:
+  selector:
+    app: interhive
+    component: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interhive-redis
+  namespace: interhive
+  labels:
+    app: interhive
+    component: redis
+spec:
+  selector:
+    app: interhive
+    component: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interhive-mongodb
+  namespace: interhive
+  labels:
+    app: interhive
+    component: mongodb
+spec:
+  selector:
+    app: interhive
+    component: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+      name: mongodb
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: interhive
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: interhive
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

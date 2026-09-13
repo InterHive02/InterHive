@@ -1,0 +1,17 @@
+{
+  "name": "@interhive/shared",
+  "version": "1.0.0",
+  "description": "Shared types, constants, and utilities for InterHive",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^6.0.0"
+  },
+  "license": "MIT"
+}

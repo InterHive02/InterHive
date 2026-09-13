@@ -1,0 +1,37 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: interhive
+          directory: packages/frontend/dist
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy packages/backend/dist
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/interhive-backend backend=interhive/backend:${{ github.sha }} -n interhive
+          kubectl set image deployment/interhive-frontend frontend=interhive/frontend:${{ github.sha }} -n interhive
+          kubectl rollout status deployment/interhive-backend -n interhive
+          kubectl rollout status deployment/interhive-frontend -n interhive

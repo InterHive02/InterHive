@@ -1,0 +1,248 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interhive-backend
+  namespace: interhive
+  labels:
+    app: interhive
+    component: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: interhive
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: interhive
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: interhive/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: interhive-secrets
+                  key: mongodb-uri
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: interhive-config
+                  key: redis-host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: interhive-config
+                  key: redis-port
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: interhive-secrets
+                  key: jwt-secret
+            - name: JWT_REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: interhive-secrets
+                  key: jwt-refresh-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interhive-frontend
+  namespace: interhive
+  labels:
+    app: interhive
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: interhive
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: interhive
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: interhive/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interhive-redis
+  namespace: interhive
+  labels:
+    app: interhive
+    component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: interhive
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: interhive
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: redis-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interhive-mongodb
+  namespace: interhive
+  labels:
+    app: interhive
+    component: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: interhive
+      component: mongodb
+  template:
+    metadata:
+      labels:
+        app: interhive
+        component: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: interhive-secrets
+                  key: mongodb-username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: interhive-secrets
+                  key: mongodb-password
+            - name: MONGO_INITDB_DATABASE
+              value: "interhive"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: mongodb-storage
+              mountPath: /data/db
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: mongodb-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
