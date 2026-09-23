@@ -164,8 +164,67 @@ export const HrLeadsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Leads Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-xs">
+      {/* Leads Mobile Cards (<640px) */}
+      <div className="block sm:hidden space-y-3">
+        {isLoading ? (
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl text-center text-slate-400 border border-slate-200/80 dark:border-slate-700/80">
+            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            Loading company leads...
+          </div>
+        ) : leads.length === 0 ? (
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl text-center text-slate-400 border border-slate-200/80 dark:border-slate-700/80 text-xs">
+            No company leads found matching your criteria.
+          </div>
+        ) : (
+          leads.map(lead => {
+            const id = lead._id || lead.id || '';
+            return (
+              <div
+                key={id}
+                onClick={() => setActiveLead(lead)}
+                className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-3 cursor-pointer"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-sm truncate">
+                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{lead.companyName}</span>
+                    </div>
+                    {lead.industry && (
+                      <div className="text-[10px] text-slate-400 mt-0.5">{lead.industry}</div>
+                    )}
+                  </div>
+                  <div className="shrink-0">{getStatusBadge(lead.status)}</div>
+                </div>
+
+                <div className="text-xs text-slate-600 dark:text-slate-300 pt-1 border-t border-slate-100 dark:border-slate-750">
+                  <div className="font-semibold text-slate-800 dark:text-slate-100">{lead.contactPerson}</div>
+                  <div className="text-[11px] text-slate-400 font-mono">{lead.email}</div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <div className="text-xs text-slate-500">
+                    Need: <span className="font-bold text-indigo-600 dark:text-indigo-400">{lead.internCount || '1-5'}</span> interns
+                  </div>
+
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setActiveLead(lead);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-xs shrink-0 min-h-[36px]"
+                  >
+                    Manage Lead →
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Leads Table (>=640px) */}
+      <div className="hidden sm:block bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-700/80 text-slate-500 uppercase tracking-wider font-bold">

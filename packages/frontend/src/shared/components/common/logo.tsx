@@ -61,6 +61,8 @@ export const Logo: React.FC<LogoProps> = ({
         <img
           src="/logo.png"
           alt="InterHive Logo"
+          loading="eager"
+          decoding="async"
           onError={() => setImageError(true)}
           className={`${currentSize.img} w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200`}
         />

@@ -297,6 +297,50 @@ a:hover {
   color: var(--text-secondary);
 }
 
+/* Safe Area & Mobile Inset Variables */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+/* Safe area padding utilities */
+.pt-safe {
+  padding-top: max(1rem, var(--sat));
+}
+.pb-safe {
+  padding-bottom: max(1rem, var(--sab));
+}
+.pl-safe {
+  padding-left: max(1rem, var(--sal));
+}
+.pr-safe {
+  padding-right: max(1rem, var(--sar));
+}
+
+/* iOS Safari Dynamic Viewport & Mobile Helpers */
+.min-h-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.h-dvh {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Touch scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent unwanted horizontal overflow globally */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 /* Responsive Utilities */
 @media (max-width: 640px) {
   .card {
@@ -306,6 +350,7 @@ a:hover {
   .btn {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
+    min-height: 44px; /* Apple minimum touch target */
   }
 }
 

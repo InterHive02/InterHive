@@ -39,6 +39,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <img
                 src={user.profilePhoto}
                 alt={`${user.firstName} ${user.lastName}`}
+                width={96}
+                height={96}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             ) : (

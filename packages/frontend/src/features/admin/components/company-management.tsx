@@ -125,8 +125,99 @@ export const CompanyManagement: React.FC<CompanyManagementProps> = ({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Stacked Card View (< 640px) */}
+      <div className="block sm:hidden space-y-3">
+        {filteredCompanies.map((company) => (
+          <div
+            key={company.id}
+            className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 space-y-3 shadow-xs"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {company.logo ? (
+                  <img
+                    src={company.logo}
+                    alt={company.name}
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-9 h-9 rounded-lg object-cover max-w-full h-auto shrink-0"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                    {company.name[0]}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
+                    {company.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {company.legalName}
+                  </p>
+                </div>
+              </div>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-lg shrink-0 ${getStatusColor(company.status)}`}>
+                {getStatusIcon(company.status)}
+                {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                <span>{company.requirements} Reqs</span>
+                <span>•</span>
+                <span>{company.hires} Hires</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(company.id)}
+                    aria-label="Edit company"
+                    className="p-2 min-h-[36px] min-w-[36px] text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-lg bg-gray-50 dark:bg-gray-700"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+                {company.status === 'pending' && onVerify && (
+                  <button
+                    onClick={() => onVerify(company.id)}
+                    aria-label="Verify company"
+                    className="p-2 min-h-[36px] min-w-[36px] text-green-600 rounded-lg bg-green-50 dark:bg-green-900/30"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                  </button>
+                )}
+                {company.status !== 'suspended' ? (
+                  onSuspend && (
+                    <button
+                      onClick={() => onSuspend(company.id)}
+                      aria-label="Suspend company"
+                      className="p-2 min-h-[36px] min-w-[36px] text-yellow-600 rounded-lg bg-yellow-50 dark:bg-yellow-900/30"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  )
+                ) : (
+                  onVerify && (
+                    <button
+                      onClick={() => onVerify(company.id)}
+                      aria-label="Restore company"
+                      className="p-2 min-h-[36px] min-w-[36px] text-green-600 rounded-lg bg-green-50 dark:bg-green-900/30"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table (>= 640px) */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -148,7 +239,11 @@ export const CompanyManagement: React.FC<CompanyManagementProps> = ({
                       <img
                         src={company.logo}
                         alt={company.name}
-                        className="w-8 h-8 rounded-lg object-cover"
+                        width={32}
+                        height={32}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-8 h-8 rounded-lg object-cover max-w-full h-auto"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-medium">

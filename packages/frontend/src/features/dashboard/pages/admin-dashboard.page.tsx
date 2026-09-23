@@ -450,8 +450,71 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto mt-2">
+            {/* Mobile Stacked Card View (< 640px) */}
+            <div className="block sm:hidden space-y-3 mt-3">
+              {filteredActivities.length > 0 ? (
+                filteredActivities.map((item) => {
+                  const isPendingApproval = item.status.toLowerCase().includes('approval');
+                  const isPendingVerification = item.status.toLowerCase().includes('verification');
+                  const isActive = item.status.toLowerCase() === 'active';
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold flex items-center justify-center text-xs shrink-0">
+                            {item.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                              {item.name}
+                            </p>
+                            <p className="text-[11px] text-slate-400 truncate">
+                              {item.email}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                            isActive
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                              : isPendingApproval
+                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400'
+                              : 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400'
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{item.role} • {item.date}</span>
+                        <button
+                          onClick={() => setSelectedActivity(item)}
+                          className="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold text-purple-600 dark:text-purple-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-2xs"
+                        >
+                          {isPendingApproval || isPendingVerification ? 'Review' : 'Details'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-6 text-center text-xs text-slate-400">
+                  No activity records found matching criteria.
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table (>= 640px) */}
+            <div className="hidden sm:block overflow-x-auto mt-2">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-semibold">

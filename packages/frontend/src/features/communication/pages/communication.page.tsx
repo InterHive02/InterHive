@@ -26,9 +26,9 @@ export const CommunicationPage: React.FC = () => {
     loadMessages,
   } = useChat(user?.id || '');
 
-  // Auto-select first chat if available and no active chat
+  // Auto-select first chat if available and no active chat on desktop
   useEffect(() => {
-    if (chats.length > 0 && !activeChatId) {
+    if (chats.length > 0 && !activeChatId && typeof window !== 'undefined' && window.innerWidth >= 1024) {
       setActiveChatId(chats[0].id);
     }
   }, [chats, activeChatId]);
@@ -56,9 +56,9 @@ export const CommunicationPage: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
+    <div className="h-[calc(100dvh-130px)] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden flex flex-col">
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('chats')}
@@ -96,11 +96,11 @@ export const CommunicationPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="flex h-[calc(100%-52px)]">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {activeTab === 'chats' ? (
           <>
-            {/* Chat List */}
-            <div className="w-full lg:w-80 border-r border-gray-200 dark:border-gray-700 flex-shrink-0">
+            {/* Chat List - hidden on mobile when a chat is open */}
+            <div className={`w-full lg:w-80 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 ${activeChatId ? 'hidden lg:block' : 'block'}`}>
               <ChatList
                 chats={chats}
                 activeChatId={activeChatId || undefined}
@@ -109,7 +109,7 @@ export const CommunicationPage: React.FC = () => {
               />
             </div>
 
-            {/* Chat Window */}
+            {/* Chat Window - Desktop */}
             <div className="flex-1 hidden lg:block">
               {activeChat ? (
                 <ChatWindow
@@ -141,7 +141,7 @@ export const CommunicationPage: React.FC = () => {
 
             {/* Mobile Chat View */}
             {activeChat && (
-              <div className="lg:hidden flex-1">
+              <div className="lg:hidden flex-1 w-full">
                 <ChatWindow
                   chat={{
                     id: activeChat.id,

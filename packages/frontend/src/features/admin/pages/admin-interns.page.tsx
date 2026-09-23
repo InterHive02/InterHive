@@ -323,8 +323,90 @@ export const AdminInternsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Candidates Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden">
+      {/* Candidates Mobile Cards (<640px) */}
+      <div className="block sm:hidden space-y-3">
+        {filteredInterns.length > 0 ? (
+          filteredInterns.map((intern: any, idx: number) => {
+            const fn = intern?.personalInfo?.firstName || intern?.firstName || 'Candidate';
+            const ln = intern?.personalInfo?.lastName || intern?.lastName || '';
+            const fullName = `${fn} ${ln}`.trim();
+            const email = intern?.contact?.email || intern?.email || '';
+            const institution = intern?.academicInfo?.currentEducation?.institution || 'Enrolled Student';
+            const degree = intern?.academicInfo?.currentEducation?.degree || 'Tech Cohort';
+            const domain = intern?.preferences?.preferredDomains?.[0] || 'Software Engineering';
+            const score = intern?.readiness?.overall || (intern?.status === 'ready' ? 88 : 72);
+            const status = intern?.status || 'enrolled';
+
+            return (
+              <div
+                key={intern.id || intern._id || `intern-card-${idx}`}
+                className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 shadow-xs space-y-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-primary text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      {(fn[0] || 'C')}{(ln[0] || '')}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{fullName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{email}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[11px] px-2 py-0.5 rounded-full font-semibold capitalize shrink-0 ${
+                      status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
+                        : status === 'placed'
+                        ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400'
+                        : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
+                    }`}
+                  >
+                    {status === 'ready' ? 'Job Ready' : status === 'placed' ? 'Placed' : 'In Training'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 pt-1 border-t border-gray-100 dark:border-gray-750">
+                  <div className="truncate pr-2">
+                    <span className="font-medium text-gray-900 dark:text-white">{institution}</span> · {degree}
+                  </div>
+                  <span className="inline-block px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded text-[10px] font-semibold shrink-0">
+                    {domain}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">Readiness:</span>
+                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          score >= 85 ? 'bg-emerald-500' : score >= 70 ? 'bg-indigo-500' : 'bg-amber-500'
+                        }`}
+                        style={{ width: `${score}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{score}%</span>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedCandidate(intern)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 transition-colors shrink-0 min-h-[36px]"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> View
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-xl text-center text-sm text-gray-400 border border-gray-100 dark:border-gray-700/60">
+            No matching candidates found.
+          </div>
+        )}
+      </div>
+
+      {/* Candidates Table (>=640px) */}
+      <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-750/50 border-b border-gray-100 dark:border-gray-700">
@@ -402,10 +484,10 @@ export const AdminInternsPage: React.FC = () => {
                             <div
                               className={`h-full rounded-full ${
                                 score >= 85
-                                  ? 'bg-emerald-500'
-                                  : score >= 70
-                                  ? 'bg-indigo-500'
-                                  : 'bg-amber-500'
+                                   ? 'bg-emerald-500'
+                                   : score >= 70
+                                   ? 'bg-indigo-500'
+                                   : 'bg-amber-500'
                               }`}
                               style={{ width: `${score}%` }}
                             />

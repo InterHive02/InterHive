@@ -95,7 +95,7 @@ export const MainLayout: React.FC = () => {
           unreadCount={unreadCount || 0}
         />
 
-        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-[calc(100vh-140px)]">
+        <main className="p-3 sm:p-6 lg:p-8 pb-safe max-w-7xl mx-auto min-h-[calc(100dvh-140px)]">
           <Outlet />
         </main>
       </div>

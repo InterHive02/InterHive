@@ -18,6 +18,7 @@ import {
   Mail,
   CheckCircle2,
   X,
+  Menu,
   ExternalLink,
   Award,
   Layers,
@@ -34,6 +35,7 @@ export const LandingPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [liveRequirements, setLiveRequirements] = useState<any[]>([]);
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [selectedProgramCategory, setSelectedProgramCategory] = useState('Software Engineering');
 
   // Dynamic Landing Page Metrics
@@ -265,7 +267,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-7 font-bold text-xs sm:text-sm text-slate-600">
+          <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-7 font-bold text-xs sm:text-sm text-slate-600">
             <a href="#" className="text-blue-600 relative py-1 border-b-2 border-blue-600">
               Home
             </a>
@@ -290,7 +292,7 @@ export const LandingPage: React.FC = () => {
             <a href="#features" className="hover:text-blue-600 transition-colors">
               Contact
             </a>
-          </div>
+          </nav>
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center relative w-64">
@@ -304,18 +306,97 @@ export const LandingPage: React.FC = () => {
             />
           </div>
 
-          {/* Actions - Single Modern Premium Login Button */}
+          {/* Actions & Mobile Menu Toggle */}
           <div className="flex items-center gap-2">
             <Link
               to="/login"
-              className="px-5 py-2 rounded-full font-extrabold text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-md shadow-slate-900/10 hover:shadow-slate-900/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
+              className="px-4 sm:px-5 py-2 min-h-[44px] rounded-full font-extrabold text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-md shadow-slate-900/10 hover:shadow-slate-900/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5"
             >
               <span>Login</span>
               <span className="text-[10px] text-slate-400">→</span>
             </Link>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              aria-label="Toggle mobile menu"
+              className="md:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
 
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileNavOpen && (
+          <div className="md:hidden bg-white/95 backdrop-blur-2xl border-b border-slate-200 shadow-2xl px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200">
+            {/* Mobile Search */}
+            <div className="relative w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Search programs, skills..."
+                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-slate-100/90 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white transition-all shadow-inner"
+              />
+            </div>
+
+            {/* Mobile Nav Links */}
+            <div className="flex flex-col space-y-1 font-bold text-sm text-slate-700">
+              <a
+                href="#"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-between"
+              >
+                <span>Home</span>
+                <span className="text-xs text-blue-600 font-extrabold">Active</span>
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              >
+                About
+              </a>
+              <a
+                href="#explore-opportunities"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              >
+                Programs
+              </a>
+              <button
+                onClick={() => {
+                  setIsMobileNavOpen(false);
+                  setIsInternshipModalOpen(true);
+                }}
+                className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
+              >
+                <span>For Interns</span>
+                <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Apply</span>
+              </button>
+              <button
+                onClick={() => {
+                  setIsMobileNavOpen(false);
+                  setIsCompanyModalOpen(true);
+                }}
+                className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
+              >
+                <span>For Companies</span>
+                <span className="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Hire</span>
+              </button>
+              <a
+                href="#features"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              >
+                Contact
+              </a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* 100% FULL-BLEED HERO SECTION WITH FULL PAGE COVERAGE */}
@@ -325,7 +406,11 @@ export const LandingPage: React.FC = () => {
         <img
           src="/interhive_full_bg.png"
           alt="InterHive Hero Tech Campus Background"
-          className="absolute inset-0 w-full h-full object-cover object-right-top opacity-80 mix-blend-multiply pointer-events-none z-0"
+          width={1920}
+          height={1080}
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover object-right-top opacity-80 mix-blend-multiply pointer-events-none z-0 max-w-full"
         />
 
         {/* Soft Linear Gradient Gradient Overlay for Text Readability */}
@@ -498,10 +583,10 @@ export const LandingPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-12 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                     
-                    {/* Sidebar */}
-                    <div className="col-span-4 space-y-1.5 border-r border-slate-100 pr-3">
+                    {/* Sidebar - Collapses on mobile for clean card presentation */}
+                    <div className="hidden sm:block sm:col-span-4 space-y-1.5 border-r border-slate-100 pr-3">
                       <div className="px-3 py-2 rounded-xl bg-blue-50 text-blue-600 font-extrabold text-xs flex items-center gap-2 shadow-xs">
                         <span>🏠</span>
                         <span>Home</span>
@@ -525,7 +610,7 @@ export const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Main Content inside Card */}
-                    <div className="col-span-8 space-y-3.5">
+                    <div className="sm:col-span-8 space-y-3.5">
                       <div>
                         <h5 className="font-black text-slate-900 text-sm flex items-center gap-1.5">
                           <span>Good Morning, Developer</span>
@@ -543,7 +628,7 @@ export const LandingPage: React.FC = () => {
                       </div>
 
                       {/* KPI Stat Cards */}
-                      <div className="grid grid-cols-4 gap-1.5 text-center">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center">
                         <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
                           <span className="block font-black text-slate-900 text-sm">12</span>
                           <span className="text-[8px] text-slate-400 font-extrabold">Applied</span>
@@ -571,7 +656,15 @@ export const LandingPage: React.FC = () => {
 
                         <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10px] hover:bg-slate-100/80 transition-colors">
                           <div className="flex items-center gap-2">
-                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4 object-contain" />
+                            <img
+                              src="https://www.google.com/favicon.ico"
+                              alt="Google"
+                              width={16}
+                              height={16}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-4 h-4 object-contain max-w-full h-auto"
+                            />
                             <div>
                               <span className="font-extrabold text-slate-900 block leading-none">Google</span>
                               <span className="text-[9px] text-slate-500 font-semibold">Software Engineering Intern</span>
@@ -582,7 +675,15 @@ export const LandingPage: React.FC = () => {
 
                         <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10px] hover:bg-slate-100/80 transition-colors">
                           <div className="flex items-center gap-2">
-                            <img src="https://www.microsoft.com/favicon.ico" alt="Microsoft" className="w-4 h-4 object-contain" />
+                            <img
+                              src="https://www.microsoft.com/favicon.ico"
+                              alt="Microsoft"
+                              width={16}
+                              height={16}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-4 h-4 object-contain max-w-full h-auto"
+                            />
                             <div>
                               <span className="font-extrabold text-slate-900 block leading-none">Microsoft</span>
                               <span className="text-[9px] text-slate-500 font-semibold">Product Intern</span>
@@ -763,7 +864,7 @@ export const LandingPage: React.FC = () => {
         {/* Cursive Handwriting Accent Callout */}
         <div className="mt-14 text-right pr-4 sm:pr-8">
           <div className="inline-block transform -rotate-2 hover:rotate-0 transition-transform">
-            <span className="handwriting-font text-3xl sm:text-4xl text-blue-600 tracking-wide font-bold whitespace-nowrap block">
+            <span className="handwriting-font text-2xl sm:text-4xl text-blue-600 tracking-wide font-bold sm:whitespace-nowrap break-words block">
               Real Projects. Real Experience. Real Growth.
             </span>
             <svg className="w-full h-3 text-blue-600 mt-0.5" viewBox="0 0 200 12" fill="none">
@@ -817,7 +918,15 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
                       {opp.logo ? (
-                        <img src={opp.logo} alt={opp.company || opp.companyName} className="w-7 h-7 object-contain" />
+                        <img
+                          src={opp.logo}
+                          alt={opp.company || opp.companyName}
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-7 h-7 object-contain max-w-full h-auto"
+                        />
                       ) : (
                         <span className="font-black text-blue-600 text-lg">
                           {(opp.company || opp.companyName || 'C')[0]}
@@ -962,21 +1071,22 @@ export const LandingPage: React.FC = () => {
 
       {/* Company Connection Modal */}
       {isCompanyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-8 shadow-2xl border border-slate-100 relative max-h-[90dvh] overflow-y-auto">
             <button
               onClick={() => setIsCompanyModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              aria-label="Close modal"
+              className="absolute top-4 right-4 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
                 <Building2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-900">Partner With InterHive</h3>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900">Partner With InterHive</h3>
                 <p className="text-xs text-slate-500 font-semibold">Submit details to get company portal login credentials</p>
               </div>
             </div>
@@ -1003,7 +1113,7 @@ export const LandingPage: React.FC = () => {
                     value={companyForm.companyName}
                     onChange={e => setCompanyForm({ ...companyForm, companyName: e.target.value })}
                     placeholder="e.g. Acme Technologies Inc."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                    className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                   />
                 </div>
 
@@ -1018,7 +1128,7 @@ export const LandingPage: React.FC = () => {
                       value={companyForm.contactPerson}
                       onChange={e => setCompanyForm({ ...companyForm, contactPerson: e.target.value })}
                       placeholder="John Doe"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -1027,11 +1137,12 @@ export const LandingPage: React.FC = () => {
                     </label>
                     <input
                       type="email"
+                      inputMode="email"
                       required
                       value={companyForm.email}
                       onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })}
                       placeholder="john@company.com"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1043,11 +1154,12 @@ export const LandingPage: React.FC = () => {
                     </label>
                     <input
                       type="tel"
+                      inputMode="tel"
                       required
                       value={companyForm.phone}
                       onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })}
                       placeholder="+91 98765 43210"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -1057,7 +1169,7 @@ export const LandingPage: React.FC = () => {
                     <select
                       value={companyForm.internCount}
                       onChange={e => setCompanyForm({ ...companyForm, internCount: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                     >
                       <option value="1-5">1-5 Interns</option>
                       <option value="5-10">5-10 Interns</option>
@@ -1076,7 +1188,7 @@ export const LandingPage: React.FC = () => {
                     value={companyForm.techStack}
                     onChange={e => setCompanyForm({ ...companyForm, techStack: e.target.value })}
                     placeholder="e.g. Full Stack (React, Node), AI/ML, UI/UX Design"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+                    className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
                   />
                 </div>
 
@@ -1089,14 +1201,14 @@ export const LandingPage: React.FC = () => {
                     value={companyForm.message}
                     onChange={e => setCompanyForm({ ...companyForm, message: e.target.value })}
                     placeholder="Tell us about your project or talent timeline..."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmittingCompany}
-                  className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 min-h-[44px] rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingCompany ? (
                     <span>Submitting Inquiry...</span>

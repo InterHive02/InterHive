@@ -117,23 +117,25 @@ export const AttendanceCalendar: React.FC<AttendanceCalendarProps> = ({
   const stats = getAttendanceStats();
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Attendance Calendar</h3>
         <div className="flex items-center gap-2">
           <button
             onClick={previousMonth}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Previous month"
+            className="p-1 min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
             {monthName} {year}
           </span>
           <button
             onClick={nextMonth}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Next month"
+            className="p-1 min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
@@ -145,7 +147,7 @@ export const AttendanceCalendar: React.FC<AttendanceCalendarProps> = ({
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
           <div
             key={day}
-            className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1"
+            className="text-center text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 py-1"
           >
             {day}
           </div>
@@ -162,7 +164,7 @@ export const AttendanceCalendar: React.FC<AttendanceCalendarProps> = ({
               onClick={() => day && handleDayClick(day)}
               disabled={!day}
               className={`
-                relative aspect-square rounded-lg flex items-center justify-center text-sm transition-colors
+                relative aspect-square rounded-lg flex items-center justify-center text-xs sm:text-sm transition-colors
                 ${!day ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'}
                 ${isSelected ? 'ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-800' : ''}
                 ${status ? getStatusColor(status) : 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300'}

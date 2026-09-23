@@ -51,6 +51,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, subtitl
                 <img
                   src={user.profilePhoto}
                   alt={user.firstName}
+                  width={32}
+                  height={32}
+                  loading="lazy"
+                  decoding="async"
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (

@@ -101,7 +101,7 @@ export const AttendanceStats: React.FC<AttendanceStatsProps> = ({
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Pie Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
             Attendance Distribution
           </h4>
@@ -129,7 +129,7 @@ export const AttendanceStats: React.FC<AttendanceStatsProps> = ({
         </div>
 
         {/* Bar Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
             Weekly Performance
           </h4>

@@ -207,16 +207,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return false;
   };
 
+  const isExpanded = !isCollapsed || isMobileOpen;
+
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white dark:bg-[#121526] text-slate-800 dark:text-slate-100 transition-colors">
       
       {/* Brand Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800/80">
-        <Logo size="md" showText={!isCollapsed} />
-        {!isCollapsed && (
+        <Logo size="md" showText={isExpanded} />
+        {isMobileOpen && (
           <button
             onClick={onCloseMobile}
-            className="lg:hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            aria-label="Close sidebar"
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -224,13 +227,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* User Avatar & Role Card */}
-      {!isCollapsed && (
+      {isExpanded && (
         <div className="p-4 border-b border-slate-100 dark:border-slate-800/80">
           <div className="flex items-center gap-3">
             {user?.profilePhoto ? (
               <img
                 src={user.profilePhoto}
                 alt={roleMeta.title}
+                width={40}
+                height={40}
+                loading="lazy"
+                decoding="async"
                 className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700"
               />
             ) : (
@@ -265,19 +272,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               to={route.path}
               onClick={onCloseMobile}
               title={route.label}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm min-h-[44px] transition-all ${
                 isActive
                   ? `${roleMeta.activeBg} shadow-2xs font-bold`
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
+              } ${!isExpanded ? 'justify-center px-2' : ''}`}
             >
               <IconComponent
                 className={`w-4 h-4 shrink-0 ${
                   isActive ? roleMeta.activeIcon : 'text-slate-400 dark:text-slate-400'
                 }`}
               />
-              {!isCollapsed && <span className="truncate">{route.label}</span>}
-              {!isCollapsed && route.badge && (
+              {isExpanded && <span className="truncate">{route.label}</span>}
+              {isExpanded && route.badge && (
                 <span
                   className={`ml-auto w-5 h-5 rounded-full ${roleMeta.avatarBg} text-white text-[10px] font-bold flex items-center justify-center`}
                 >
@@ -295,7 +302,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button
           onClick={toggleTheme}
           title="Toggle Dark / Light Theme"
-          className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           {mode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
         </button>
@@ -303,10 +310,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          {!isCollapsed && <span>Logout</span>}
+          {isExpanded && <span>Logout</span>}
         </button>
       </div>
 
@@ -325,8 +332,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-white dark:bg-[#121526] border-r border-slate-200/80 dark:border-slate-800/80 z-50 transition-all duration-300 ${
-          isMobileOpen ? 'w-64' : '-translate-x-full lg:translate-x-0'
+        className={`fixed top-0 left-0 h-full h-dvh bg-white dark:bg-[#121526] border-r border-slate-200/80 dark:border-slate-800/80 z-50 transition-all duration-300 ${
+          isMobileOpen ? 'translate-x-0 w-64 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         {sidebarContent}

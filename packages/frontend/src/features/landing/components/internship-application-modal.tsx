@@ -137,13 +137,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90dvh]">
         {/* Modal Top Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 text-white relative shrink-0">
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-5 sm:p-6 text-white relative shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all cursor-pointer"
+            aria-label="Close modal"
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-white/10 transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -162,44 +163,44 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
             Complete candidate intake form. All applications are evaluated directly by the HR & technical review committee.
           </p>
 
-          {/* Stepper Tabs */}
+          {/* Stepper Tabs - Horizontally scrollable on mobile */}
           {!isSubmitted && (
-            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/20">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-4 pt-3 border-t border-white/20 overflow-x-auto pb-1 scrollbar-none touch-scroll">
               <button
                 type="button"
                 onClick={() => setActiveTab('personal')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   activeTab === 'personal'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-white/80 hover:bg-white/10'
                 }`}
               >
                 <User className="w-3.5 h-3.5" />
-                1. Personal & College
+                <span>1. Personal & College</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('skills')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   activeTab === 'skills'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-white/80 hover:bg-white/10'
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
-                2. Skills & Domain
+                <span>2. Skills & Domain</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('portfolio')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   activeTab === 'portfolio'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-white/80 hover:bg-white/10'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
-                3. Resume & Statement
+                <span>3. Resume & Statement</span>
               </button>
             </div>
           )}
@@ -257,7 +258,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         value={formData.fullName}
                         onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                         placeholder="e.g. John Doe"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
 
@@ -267,11 +268,12 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </label>
                       <input
                         type="email"
+                        inputMode="email"
                         required
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
                         placeholder="e.g. applicant@college.edu"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -283,11 +285,12 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </label>
                       <input
                         type="tel"
+                        inputMode="tel"
                         required
                         value={formData.phone}
                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="e.g. +91 9876543210"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
 
@@ -301,7 +304,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         value={formData.rollNumber}
                         onChange={e => setFormData({ ...formData, rollNumber: e.target.value })}
                         placeholder="e.g. 21CS042"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -317,7 +320,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         value={formData.institution}
                         onChange={e => setFormData({ ...formData, institution: e.target.value })}
                         placeholder="e.g. National Institute of Technology"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
 
@@ -332,7 +335,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           value={formData.degree}
                           onChange={e => setFormData({ ...formData, degree: e.target.value })}
                           placeholder="e.g. B.Tech CSE"
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                          className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                         />
                       </div>
                       <div>
@@ -345,7 +348,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           value={formData.semester}
                           onChange={e => setFormData({ ...formData, semester: e.target.value })}
                           placeholder="e.g. 6th Sem / 3rd Yr"
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                          className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                         />
                       </div>
                     </div>
@@ -376,7 +379,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       value={formData.skills}
                       onChange={e => setFormData({ ...formData, skills: e.target.value })}
                       placeholder="e.g. React.js, TypeScript, Node.js, Python, SQL"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                      className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                     />
                     <p className="text-[11px] text-slate-400 mt-1">Separate individual technologies with a comma.</p>
                   </div>
@@ -393,7 +396,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                             type="button"
                             key={interest}
                             onClick={() => toggleInterest(interest)}
-                            className={`p-2 rounded-xl text-xs font-semibold text-left transition-all border cursor-pointer ${
+                            className={`p-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-left transition-all border cursor-pointer ${
                               isSelected
                                 ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
                                 : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -419,7 +422,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                             internshipPreference: e.target.value as any,
                           })
                         }
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white font-medium"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white font-medium"
                       >
                         <option value="remote">Remote (Work from Anywhere)</option>
                         <option value="hybrid">Hybrid</option>
@@ -438,7 +441,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           setFormData({ ...formData, previousExperience: e.target.value })
                         }
                         placeholder="e.g. 1 past internship, freelance web dev"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -447,14 +450,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                     <button
                       type="button"
                       onClick={() => setActiveTab('personal')}
-                      className="px-4 py-2 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                      className="px-4 py-2.5 min-h-[44px] rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
                     >
                       ← Back
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveTab('portfolio')}
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white transition-all cursor-pointer"
+                      className="px-5 py-2.5 min-h-[44px] rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white transition-all cursor-pointer"
                     >
                       Next: Links & Statement →
                     </button>
@@ -473,11 +476,12 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <input
                         type="url"
+                        inputMode="url"
                         required
                         value={formData.resumeUrl}
                         onChange={e => setFormData({ ...formData, resumeUrl: e.target.value })}
                         placeholder="https://drive.google.com/file/d/your-resume"
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full pl-10 pr-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
                     <p className="text-[11px] text-slate-400 mt-1">Please ensure link access permissions are set to "Anyone with link can view".</p>
@@ -490,10 +494,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </label>
                       <input
                         type="url"
+                        inputMode="url"
                         value={formData.linkedInUrl}
                         onChange={e => setFormData({ ...formData, linkedInUrl: e.target.value })}
                         placeholder="https://linkedin.com/in/username"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
 
@@ -503,10 +508,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </label>
                       <input
                         type="url"
+                        inputMode="url"
                         value={formData.githubUrl}
                         onChange={e => setFormData({ ...formData, githubUrl: e.target.value })}
                         placeholder="https://github.com/username"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -521,7 +527,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       value={formData.reasonForApplying}
                       onChange={e => setFormData({ ...formData, reasonForApplying: e.target.value })}
                       placeholder="Tell us about your learning goals and why you are excited to become industry-ready..."
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
                     ></textarea>
                   </div>
 
@@ -534,22 +540,22 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       value={formData.additionalInfo}
                       onChange={e => setFormData({ ...formData, additionalInfo: e.target.value })}
                       placeholder="Availability dates, certifications, or specific questions"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
+                      className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
                     <button
                       type="button"
                       onClick={() => setActiveTab('skills')}
-                      className="px-4 py-2 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                      className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-100 transition-all cursor-pointer text-center"
                     >
                       ← Back
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex items-center gap-2 px-7 py-3 rounded-full font-extrabold text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 min-h-[44px] rounded-full font-extrabold text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>

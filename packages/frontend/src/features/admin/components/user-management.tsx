@@ -138,8 +138,104 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Stacked Card View (< 640px) */}
+      <div className="block sm:hidden space-y-3">
+        {filteredUsers.map((user) => (
+          <div
+            key={user.id}
+            className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 space-y-3 shadow-xs"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {user.profilePhoto ? (
+                  <img
+                    src={user.profilePhoto}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-9 h-9 rounded-full object-cover max-w-full h-auto shrink-0"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                    {user.firstName[0]}{user.lastName[0]}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-lg shrink-0 ${getStatusColor(user.status)}`}>
+                {getStatusIcon(user.status)}
+                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-gray-700 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className={`px-2 py-0.5 text-xs rounded-lg font-semibold ${getRoleColor(user.role)}`}>
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
+                {user.isVerified && <span className="text-green-500 font-bold">✓</span>}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {onRoleChange && (
+                  <select
+                    value={user.role}
+                    onChange={(e) => onRoleChange(user.id, e.target.value)}
+                    className="px-2 py-1 min-h-[36px] text-xs border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="intern">Intern</option>
+                    <option value="manager">Manager</option>
+                    <option value="hr">HR</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                )}
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(user.id)}
+                    aria-label="Edit user"
+                    className="p-2 min-h-[36px] min-w-[36px] text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-lg bg-gray-50 dark:bg-gray-700"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+                {user.status !== 'suspended' ? (
+                  onSuspend && (
+                    <button
+                      onClick={() => onSuspend(user.id)}
+                      aria-label="Suspend user"
+                      className="p-2 min-h-[36px] min-w-[36px] text-yellow-600 rounded-lg bg-yellow-50 dark:bg-yellow-900/30"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  )
+                ) : (
+                  onActivate && (
+                    <button
+                      onClick={() => onActivate(user.id)}
+                      aria-label="Activate user"
+                      className="p-2 min-h-[36px] min-w-[36px] text-green-600 rounded-lg bg-green-50 dark:bg-green-900/30"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table (>= 640px) */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -160,7 +256,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                       <img
                         src={user.profilePhoto}
                         alt={`${user.firstName} ${user.lastName}`}
-                        className="w-8 h-8 rounded-full object-cover"
+                        width={32}
+                        height={32}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-8 h-8 rounded-full object-cover max-w-full h-auto"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
