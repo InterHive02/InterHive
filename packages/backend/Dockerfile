@@ -4,15 +4,16 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy monorepo package manifests
 COPY package.json yarn.lock ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/backend/package.json ./packages/backend/
+COPY packages/frontend/package.json ./packages/frontend/
 
-# Install dependencies
-RUN yarn install --frozen-lockfile --production=false
+# Install dependencies (without --frozen-lockfile to allow workspace resolution)
+RUN yarn install --production=false --network-timeout 300000
 
-# Copy source code
+# Copy source code for shared and backend
 COPY packages/shared ./packages/shared
 COPY packages/backend ./packages/backend
 
@@ -31,8 +32,9 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/backend/package.json ./packages/backend/
+COPY packages/frontend/package.json ./packages/frontend/
 
-RUN yarn install --frozen-lockfile --production=true
+RUN yarn install --production=true --network-timeout 300000
 
 # Copy built artifacts from builder
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
