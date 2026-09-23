@@ -4,6 +4,9 @@ node_modules
 .pnp
 .pnp.js
 
+# Cloudflare Workers - wrangler.toml can contain secrets, use wrangler.toml.example instead
+wrangler.toml
+
 node_modules/
 .env
 .env.*

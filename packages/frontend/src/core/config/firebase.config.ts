@@ -1,14 +1,16 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
+// All Firebase config values are read from environment variables ONLY.
+// Never hardcode API keys or config values here.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD2b1LM-CsM-IEqT--stGgzxJ6JrccgtfM',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'interhive-0.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'interhive-0',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'interhive-0.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '83363730117',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:83363730117:web:54d26c9a6e73c4520c56ac',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-4V8D2EMZM5',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase App
