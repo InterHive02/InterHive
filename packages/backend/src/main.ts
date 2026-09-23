@@ -84,15 +84,19 @@ async function bootstrap() {
 // const document = SwaggerModule.createDocument(app, config);
 // SwaggerModule.setup('api/docs', app, document);
 
-  // Health check endpoint
-  app.getHttpAdapter().get('/health', (req, res) => {
+  // Root & Health check endpoints
+  const healthHandler = (req, res) => {
     res.status(200).json({
+      name: 'InterHive API',
       status: 'OK',
       timestamp: new Date().toISOString(),
       environment: configService.get('NODE_ENV'),
       version: require('../package.json').version,
     });
-  });
+  };
+
+  app.getHttpAdapter().get('/', healthHandler);
+  app.getHttpAdapter().get('/health', healthHandler);
 
   // Start server
   const port = configService.get('PORT', 3000);
