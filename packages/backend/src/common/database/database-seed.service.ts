@@ -11,16 +11,21 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.seedDemoAccounts();
-    await this.seedRoleBasedChats();
-    await this.seedApplications();
-    await this.seedTrainingPrograms();
-    await this.seedProjects();
-    await this.seedCompanyLeads();
-    await this.seedInternReadiness();
-    await this.seedCompanies();
-    await this.seedCompanyRequirements();
-    await this.seedMatches();
-    await this.seedPlatformActivities();
+    if (process.env.SEED_DATABASE === 'true') {
+      this.logger.log('🌱 SEED_DATABASE=true detected: Seeding demo records and dummy activities...');
+      await this.seedRoleBasedChats();
+      await this.seedApplications();
+      await this.seedTrainingPrograms();
+      await this.seedProjects();
+      await this.seedCompanyLeads();
+      await this.seedInternReadiness();
+      await this.seedCompanies();
+      await this.seedCompanyRequirements();
+      await this.seedMatches();
+      await this.seedPlatformActivities();
+    } else {
+      this.logger.log('⚡ Clean startup mode: Demo accounts ensured. Fake data seeding skipped (SEED_DATABASE!=true).');
+    }
   }
 
   async seedDemoAccounts() {
