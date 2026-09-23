@@ -2,6 +2,7 @@
   "name": "@interhive/shared",
   "version": "1.0.0",
   "description": "Shared types, constants, and utilities for InterHive",
+  "packageManager": "yarn@1.22.22",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
