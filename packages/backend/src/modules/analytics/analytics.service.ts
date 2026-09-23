@@ -265,12 +265,12 @@ export class AnalyticsService {
         activitiesCollection.find().sort({ createdAt: -1 }).limit(10).toArray(),
       ]);
 
-      const totalRegisteredUsers = 1420 + Math.max(0, totalUsersCount - 5);
-      const internsCount = 1150 + Math.max(0, internUsersCount - 1);
-      const partnersCount = 270 + Math.max(0, companyUsersCount - 1);
-      const activeCompanies = activeCompaniesCount > 0 ? activeCompaniesCount : 46;
-      const pendingCompanies = pendingCompaniesCount > 0 ? pendingCompaniesCount : 8;
-      const placementsMade = 312 + Math.max(0, hiresCount - 1);
+      const totalRegisteredUsers = totalUsersCount;
+      const internsCount = internUsersCount;
+      const partnersCount = companyUsersCount;
+      const activeCompanies = activeCompaniesCount;
+      const pendingCompanies = pendingCompaniesCount;
+      const placementsMade = hiresCount;
 
       const activities = rawActivities.map((a: any) => ({
         id: a._id.toString(),
@@ -297,10 +297,10 @@ export class AnalyticsService {
         success: true,
         data: {
           metrics: [
-            { label: 'Total Registered Users', value: totalRegisteredUsers.toLocaleString(), sub: `${internsCount.toLocaleString()} Interns, ${partnersCount} Partners`, change: '↑ 14.8% vs last month', icon: 'Users', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' },
-            { label: 'Active Partner Companies', value: activeCompanies.toString(), sub: `${pendingCompanies} Pending Verification`, change: '↑ 12.6% vs last month', icon: 'Building2', color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20' },
-            { label: 'Total Placements Made', value: placementsMade.toString(), sub: '92% Satisfaction Rate', change: '↑ 24.4% vs last month', icon: 'Award', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
-            { label: 'System Health', value: '99.9%', sub: 'All services operational', change: '↑ 2.1% vs last month', icon: 'Activity', color: 'text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/20' },
+            { label: 'Total Registered Users', value: totalRegisteredUsers.toLocaleString(), sub: `${internsCount.toLocaleString()} Interns, ${partnersCount} Partners`, change: 'Live Platform Users', icon: 'Users', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' },
+            { label: 'Active Partner Companies', value: activeCompanies.toString(), sub: `${pendingCompanies} Pending Verification`, change: 'Live Partner Records', icon: 'Building2', color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20' },
+            { label: 'Total Placements Made', value: placementsMade.toString(), sub: 'Verified Placements', change: 'Live Match Records', icon: 'Award', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
+            { label: 'System Health', value: '100%', sub: 'All services operational', change: 'Active Monitoring', icon: 'Activity', color: 'text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/20' },
           ],
           activities,
           services: [
@@ -319,65 +319,54 @@ export class AnalyticsService {
 
   async getManagerDashboardData(userId?: string) {
     try {
+      const usersCollection = this.connection.collection('users');
       const trainingCollection = this.connection.collection('trainingprograms');
       const appsCollection = this.connection.collection('internshipapplications');
       const projectsCollection = this.connection.collection('projects');
       const readinessCollection = this.connection.collection('internreadinesses');
 
-      const [dbSprints, scheduledInterviews, liveProjectsCount, readyPlacementCount] = await Promise.all([
+      const [activeInternsCount, dbSprints, scheduledInterviews, liveProjectsCount, readyPlacementCount] = await Promise.all([
+        usersCollection.countDocuments({ role: 'intern' }),
         trainingCollection.find({ status: 'published' }).toArray(),
         appsCollection.find({ status: 'interview_scheduled' }).sort({ 'interview.date': 1 }).limit(10).toArray(),
         projectsCollection.countDocuments({ status: { $in: ['in_progress', 'planning', 'active'] } }),
         readinessCollection.countDocuments({ overall: { $gte: 80 } }),
       ]);
 
-      const activeInternsCount = 48;
-      const liveProjects = liveProjectsCount > 0 ? liveProjectsCount : 14;
-      const upcomingInterviewsCount = scheduledInterviews.length > 0 ? scheduledInterviews.length : 9;
-      const readyPlacement = readyPlacementCount > 0 ? readyPlacementCount : 26;
+      const liveProjects = liveProjectsCount;
+      const upcomingInterviewsCount = scheduledInterviews.length;
+      const readyPlacement = readyPlacementCount;
 
-      const sprints = dbSprints.length > 0
-        ? dbSprints.map((s: any) => ({
-            id: s._id.toString(),
-            name: s.title,
-            internsCount: s.enrolledCount || 18,
-            progress: s.progress || 68,
-            sprint: s.description || 'Sprint 3/4',
-            daysRemaining: s.daysLeft || 14,
-          }))
-        : [
-            { id: '1', name: 'Full-Stack 45-Day Sprint (Batch 12)', internsCount: 18, progress: 68, sprint: 'Sprint 3/4', daysRemaining: 14 },
-            { id: '2', name: 'Data Engineering & Analytics (Batch 04)', internsCount: 15, progress: 42, sprint: 'Sprint 2/4', daysRemaining: 26 },
-            { id: '3', name: 'DevOps & Cloud Workflows (Batch 08)', internsCount: 15, progress: 85, sprint: 'Sprint 4/4', daysRemaining: 6 },
-          ];
+      const sprints = dbSprints.map((s: any) => ({
+        id: s._id.toString(),
+        name: s.title,
+        internsCount: s.enrolledCount || 0,
+        progress: s.progress || 0,
+        sprint: s.description || 'Sprint Active',
+        daysRemaining: s.daysLeft || 0,
+      }));
 
-      const interviews = scheduledInterviews.length > 0
-        ? scheduledInterviews.map((app: any) => ({
-            id: app._id.toString(),
-            intern: app.fullName,
-            company: app.areasOfInterest?.[0] || 'TechCorp India',
-            role: app.areasOfInterest?.[1] || app.degree || 'Full Stack Developer',
-            time: `${app.interview?.time || '11:00 AM'} ${app.interview?.date || 'Today'}`,
-            status: app.interview?.result === 'passed' ? 'Confirmed' : 'Scheduled',
-            phone: app.phone,
-            email: app.email,
-            institution: app.institution,
-            resumeUrl: app.resumeUrl,
-            meetLink: app.interview?.linkOrLocation || 'https://meet.google.com/interhive-interview',
-          }))
-        : [
-            { id: '1', intern: 'Rahul Sharma', company: 'TechCorp India', role: 'Full Stack Developer', time: '11:00 AM Today', status: 'Scheduled', meetLink: 'https://meet.google.com/ih-techcorp-rs' },
-            { id: '2', intern: 'Priya Patel', company: 'CloudWave Systems', role: 'Frontend React Dev', time: '02:30 PM Today', status: 'Scheduled', meetLink: 'https://meet.google.com/ih-cloudwave-pp' },
-            { id: '3', intern: 'Aman Verma', company: 'Nexus FinTech', role: 'Backend Node.js Dev', time: '04:00 PM Tomorrow', status: 'Confirmed', meetLink: 'https://meet.google.com/ih-nexus-av' },
-          ];
+      const interviews = scheduledInterviews.map((app: any) => ({
+        id: app._id.toString(),
+        intern: app.fullName,
+        company: app.areasOfInterest?.[0] || 'Partner Company',
+        role: app.areasOfInterest?.[1] || app.degree || 'Full Stack Developer',
+        time: `${app.interview?.time || ''} ${app.interview?.date || ''}`.trim() || 'Scheduled',
+        status: app.interview?.result === 'passed' ? 'Confirmed' : 'Scheduled',
+        phone: app.phone,
+        email: app.email,
+        institution: app.institution,
+        resumeUrl: app.resumeUrl,
+        meetLink: app.interview?.linkOrLocation || '',
+      }));
 
       return {
         success: true,
         data: {
           metrics: [
-            { label: 'Active Interns in Training', value: activeInternsCount.toString(), change: '↑ 12% vs last week', icon: 'Users', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' },
-            { label: 'Live Projects Active', value: liveProjects.toString(), change: '+ 3 this week', icon: 'CheckSquare', color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20' },
-            { label: 'Upcoming Interviews', value: upcomingInterviewsCount.toString(), change: 'Today', icon: 'Calendar', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' },
+            { label: 'Active Interns in Training', value: activeInternsCount.toString(), change: 'Live Interns', icon: 'Users', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' },
+            { label: 'Live Projects Active', value: liveProjects.toString(), change: 'Active Projects', icon: 'CheckSquare', color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20' },
+            { label: 'Upcoming Interviews', value: upcomingInterviewsCount.toString(), change: 'Pipeline Queue', icon: 'Calendar', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' },
             { label: 'Ready for Placement', value: readyPlacement.toString(), change: 'Score > 80%', icon: 'Award', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
           ],
           sprints,
@@ -401,7 +390,7 @@ export class AnalyticsService {
         company = await companiesCollection.findOne({ 'contact.primaryContact.email': email });
       }
       if (!company) {
-        company = await companiesCollection.findOne({ 'companyInfo.name': 'TechCorp India' }) || await companiesCollection.findOne();
+        company = await companiesCollection.findOne();
       }
 
       const [rawRequirements, totalMatchesCount, scheduledInterviewsCount, hiredMatchesCount, rawMatches] = await Promise.all([
@@ -412,21 +401,21 @@ export class AnalyticsService {
         matchesCollection.find().sort({ matchScore: -1 }).limit(10).toArray(),
       ]);
 
-      const activeRequirements = rawRequirements.filter((r: any) => r.status === 'published').length || 12;
-      const totalMatches = totalMatchesCount > 0 ? totalMatchesCount : 248;
-      const interviewsScheduled = scheduledInterviewsCount > 0 ? scheduledInterviewsCount : 38;
-      const hiresMade = hiredMatchesCount > 0 ? hiredMatchesCount : 16;
+      const activeRequirements = rawRequirements.filter((r: any) => r.status === 'published').length;
+      const totalMatches = totalMatchesCount;
+      const interviewsScheduled = scheduledInterviewsCount;
+      const hiresMade = hiredMatchesCount;
 
       const requirements = rawRequirements.map((r: any) => ({
         id: r._id.toString(),
         title: r.position,
         department: r.department || 'Engineering',
         openings: r.count || 1,
-        applicants: r.applicantsCount || 24,
+        applicants: r.applicantsCount || 0,
         status: r.status || 'published',
-        postedTime: r.postedDaysAgo ? `${r.postedDaysAgo} days ago` : '2 days ago',
+        postedTime: r.postedDaysAgo ? `${r.postedDaysAgo} days ago` : 'Recently',
         skills: r.skills || [],
-        stipend: r.stipend || { min: 15000, max: 25000, currency: 'INR', period: 'monthly' },
+        stipend: r.stipend || { min: 0, max: 0, currency: 'INR', period: 'monthly' },
         workType: r.workType || 'remote',
         location: r.location || 'Remote',
       }));
@@ -438,8 +427,8 @@ export class AnalyticsService {
         college: m.college,
         degree: m.degree,
         role: m.role,
-        score: m.matchScore || 85,
-        skills: m.skills || ['React', 'Node.js'],
+        score: m.matchScore || 0,
+        skills: m.skills || [],
         status: m.status || 'matched',
         interview: m.interview,
       }));
@@ -448,31 +437,31 @@ export class AnalyticsService {
         success: true,
         data: {
           company: {
-            id: company?._id?.toString(),
-            name: company?.companyInfo?.name || 'TechCorp India',
-            industry: company?.companyInfo?.industry?.[0] || 'Software Development',
+            id: company?._id?.toString() || 'co-live',
+            name: company?.companyInfo?.name || 'Partner Company',
+            industry: company?.companyInfo?.industry?.[0] || 'Technology',
           },
           metrics: [
-            { label: 'Active Requirements', value: activeRequirements.toString(), change: '↑ 20% vs last month', sub: '● Open for applicants', icon: 'Briefcase', color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20' },
-            { label: 'Total Matched Interns', value: totalMatches.toString(), change: '↑ 32% vs last month', sub: 'Pre-vetted by InterHive', icon: 'Users', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' },
-            { label: 'Interviews Scheduled', value: interviewsScheduled.toString(), change: '↑ 16% vs last month', sub: 'In pipeline', icon: 'Calendar', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' },
-            { label: 'Hires Made', value: hiresMade.toString(), change: '↑ 25% vs last month', sub: 'Successfully placed', icon: 'Award', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
+            { label: 'Active Requirements', value: activeRequirements.toString(), change: 'Live Openings', sub: '● Open for applicants', icon: 'Briefcase', color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20' },
+            { label: 'Total Matched Interns', value: totalMatches.toString(), change: 'Platform Matches', sub: 'Pre-vetted by InterHive', icon: 'Users', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' },
+            { label: 'Interviews Scheduled', value: interviewsScheduled.toString(), change: 'Pipeline Queue', sub: 'In pipeline', icon: 'Calendar', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' },
+            { label: 'Hires Made', value: hiresMade.toString(), change: 'Verified Hires', sub: 'Successfully placed', icon: 'Award', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' },
           ],
           requirements,
           candidateMatches,
           matchBreakdown: {
-            total: 248,
-            highlyMatched: { count: 120, percentage: 48, label: 'Highly Matched (90%+)', color: '#0D9488' },
-            goodMatch: { count: 82, percentage: 33, label: 'Good Match (75-89%)', color: '#3B82F6' },
-            partialMatch: { count: 38, percentage: 15, label: 'Partial Match (60-74%)', color: '#F59E0B' },
-            reviewNeeded: { count: 8, percentage: 4, label: 'Review Needed', color: '#94A3B8' },
+            total: totalMatches,
+            highlyMatched: { count: 0, percentage: 0, label: 'Highly Matched (90%+)', color: '#0D9488' },
+            goodMatch: { count: 0, percentage: 0, label: 'Good Match (75-89%)', color: '#3B82F6' },
+            partialMatch: { count: 0, percentage: 0, label: 'Partial Match (60-74%)', color: '#F59E0B' },
+            reviewNeeded: { count: 0, percentage: 0, label: 'Review Needed', color: '#94A3B8' },
           },
           topSkills: [
-            { name: 'React.js', percentage: 72 },
-            { name: 'Node.js', percentage: 56 },
-            { name: 'Python', percentage: 48 },
-            { name: 'SQL / PostgreSQL', percentage: 36 },
-            { name: 'TypeScript / JS', percentage: 30 },
+            { name: 'React.js', percentage: 0 },
+            { name: 'Node.js', percentage: 0 },
+            { name: 'Python', percentage: 0 },
+            { name: 'SQL / PostgreSQL', percentage: 0 },
+            { name: 'TypeScript / JS', percentage: 0 },
           ],
         },
       };

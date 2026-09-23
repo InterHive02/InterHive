@@ -62,7 +62,7 @@ const dummyUsers = [
     firstName: 'Sarah',
     lastName: 'HR',
     email: 'hr@interhive.in',
-    passwordPlain: 'Hr@123',
+    passwordPlain: 'HrManager@123',
     role: 'hr',
     position: 'HR Manager',
     phone: '+91 9876543211',
@@ -70,17 +70,6 @@ const dummyUsers = [
   },
   {
     employeeId: 'EMP0003',
-    firstName: 'Alex',
-    lastName: 'Manager',
-    email: 'manager@interhive.in',
-    passwordPlain: 'Manager@123',
-    role: 'manager',
-    position: 'Engineering Manager',
-    phone: '+91 9876543212',
-    skills: ['Team Leadership', 'Project Management', 'Agile/Scrum', 'Architecture Design']
-  },
-  {
-    employeeId: 'EMP0004',
     firstName: 'John',
     lastName: 'Intern',
     email: 'intern@interhive.in',
@@ -91,7 +80,18 @@ const dummyUsers = [
     skills: ['JavaScript', 'TypeScript', 'Node.js', 'React', 'MongoDB']
   },
   {
-    employeeId: 'EMP0005',
+    employeeId: 'EMP9003',
+    firstName: 'Alex',
+    lastName: 'Manager',
+    email: 'manager@interhive.in',
+    passwordPlain: 'Manager@123',
+    role: 'manager',
+    position: 'Engineering Manager',
+    phone: '+91 9876543212',
+    skills: ['Team Leadership', 'Project Management', 'Agile/Scrum', 'Architecture Design']
+  },
+  {
+    employeeId: 'EMP9005',
     firstName: 'TechCorp',
     lastName: 'Representative',
     email: 'company@interhive.in',

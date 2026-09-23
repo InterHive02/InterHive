@@ -78,32 +78,32 @@ export const CompanyDashboardPage: React.FC = () => {
   const [metrics, setMetrics] = useState([
     {
       label: 'Active Requirements',
-      value: '12',
-      change: '↑ 20% vs last month',
+      value: '0',
+      change: 'Live Openings',
       sub: '● Open for applicants',
       icon: Briefcase,
       color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30',
     },
     {
       label: 'Total Matched Interns',
-      value: '248',
-      change: '↑ 32% vs last month',
+      value: '0',
+      change: 'Platform Matches',
       sub: 'Pre-vetted by InterHive',
       icon: Users,
       color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
     },
     {
       label: 'Interviews Scheduled',
-      value: '38',
-      change: '↑ 16% vs last month',
+      value: '0',
+      change: 'Pipeline Queue',
       sub: 'In pipeline',
       icon: Calendar,
       color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30',
     },
     {
       label: 'Hires Made',
-      value: '16',
-      change: '↑ 25% vs last month',
+      value: '0',
+      change: 'Verified Hires',
       sub: 'Successfully placed',
       icon: Award,
       color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
@@ -111,125 +111,27 @@ export const CompanyDashboardPage: React.FC = () => {
   ]);
 
   // Requirements list state
-  const [requirements, setRequirements] = useState<RequirementCard[]>([
-    {
-      id: 'req-1',
-      title: 'Frontend Developer Intern',
-      department: 'Web Development',
-      openings: 3,
-      applicants: 24,
-      status: 'published',
-      postedTime: '2 days ago',
-      skills: [{ name: 'React.js' }, { name: 'TypeScript' }, { name: 'Tailwind CSS' }],
-      stipend: { min: 15000, max: 25000, currency: 'INR' },
-      workType: 'remote',
-      location: 'Remote',
-    },
-    {
-      id: 'req-2',
-      title: 'Data Science Intern',
-      department: 'Data & Analytics',
-      openings: 2,
-      applicants: 18,
-      status: 'published',
-      postedTime: '4 days ago',
-      skills: [{ name: 'Python' }, { name: 'Pandas' }, { name: 'SQL' }],
-      stipend: { min: 18000, max: 28000, currency: 'INR' },
-      workType: 'hybrid',
-      location: 'Mumbai / Hybrid',
-    },
-    {
-      id: 'req-3',
-      title: 'UI/UX Design Intern',
-      department: 'Design',
-      openings: 2,
-      applicants: 16,
-      status: 'draft',
-      postedTime: '6 days ago',
-      skills: [{ name: 'Figma' }, { name: 'Wireframing' }, { name: 'Design Systems' }],
-      stipend: { min: 15000, max: 22000, currency: 'INR' },
-      workType: 'remote',
-      location: 'Remote',
-    },
-    {
-      id: 'req-4',
-      title: 'Backend Developer Intern',
-      department: 'Backend Development',
-      openings: 4,
-      applicants: 31,
-      status: 'published',
-      postedTime: '1 week ago',
-      skills: [{ name: 'Node.js' }, { name: 'PostgreSQL' }, { name: 'Redis' }],
-      stipend: { min: 20000, max: 30000, currency: 'INR' },
-      workType: 'remote',
-      location: 'Remote',
-    },
-  ]);
+  const [requirements, setRequirements] = useState<RequirementCard[]>([]);
 
   // Candidates state
-  const [candidates, setCandidates] = useState<CandidateMatch[]>([
-    {
-      id: 'c-1',
-      name: 'Rahul Sharma',
-      email: 'rahul.sharma@techcorp.in',
-      college: 'IIT Bombay',
-      degree: 'B.Tech Computer Science',
-      role: 'Full Stack Developer',
-      score: 94,
-      skills: ['React', 'Node.js', 'TypeScript', 'MongoDB'],
-      status: 'interview_scheduled',
-    },
-    {
-      id: 'c-2',
-      name: 'Priya Patel',
-      email: 'priya.patel@cloudwave.io',
-      college: 'NIT Surat',
-      degree: 'B.E. Information Technology',
-      role: 'Frontend React Dev',
-      score: 91,
-      skills: ['React', 'Next.js', 'Tailwind CSS', 'Redux'],
-      status: 'interview_scheduled',
-    },
-    {
-      id: 'c-3',
-      name: 'Aman Verma',
-      email: 'aman.verma@nexusfin.com',
-      college: 'Delhi University',
-      degree: 'M.C.A. Software Engineering',
-      role: 'Backend Node.js Dev',
-      score: 89,
-      skills: ['Node.js', 'PostgreSQL', 'Redis', 'Docker'],
-      status: 'interview_scheduled',
-    },
-    {
-      id: 'c-4',
-      name: 'Vikram Mehta',
-      email: 'vikram.m@gmail.com',
-      college: 'IIT Delhi',
-      degree: 'B.Tech Computer Science',
-      role: 'Full Stack Developer',
-      score: 85,
-      skills: ['React', 'Node.js', 'PostgreSQL'],
-      status: 'hired',
-    },
-  ]);
+  const [candidates, setCandidates] = useState<CandidateMatch[]>([]);
 
   // Match breakdown stats
   const [breakdown, setBreakdown] = useState({
-    total: 248,
-    highlyMatched: { count: 120, percentage: 48, label: 'Highly Matched (90%+)', color: '#0D9488' },
-    goodMatch: { count: 82, percentage: 33, label: 'Good Match (75-89%)', color: '#3B82F6' },
-    partialMatch: { count: 38, percentage: 15, label: 'Partial Match (60-74%)', color: '#F59E0B' },
-    reviewNeeded: { count: 8, percentage: 4, label: 'Review Needed', color: '#94A3B8' },
+    total: 0,
+    highlyMatched: { count: 0, percentage: 0, label: 'Highly Matched (90%+)', color: '#0D9488' },
+    goodMatch: { count: 0, percentage: 0, label: 'Good Match (75-89%)', color: '#3B82F6' },
+    partialMatch: { count: 0, percentage: 0, label: 'Partial Match (60-74%)', color: '#F59E0B' },
+    reviewNeeded: { count: 0, percentage: 0, label: 'Review Needed', color: '#94A3B8' },
   });
 
   // Top skills in demand
   const [topSkills, setTopSkills] = useState([
-    { name: 'React.js', percentage: 72 },
-    { name: 'Node.js', percentage: 56 },
-    { name: 'Python', percentage: 48 },
-    { name: 'SQL / PostgreSQL', percentage: 36 },
-    { name: 'JavaScript / TS', percentage: 30 },
+    { name: 'React.js', percentage: 0 },
+    { name: 'Node.js', percentage: 0 },
+    { name: 'Python', percentage: 0 },
+    { name: 'SQL / PostgreSQL', percentage: 0 },
+    { name: 'JavaScript / TS', percentage: 0 },
   ]);
 
   // Load dashboard from database
@@ -247,10 +149,10 @@ export const CompanyDashboardPage: React.FC = () => {
             { ...d.metrics[3], icon: Award },
           ]);
         }
-        if (d.requirements && Array.isArray(d.requirements) && d.requirements.length > 0) {
+        if (d.requirements && Array.isArray(d.requirements)) {
           setRequirements(d.requirements);
         }
-        if (d.candidateMatches && Array.isArray(d.candidateMatches) && d.candidateMatches.length > 0) {
+        if (d.candidateMatches && Array.isArray(d.candidateMatches)) {
           setCandidates(d.candidateMatches);
         }
         if (d.matchBreakdown) {
@@ -486,57 +388,63 @@ export const CompanyDashboardPage: React.FC = () => {
 
             {/* Requirements Cards */}
             <div className="space-y-3 mt-4">
-              {filteredRequirements.slice(0, 4).map((req) => {
-                const isActive = req.status === 'published';
-                return (
-                  <div
-                    key={req.id}
-                    className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-teal-200 dark:hover:border-teal-900/60 transition-all flex items-center justify-between group shadow-2xs"
-                  >
-                    <div className="min-w-0 pr-2">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
-                          {req.title}
-                        </h4>
-                        <span
-                          className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                            isActive
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50'
-                              : 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50'
-                          }`}
+              {filteredRequirements.length > 0 ? (
+                filteredRequirements.slice(0, 4).map((req) => {
+                  const isActive = req.status === 'published';
+                  return (
+                    <div
+                      key={req.id}
+                      className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-teal-200 dark:hover:border-teal-900/60 transition-all flex items-center justify-between group shadow-2xs"
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
+                            {req.title}
+                          </h4>
+                          <span
+                            className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                              isActive
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50'
+                                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50'
+                            }`}
+                          >
+                            {isActive ? 'Active' : 'Draft'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          <span>{req.department}</span>
+                          <span>•</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            {req.applicants} Applicants
+                          </span>
+                          <span>•</span>
+                          <span className="text-slate-400">{req.postedTime}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => setSelectedReq(req)}
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-teal-500 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-teal-600 transition-colors shadow-2xs"
                         >
-                          {isActive ? 'Active' : 'Draft'}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        <span>{req.department}</span>
-                        <span>•</span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">
-                          {req.applicants} Applicants
-                        </span>
-                        <span>•</span>
-                        <span className="text-slate-400">{req.postedTime}</span>
+                          {isActive ? 'View Matches' : 'Edit Draft'}
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => setSelectedReq(req)}
-                        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-teal-500 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-teal-600 transition-colors shadow-2xs"
-                      >
-                        {isActive ? 'View Matches' : 'Edit Draft'}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No job requirements posted yet.
+                </div>
+              )}
             </div>
           </div>
 
           <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <span className="text-xs text-slate-400">
-              Showing 4 of {requirements.length} active company openings
+              Showing {Math.min(4, requirements.length)} of {requirements.length} active company openings
             </span>
             <Link
               to="/company/requirements"

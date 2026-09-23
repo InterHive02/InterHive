@@ -73,98 +73,14 @@ export const HrDashboardPage: React.FC = () => {
   const [isSubmittingAction, setIsSubmittingAction] = useState<boolean>(false);
 
   const [stats, setStats] = useState({
-    activeInterns: 48,
-    liveProjects: 14,
-    upcomingInterviews: 9,
-    readyPlacement: 26,
+    activeInterns: 0,
+    liveProjects: 0,
+    upcomingInterviews: 0,
+    readyPlacement: 0,
   });
 
-  // Base training sprints matching reference image
-  const defaultSprints: SprintItem[] = [
-    {
-      id: 'sprint-1',
-      title: 'Full-Stack 45-Day Sprint (Batch 12)',
-      subtitle: '18 Enrolled Interns • Sprint 3/4',
-      daysLeft: 14,
-      progress: 68,
-      icon: 'rocket',
-      enrolledCount: 18,
-    },
-    {
-      id: 'sprint-2',
-      title: 'Data Engineering & Analytics (Batch 04)',
-      subtitle: '15 Enrolled Interns • Sprint 2/4',
-      daysLeft: 26,
-      progress: 42,
-      icon: 'code',
-      enrolledCount: 15,
-    },
-  ];
-
-  // Base partner interview queue matching reference image
-  const defaultInterviews: InterviewItem[] = [
-    {
-      id: 'int-1',
-      candidateName: 'Rahul Sharma',
-      email: 'rahul.sharma@techcorp.in',
-      phone: '+91 9876543201',
-      institution: 'IIT Bombay',
-      degree: 'B.Tech Computer Science',
-      skills: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
-      resumeUrl: 'https://interhive.in/resumes/rahul-sharma.pdf',
-      avatarText: 'RS',
-      companyName: 'TechCorp India',
-      roleTitle: 'Full Stack Developer',
-      interviewTime: '11:00 AM Today',
-      interviewDate: 'Today',
-      interviewMode: 'online',
-      linkOrLocation: 'https://meet.google.com/ih-techcorp-rs',
-      interviewer: 'TechCorp Technical Team',
-      notes: 'Round 1 technical architecture assessment.',
-      status: 'Scheduled',
-    },
-    {
-      id: 'int-2',
-      candidateName: 'Priya Patel',
-      email: 'priya.patel@cloudwave.io',
-      phone: '+91 9876543202',
-      institution: 'NIT Surat',
-      degree: 'B.E. Information Technology',
-      skills: ['React', 'Next.js', 'Tailwind CSS', 'Redux'],
-      resumeUrl: 'https://interhive.in/resumes/priya-patel.pdf',
-      avatarText: 'PP',
-      companyName: 'CloudWave Systems',
-      roleTitle: 'Frontend React Dev',
-      interviewTime: '02:30 PM Today',
-      interviewDate: 'Today',
-      interviewMode: 'online',
-      linkOrLocation: 'https://meet.google.com/ih-cloudwave-pp',
-      interviewer: 'CloudWave Lead Architect',
-      notes: 'Frontend system design and responsive layouts.',
-      status: 'Scheduled',
-    },
-    {
-      id: 'int-3',
-      candidateName: 'Aman Verma',
-      email: 'aman.verma@nexusfin.com',
-      phone: '+91 9876543203',
-      institution: 'Delhi University',
-      degree: 'M.C.A. Software Engineering',
-      skills: ['Node.js', 'Express', 'PostgreSQL', 'Redis', 'Kafka'],
-      resumeUrl: 'https://interhive.in/resumes/aman-verma.pdf',
-      avatarText: 'AV',
-      companyName: 'Nexus FinTech',
-      roleTitle: 'Backend Node.js Dev',
-      interviewTime: '04:00 PM Tomorrow',
-      interviewDate: 'Tomorrow',
-      interviewMode: 'online',
-      linkOrLocation: 'https://meet.google.com/ih-nexus-av',
-      interviewer: 'Nexus FinTech VP of Tech',
-      notes: 'Confirmed by partner company engineering committee.',
-      status: 'Confirmed',
-      isEmerald: true,
-    },
-  ];
+  const defaultSprints: SprintItem[] = [];
+  const defaultInterviews: InterviewItem[] = [];
 
   const [sprints, setSprints] = useState<SprintItem[]>(defaultSprints);
   const [interviews, setInterviews] = useState<InterviewItem[]>(defaultInterviews);
@@ -179,17 +95,17 @@ export const HrDashboardPage: React.FC = () => {
 
       if (payload && payload.stats) {
         setStats({
-          activeInterns: payload.stats.activeInterns || 48,
-          liveProjects: payload.stats.liveProjects || 14,
-          upcomingInterviews: payload.stats.upcomingInterviews !== undefined ? payload.stats.upcomingInterviews : 9,
-          readyPlacement: payload.stats.readyPlacement || 26,
+          activeInterns: payload.stats.activeInterns || 0,
+          liveProjects: payload.stats.liveProjects || 0,
+          upcomingInterviews: payload.stats.upcomingInterviews !== undefined ? payload.stats.upcomingInterviews : 0,
+          readyPlacement: payload.stats.readyPlacement || 0,
         });
 
-        if (Array.isArray(payload.sprints) && payload.sprints.length > 0) {
+        if (Array.isArray(payload.sprints)) {
           setSprints(payload.sprints);
         }
 
-        if (Array.isArray(payload.interviews) && payload.interviews.length > 0) {
+        if (Array.isArray(payload.interviews)) {
           setInterviews(payload.interviews);
         }
       }
@@ -472,7 +388,7 @@ export const HrDashboardPage: React.FC = () => {
             <div className="space-y-4 mt-5">
               {filteredSprints.length === 0 ? (
                 <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
-                  No sprints match "{searchTerm}".
+                  {searchTerm ? `No sprints match "${searchTerm}".` : 'No active training sprints at this time.'}
                 </div>
               ) : (
                 filteredSprints.map((sprint) => (
@@ -554,7 +470,7 @@ export const HrDashboardPage: React.FC = () => {
             <div className="space-y-3.5 mt-5">
               {filteredInterviews.length === 0 ? (
                 <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
-                  No interview candidates match "{searchTerm}".
+                  {searchTerm ? `No interview candidates match "${searchTerm}".` : 'No partner interviews currently scheduled.'}
                 </div>
               ) : (
                 filteredInterviews.map((item) => (

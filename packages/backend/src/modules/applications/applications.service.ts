@@ -452,45 +452,24 @@ export class ApplicationsService {
       });
 
       // Format sprints
-      const sprints = dbSprints.length > 0
-        ? dbSprints.map((p: any) => ({
-            id: p._id.toString(),
-            title: p.title,
-            subtitle: p.description || `${p.enrolledCount || 18} Enrolled Interns • Sprint Active`,
-            daysLeft: p.daysLeft || (p.duration?.min ? Math.max(1, Math.round(p.duration.min / 3)) : 14),
-            progress: p.progress || 68,
-            icon: (p.category || '').toLowerCase().includes('data') ? 'code' : 'rocket',
-            enrolledCount: p.enrolledCount || 18,
-          }))
-        : [
-            {
-              id: 'sprint-1',
-              title: 'Full-Stack 45-Day Sprint (Batch 12)',
-              subtitle: '18 Enrolled Interns • Sprint 3/4',
-              daysLeft: 14,
-              progress: 68,
-              icon: 'rocket',
-              enrolledCount: 18,
-            },
-            {
-              id: 'sprint-2',
-              title: 'Data Engineering & Analytics (Batch 04)',
-              subtitle: '15 Enrolled Interns • Sprint 2/4',
-              daysLeft: 26,
-              progress: 42,
-              icon: 'code',
-              enrolledCount: 15,
-            },
-          ];
+      const sprints = dbSprints.map((p: any) => ({
+        id: p._id.toString(),
+        title: p.title,
+        subtitle: p.description || `${p.enrolledCount || 0} Enrolled Interns • Sprint Active`,
+        daysLeft: p.daysLeft || (p.duration?.min ? Math.max(1, Math.round(p.duration.min / 3)) : 0),
+        progress: p.progress || 0,
+        icon: (p.category || '').toLowerCase().includes('data') ? 'code' : 'rocket',
+        enrolledCount: p.enrolledCount || 0,
+      }));
 
       return {
         success: true,
         data: {
           stats: {
-            activeInterns: totalApps > 0 ? totalApps : 48,
-            liveProjects: liveProjectsCount > 0 ? liveProjectsCount : 14,
-            upcomingInterviews: scheduledInterviews.length > 0 ? scheduledInterviews.length : 9,
-            readyPlacement: readyPlacementCount > 0 ? readyPlacementCount : (selectedCount > 0 ? selectedCount : 26),
+            activeInterns: totalApps,
+            liveProjects: liveProjectsCount,
+            upcomingInterviews: scheduledInterviews.length,
+            readyPlacement: readyPlacementCount > 0 ? readyPlacementCount : selectedCount,
           },
           sprints,
           interviews,

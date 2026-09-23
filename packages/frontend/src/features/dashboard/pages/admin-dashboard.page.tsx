@@ -64,32 +64,32 @@ export const AdminDashboardPage: React.FC = () => {
   const [metrics, setMetrics] = useState([
     {
       label: 'Total Registered Users',
-      value: '1,420',
-      change: '↑ 14.8% vs last month',
-      sub: '1,150 Interns, 270 Partners',
+      value: '5',
+      change: 'Live Platform Users',
+      sub: '1 Interns, 1 Partners',
       icon: Users,
       color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
     },
     {
       label: 'Active Partner Companies',
-      value: '46',
-      change: '↑ 12.6% vs last month',
-      sub: '8 Pending Verification',
+      value: '0',
+      change: 'Live Partner Records',
+      sub: '0 Pending Verification',
       icon: Building2,
       color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30',
     },
     {
       label: 'Total Placements Made',
-      value: '312',
-      change: '↑ 24.4% vs last month',
-      sub: '92% Satisfaction Rate',
+      value: '0',
+      change: 'Live Match Records',
+      sub: 'Verified Placements',
       icon: Award,
       color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
     },
     {
       label: 'System Health',
-      value: '99.9%',
-      change: '↑ 2.1% vs last month',
+      value: '100%',
+      change: 'Active Monitoring',
       sub: 'All services operational',
       icon: Activity,
       color: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-900/30',
@@ -97,63 +97,7 @@ export const AdminDashboardPage: React.FC = () => {
   ]);
 
   // Activities state
-  const [activities, setActivities] = useState<ActivityItem[]>([
-    {
-      id: 'act-1',
-      name: 'Vikram Mehta',
-      email: 'vikram.m@gmail.com',
-      role: 'Intern (Full Stack)',
-      date: '10 mins ago',
-      status: 'Active',
-      statusType: 'success',
-      entityType: 'intern',
-      details: 'Completed profile setup and verified identity credentials.',
-    },
-    {
-      id: 'act-2',
-      name: 'Innovate AI Labs',
-      email: 'careers@innovateai.io',
-      role: 'Company Partner',
-      date: '35 mins ago',
-      status: 'Pending Approval',
-      statusType: 'warning',
-      entityType: 'company',
-      details: 'Submitted enterprise onboarding inquiry with 85 team headcount.',
-    },
-    {
-      id: 'act-3',
-      name: 'Sneha Reddy',
-      email: 'sneha.r@outlook.com',
-      role: 'Intern (Frontend)',
-      date: '1 hour ago',
-      status: 'Active',
-      statusType: 'success',
-      entityType: 'intern',
-      details: 'Earned Advanced React 98% badge on skills assessment.',
-    },
-    {
-      id: 'act-4',
-      name: 'Ananya Deshmukh',
-      email: 'ananya@interhive.in',
-      role: 'HR Evaluator',
-      date: '3 hours ago',
-      status: 'Active',
-      statusType: 'success',
-      entityType: 'staff',
-      details: 'Scheduled 6 candidate interviews for TechCorp India.',
-    },
-    {
-      id: 'act-5',
-      name: 'Rahul Chawla',
-      email: 'rahul@cloudwave.com',
-      role: 'Company Partner',
-      date: '3 hours ago',
-      status: 'Pending Verification',
-      statusType: 'primary',
-      entityType: 'company',
-      details: 'Updated corporate GSTIN and company verification documents.',
-    },
-  ]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
 
   // Services state
   const [services, setServices] = useState<ServiceStatusItem[]>([
@@ -178,7 +122,7 @@ export const AdminDashboardPage: React.FC = () => {
             { ...d.metrics[3], icon: Activity },
           ]);
         }
-        if (d.activities && Array.isArray(d.activities) && d.activities.length > 0) {
+        if (d.activities && Array.isArray(d.activities)) {
           setActivities(d.activities);
         }
         if (d.services && Array.isArray(d.services)) {

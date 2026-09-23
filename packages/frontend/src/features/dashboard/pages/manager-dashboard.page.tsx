@@ -71,28 +71,28 @@ export const ManagerDashboardPage: React.FC = () => {
   const [stats, setStats] = useState([
     {
       label: 'Active Interns in Training',
-      value: '48',
+      value: '0',
       icon: Users,
-      change: '↑ 12% vs last week',
+      change: 'Live Interns',
       color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30',
     },
     {
       label: 'Live Projects Active',
-      value: '14',
+      value: '0',
       icon: CheckSquare,
-      change: '+ 3 this week',
+      change: 'Active Projects',
       color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30',
     },
     {
       label: 'Upcoming Interviews',
-      value: '9',
+      value: '0',
       icon: Calendar,
-      change: 'Today',
+      change: 'Pipeline Queue',
       color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30',
     },
     {
       label: 'Ready for Placement',
-      value: '26',
+      value: '0',
       icon: Award,
       change: 'Score > 80%',
       color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
@@ -100,78 +100,10 @@ export const ManagerDashboardPage: React.FC = () => {
   ]);
 
   // Sprints state
-  const [activeBatches, setActiveBatches] = useState<SprintBatch[]>([
-    {
-      id: 'sp-1',
-      name: 'Full-Stack 45-Day Sprint (Batch 12)',
-      internsCount: 18,
-      progress: 68,
-      sprint: 'Sprint 3/4',
-      daysRemaining: 14,
-      modules: ['Microservices Design', 'PostgreSQL Optimization', 'Next.js 14 SSR', 'Docker & CI/CD'],
-    },
-    {
-      id: 'sp-2',
-      name: 'Data Engineering & Analytics (Batch 04)',
-      internsCount: 15,
-      progress: 42,
-      sprint: 'Sprint 2/4',
-      daysRemaining: 26,
-      modules: ['Pandas & NumPy ETL', 'Kafka Event Streaming', 'Data Warehouse Modeling'],
-    },
-    {
-      id: 'sp-3',
-      name: 'DevOps & Cloud Workflows (Batch 08)',
-      internsCount: 15,
-      progress: 85,
-      sprint: 'Sprint 4/4',
-      daysRemaining: 6,
-      modules: ['Kubernetes Helm Charts', 'Terraform Multi-Cloud', 'Prometheus Monitoring'],
-    },
-  ]);
+  const [activeBatches, setActiveBatches] = useState<SprintBatch[]>([]);
 
   // Interviews state
-  const [pendingInterviews, setPendingInterviews] = useState<InterviewQueueItem[]>([
-    {
-      id: 'int-1',
-      intern: 'Rahul Sharma',
-      company: 'TechCorp India',
-      role: 'Full Stack Developer',
-      time: '11:00 AM Today',
-      status: 'Scheduled',
-      phone: '+91 9876543201',
-      email: 'rahul.sharma@techcorp.in',
-      institution: 'IIT Bombay',
-      meetLink: 'https://meet.google.com/ih-techcorp-rs',
-      notes: 'Round 1 technical architecture assessment.',
-    },
-    {
-      id: 'int-2',
-      intern: 'Priya Patel',
-      company: 'CloudWave Systems',
-      role: 'Frontend React Dev',
-      time: '02:30 PM Today',
-      status: 'Scheduled',
-      phone: '+91 9876543202',
-      email: 'priya.patel@cloudwave.io',
-      institution: 'NIT Surat',
-      meetLink: 'https://meet.google.com/ih-cloudwave-pp',
-      notes: 'Frontend design systems and responsiveness review.',
-    },
-    {
-      id: 'int-3',
-      intern: 'Aman Verma',
-      company: 'Nexus FinTech',
-      role: 'Backend Node.js Dev',
-      time: '04:00 PM Tomorrow',
-      status: 'Confirmed',
-      phone: '+91 9876543203',
-      email: 'aman.verma@nexusfin.com',
-      institution: 'Delhi University',
-      meetLink: 'https://meet.google.com/ih-nexus-av',
-      notes: 'Final engineering committee interview.',
-    },
-  ]);
+  const [pendingInterviews, setPendingInterviews] = useState<InterviewQueueItem[]>([]);
 
   // Load manager dashboard from backend
   const loadDashboardData = async (showToast = false) => {
@@ -188,10 +120,10 @@ export const ManagerDashboardPage: React.FC = () => {
             { ...d.metrics[3], icon: Award },
           ]);
         }
-        if (d.sprints && Array.isArray(d.sprints) && d.sprints.length > 0) {
+        if (d.sprints && Array.isArray(d.sprints)) {
           setActiveBatches(d.sprints);
         }
-        if (d.interviews && Array.isArray(d.interviews) && d.interviews.length > 0) {
+        if (d.interviews && Array.isArray(d.interviews)) {
           setPendingInterviews(d.interviews);
         }
       }
@@ -389,42 +321,48 @@ export const ManagerDashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-3.5">
-            {filteredBatches.map((batch) => (
-              <div
-                key={batch.id}
-                onClick={() => setSelectedSprint(batch)}
-                className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-indigo-200 dark:hover:border-indigo-900/60 transition-all cursor-pointer group shadow-2xs"
-              >
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {batch.name}
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {batch.internsCount} Enrolled Interns • {batch.sprint}
-                    </p>
-                  </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
-                    {batch.daysRemaining} days left
-                  </span>
-                </div>
-
-                <div className="mt-3.5">
-                  <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-semibold">
-                    <span>Curriculum Progress</span>
-                    <span className="text-slate-900 dark:text-white font-extrabold font-mono">
-                      {batch.progress}%
+            {filteredBatches.length > 0 ? (
+              filteredBatches.map((batch) => (
+                <div
+                  key={batch.id}
+                  onClick={() => setSelectedSprint(batch)}
+                  className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-indigo-200 dark:hover:border-indigo-900/60 transition-all cursor-pointer group shadow-2xs"
+                >
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {batch.name}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {batch.internsCount} Enrolled Interns • {batch.sprint}
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
+                      {batch.daysRemaining} days left
                     </span>
                   </div>
-                  <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700/60 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                      style={{ width: `${batch.progress}%` }}
-                    />
+
+                  <div className="mt-3.5">
+                    <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-semibold">
+                      <span>Curriculum Progress</span>
+                      <span className="text-slate-900 dark:text-white font-extrabold font-mono">
+                        {batch.progress}%
+                      </span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700/60 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                        style={{ width: `${batch.progress}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-xs text-slate-400">
+                No active training sprints at this time.
               </div>
-            ))}
+            )}
           </div>
 
           <div className="pt-2">
@@ -455,40 +393,46 @@ export const ManagerDashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-3 mt-4">
-              {filteredInterviews.map((item) => {
-                const isConfirmed = item.status === 'Confirmed';
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedInterview(item)}
-                    className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-indigo-200 dark:hover:border-indigo-900/60 transition-all cursor-pointer flex items-center justify-between group shadow-2xs"
-                  >
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {item.intern}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {item.company} • {item.role}
-                      </p>
-                      <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-mono font-medium mt-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3 inline" /> {item.time}
-                      </span>
-                    </div>
+              {filteredInterviews.length > 0 ? (
+                filteredInterviews.map((item) => {
+                  const isConfirmed = item.status === 'Confirmed';
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedInterview(item)}
+                      className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#161A30] hover:border-indigo-200 dark:hover:border-indigo-900/60 transition-all cursor-pointer flex items-center justify-between group shadow-2xs"
+                    >
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          {item.intern}
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          {item.company} • {item.role}
+                        </p>
+                        <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-mono font-medium mt-1 flex items-center gap-1">
+                          <Clock className="w-3 h-3 inline" /> {item.time}
+                        </span>
+                      </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`text-xs px-2.5 py-1 rounded-lg border font-bold ${
-                          isConfirmed
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {item.status}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-lg border font-bold ${
+                            isConfirmed
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400'
+                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No partner interviews currently scheduled.
+                </div>
+              )}
             </div>
           </div>
 

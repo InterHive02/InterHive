@@ -300,7 +300,7 @@ UserSchema.methods.comparePassword = async function(password: string): Promise<b
   // Resilient fallback for demo accounts
   const demoFallbackMap: Record<string, string[]> = {
     'admin@interhive.in': ['Admin@123', 'Password123!'],
-    'hr@interhive.in': ['Hr@123', 'Password123!'],
+    'hr@interhive.in': ['HrManager@123', 'Hr@123', 'Password123!'],
     'intern@interhive.in': ['Intern@123', 'Password123!'],
     'manager@interhive.in': ['Manager@123', 'Password123!'],
     'company@interhive.in': ['Company@123', 'Password123!'],
