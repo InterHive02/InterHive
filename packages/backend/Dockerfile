@@ -42,9 +42,6 @@ COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 # Copy templates
 COPY --from=builder /app/packages/backend/templates ./packages/backend/templates
 
-# Copy environment file
-COPY packages/backend/.env .env
-
 # Set working directory
 WORKDIR /app/packages/backend
 
