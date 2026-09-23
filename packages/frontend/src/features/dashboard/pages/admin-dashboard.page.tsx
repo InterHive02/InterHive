@@ -451,7 +451,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             {/* Mobile Stacked Card View (< 640px) */}
-            <div className="block sm:hidden space-y-3 mt-3">
+            <div data-testid="activity-card-list" className="block sm:hidden space-y-3 mt-3">
               {filteredActivities.length > 0 ? (
                 filteredActivities.map((item) => {
                   const isPendingApproval = item.status.toLowerCase().includes('approval');
@@ -514,7 +514,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             {/* Desktop Table (>= 640px) */}
-            <div className="hidden sm:block overflow-x-auto mt-2">
+            <div data-testid="activity-desktop-table" className="hidden sm:block overflow-x-auto mt-2">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-semibold">

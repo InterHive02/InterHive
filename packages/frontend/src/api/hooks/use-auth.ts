@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { authApi, LoginData, RegisterData, ForgotPasswordData, ResetPasswordData } from '../endpoints/auth.api';
@@ -130,9 +131,9 @@ export const useAuth = () => {
     },
   });
 
-  const initAuth = async () => {
+  const initAuth = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
   return {
     user,

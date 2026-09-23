@@ -16,7 +16,7 @@ export const AdminCompaniesPage: React.FC = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 p-4 sm:p-6">
         {/* Mobile Stacked Card View (< 640px) */}
-        <div className="block sm:hidden space-y-3">
+        <div data-testid="company-card-list" className="block sm:hidden space-y-3">
           {companies.length > 0 ? (
             companies.map((c: any, idx: number) => (
               <div
@@ -44,7 +44,7 @@ export const AdminCompaniesPage: React.FC = () => {
         </div>
 
         {/* Desktop Table (>= 640px) */}
-        <div className="hidden sm:block overflow-x-auto">
+        <div data-testid="company-desktop-table" className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-gray-500 border-b border-gray-100 dark:border-gray-700 pb-3">
               <tr>

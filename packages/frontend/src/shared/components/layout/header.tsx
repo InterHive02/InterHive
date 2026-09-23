@@ -17,13 +17,13 @@ import { NotificationBell } from '../common/notification-bell';
 interface HeaderProps {
   onToggleSidebar: () => void;
   onToggleMobile: () => void;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
+  user?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
     profilePhoto?: string;
-    role: string;
-  };
+    role?: string;
+  } | null;
   unreadCount: number;
 }
 
@@ -45,8 +45,8 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getUserDisplayName = () => {
-    if (user.firstName) return `${user.firstName} ${user.lastName || ''}`.trim();
-    switch (user.role) {
+    if (user?.firstName) return `${user.firstName} ${user.lastName || ''}`.trim();
+    switch (user?.role) {
       case 'admin':
         return 'Alex Admin';
       case 'hr':
@@ -62,10 +62,10 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getUserInitials = () => {
-    if (user.firstName) {
+    if (user?.firstName) {
       return `${user.firstName[0]}${user.lastName ? user.lastName[0] : ''}`.toUpperCase();
     }
-    switch (user.role) {
+    switch (user?.role) {
       case 'admin':
         return 'AA';
       case 'hr':
@@ -88,12 +88,16 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
+            data-testid="desktop-sidebar-toggle"
+            aria-label="Toggle sidebar"
             className="hidden lg:block p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <Menu className="w-5 h-5" />
           </button>
           <button
             onClick={onToggleMobile}
+            data-testid="mobile-menu-btn"
+            aria-label="Open sidebar"
             className="lg:hidden p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <Menu className="w-5 h-5" />
@@ -135,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
             >
-              {user.profilePhoto ? (
+              {user?.profilePhoto ? (
                 <img
                   src={user.profilePhoto}
                   alt={getUserDisplayName()}
@@ -165,9 +169,9 @@ export const Header: React.FC<HeaderProps> = ({
                   <p className="font-extrabold text-sm text-slate-900 dark:text-white">
                     {getUserDisplayName()}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{user.email}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{user?.email}</p>
                   <span className="inline-block px-2 py-0.5 mt-1.5 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 rounded-md capitalize">
-                    {user.role}
+                    {user?.role}
                   </span>
                 </div>
 

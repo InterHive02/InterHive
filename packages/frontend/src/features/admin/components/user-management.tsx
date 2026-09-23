@@ -139,7 +139,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       </div>
 
       {/* Mobile Stacked Card View (< 640px) */}
-      <div className="block sm:hidden space-y-3">
+      <div data-testid="user-card-list" className="block sm:hidden space-y-3">
         {filteredUsers.map((user) => (
           <div
             key={user.id}
@@ -235,7 +235,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       </div>
 
       {/* Desktop Table (>= 640px) */}
-      <div className="hidden sm:block overflow-x-auto">
+      <div data-testid="user-desktop-table" className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">

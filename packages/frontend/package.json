@@ -14,7 +14,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e:responsive": "playwright test e2e/responsive.spec.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -48,6 +49,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20.4.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

@@ -9,7 +9,8 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     initAuth();
-  }, [initAuth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading) {
     return (
