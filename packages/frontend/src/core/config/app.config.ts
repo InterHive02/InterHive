@@ -36,9 +36,8 @@ interface AppConfig {
 export const APP_CONFIG: AppConfig = {
   appName: import.meta.env.VITE_APP_NAME || 'InterHive',
   appVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
-  environment: (import.meta.env.VITE_NODE_ENV as AppConfig['environment']) || 'development',
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:3000',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://interhive-backend.onrender.com/api/v1' : 'http://localhost:3000'),
+  wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || (import.meta.env.PROD ? 'wss://interhive-backend.onrender.com' : 'ws://localhost:3000'),
   socketPath: import.meta.env.VITE_SOCKET_PATH || '/socket.io',
   features: {
     enableChat: import.meta.env.VITE_ENABLE_CHAT === 'true',

@@ -21,8 +21,12 @@ class ApiClient {
   private static instance: ApiClient;
 
   private constructor() {
+    const defaultBaseUrl = import.meta.env.PROD
+      ? 'https://interhive-backend.onrender.com/api/v1'
+      : '/api/v1';
+
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+      baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseUrl,
       timeout: 30000,
       withCredentials: true,
       headers: {

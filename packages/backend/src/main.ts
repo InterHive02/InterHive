@@ -35,8 +35,35 @@ async function bootstrap() {
   app.use((cookieParser as any)());
   
   // CORS configuration
+  const customOrigins = configService
+    .get('CORS_ORIGIN', '')
+    .split(',')
+    .map((o: string) => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN', 'http://localhost:3000').split(','),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const standardOrigins = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://interhive.in',
+        'https://www.interhive.in',
+        ...customOrigins,
+      ];
+
+      if (
+        standardOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('interhive.in')
+      ) {
+        return callback(null, true);
+      }
+
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
