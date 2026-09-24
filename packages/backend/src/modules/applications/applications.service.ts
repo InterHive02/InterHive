@@ -55,12 +55,15 @@ export class ApplicationsService {
 
     await application.save();
 
-    // Send confirmation email to the applicant
-    try {
-      await this.mailService.sendApplicationReceivedEmail(cleanEmail, dto.fullName);
-    } catch (mailErr) {
-      console.error('Failed to send application confirmation email:', mailErr);
-    }
+    // Send confirmation email asynchronously without blocking the HTTP response
+    this.mailService
+      .sendApplicationReceivedEmail(cleanEmail, dto.fullName)
+      .then(() => {
+        this.logger.log(`📧 Application confirmation email sent to ${cleanEmail}`);
+      })
+      .catch((mailErr) => {
+        this.logger.error(`Failed to send application confirmation email: ${mailErr.message}`);
+      });
 
     return {
       success: true,
@@ -151,18 +154,20 @@ export class ApplicationsService {
     application.status = updateStatusDto.status as ApplicationWorkflowStatus;
     await application.save();
 
-    // If candidate was newly shortlisted, send notification email
+    // If candidate was newly shortlisted, send notification email asynchronously
     if (updateStatusDto.status === 'shortlisted' && prevStatus !== 'shortlisted') {
-      try {
-        await this.mailService.sendShortlistedEmail({
+      this.mailService
+        .sendShortlistedEmail({
           to: application.email,
           fullName: application.fullName,
           position: application.degree ? `${application.degree} Intern` : undefined,
+        })
+        .then(() => {
+          this.logger.log(`📧 Shortlisted notification email dispatched to ${application.email}`);
+        })
+        .catch((err: any) => {
+          this.logger.error(`Failed to send shortlisted email to ${application.email}: ${err.message}`);
         });
-        this.logger.log(`📧 Shortlisted notification email dispatched to ${application.email}`);
-      } catch (err: any) {
-        this.logger.error(`Failed to send shortlisted email to ${application.email}: ${err.message}`);
-      }
     }
 
     return {
@@ -191,9 +196,9 @@ export class ApplicationsService {
     application.status = 'interview_scheduled';
     await application.save();
 
-    // Send interview invitation email to applicant
-    try {
-      await this.mailService.sendApplicationInterviewEmail({
+    // Send interview invitation email to applicant asynchronously
+    this.mailService
+      .sendApplicationInterviewEmail({
         to: application.email,
         fullName: application.fullName,
         date: dto.date,
@@ -202,13 +207,15 @@ export class ApplicationsService {
         linkOrLocation: dto.linkOrLocation || 'Google Meet (link will be sent)',
         interviewer: dto.interviewer,
         notes: dto.notes,
+      })
+      .then(() => {
+        this.logger.log(`📧 Interview invitation email dispatched to ${application.email}`);
+      })
+      .catch((mailErr: any) => {
+        this.logger.error(
+          `Failed to send interview invitation email to ${application.email}: ${mailErr.message}`,
+        );
       });
-      this.logger.log(`📧 Interview invitation email dispatched to ${application.email}`);
-    } catch (mailErr: any) {
-      this.logger.error(
-        `Failed to send interview invitation email to ${application.email}: ${mailErr.message}`,
-      );
-    }
 
     return {
       success: true,
@@ -300,24 +307,27 @@ export class ApplicationsService {
     application.createdUserId = user._id as Types.ObjectId;
     await application.save();
 
-    // Send official email with credentials
+    // Send official email with credentials asynchronously
     const appUrl = (process.env.APP_URL && !process.env.APP_URL.includes('localhost'))
       ? process.env.APP_URL
       : (process.env.NODE_ENV === 'production' ? 'https://interhive.in' : 'http://localhost:5173');
     const loginUrl = `${appUrl.replace(/\/$/, '')}/login`;
 
-    try {
-      await this.mailService.sendCredentialDeliveryEmail({
+    this.mailService
+      .sendCredentialDeliveryEmail({
         to: cleanEmail,
         fullName: application.fullName,
         employeeId: user.employeeId,
         loginEmail: cleanEmail,
         temporaryPassword: tempPassword,
         loginUrl,
+      })
+      .then(() => {
+        this.logger.log(`📧 Intern credential delivery email dispatched to ${cleanEmail}`);
+      })
+      .catch((mailErr) => {
+        this.logger.error(`Failed to send credential delivery email: ${mailErr.message}`);
       });
-    } catch (mailErr) {
-      console.error('Failed to send credential delivery email:', mailErr);
-    }
 
     return {
       success: true,
@@ -345,19 +355,21 @@ export class ApplicationsService {
     application.status = 'rejected' as ApplicationWorkflowStatus;
     await application.save();
 
-    // Send rejection email
-    try {
-      await this.mailService.sendRejectionEmail({
+    // Send rejection email asynchronously without blocking HTTP response
+    this.mailService
+      .sendRejectionEmail({
         to: application.email,
         fullName: application.fullName,
         feedback: feedback?.trim() || undefined,
+      })
+      .then(() => {
+        this.logger.log(`📧 Rejection email dispatched to ${application.email}`);
+      })
+      .catch((mailErr: any) => {
+        this.logger.error(
+          `Failed to send rejection email to ${application.email}: ${mailErr.message}`,
+        );
       });
-      this.logger.log(`📧 Rejection email dispatched to ${application.email}`);
-    } catch (mailErr: any) {
-      this.logger.error(
-        `Failed to send rejection email to ${application.email}: ${mailErr.message}`,
-      );
-    }
 
     return {
       success: true,

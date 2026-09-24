@@ -49,9 +49,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       path: APP_CONFIG.socketPath,
       auth: { token },
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: 2,
+      reconnectionDelay: 5000,
       autoConnect: true,
+      timeout: 10000,
     });
 
     socket.on('connect', () => {
@@ -60,17 +61,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('Socket: Disconnected', reason);
       setIsConnected(false);
     });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket: Connection error', error);
+    socket.on('connect_error', () => {
+      // Graceful fallback when WebSocket is inactive
       setIsConnected(false);
-    });
-
-    socket.on('error', (error) => {
-      console.error('Socket: Error', error);
     });
 
     socketRef.current = socket;

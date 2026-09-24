@@ -72,10 +72,10 @@ export const getApiUrl = (path: string): string => {
 };
 
 export const getWsUrl = (): string => {
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
+  if (import.meta.env.PROD) {
+    return 'https://interhive-backend.onrender.com';
   }
-  return APP_CONFIG.apiBaseUrl;
+  return import.meta.env.VITE_WS_BASE_URL || 'http://localhost:3000';
 };
 
 export const isDevelopment = APP_CONFIG.environment === 'development';

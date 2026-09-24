@@ -25,25 +25,22 @@ export class MailService {
 
     const isGmail = host.includes('gmail') || user.includes('@gmail.com');
 
-    const transportOptions: any = isGmail
-      ? {
-          service: 'gmail',
-          auth: { user, pass },
-        }
-      : {
-          host,
-          port,
-          secure: port === 465,
-          auth: { user, pass },
-        };
-
-    this.transporter = nodemailer.createTransport(transportOptions);
+    this.transporter = nodemailer.createTransport({
+      host: isGmail ? 'smtp.gmail.com' : host,
+      port: 465,
+      secure: true,
+      family: 4, // Crucial for cloud hosts (Render/AWS): force IPv4 to avoid IPv6 drops
+      auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
+    } as any);
 
     this.transporter.verify((error) => {
       if (error) {
         this.logger.warn(`Mail transporter warning: ${error.message} (Check SMTP credentials)`);
       } else {
-        this.logger.log('📧 Mail transporter verified and ready to send emails via Gmail SMTP');
+        this.logger.log('📧 Mail transporter verified and ready to send emails via Gmail SMTP (IPv4/SSL 465)');
       }
     });
   }
