@@ -14,7 +14,8 @@ import {
   Sparkles,
   ChevronRight,
   MapPin,
-  DollarSign,
+  IndianRupee,
+  Wallet,
   Mail,
   CheckCircle2,
   X,
@@ -38,17 +39,34 @@ export const LandingPage: React.FC = () => {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [selectedProgramCategory, setSelectedProgramCategory] = useState('Software Engineering');
 
-  // Dynamic Landing Page Metrics
-  const [statsData, setStatsData] = useState<LandingStats>(getLandingStats());
+  // Dynamic Landing Page Metrics from live backend
+  const [statsData, setStatsData] = useState<{
+    companyCount: number;
+    activeInternshipsCount: number;
+    studentsPlacedCount: number;
+    averageRating: number | null;
+  } | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
-    const handleStatsUpdate = () => {
-      setStatsData(getLandingStats());
+    const fetchStats = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL ||
+          (import.meta.env.PROD ? 'https://interhive-backend.onrender.com/api/v1' : '/api/v1');
+        const res = await fetch(`${apiBase}/stats/public`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            setStatsData(json.data);
+          }
+        }
+      } catch (err) {
+        // Stats fetch failed — will show onboarding message
+      } finally {
+        setStatsLoading(false);
+      }
     };
-    window.addEventListener('landing-stats-updated', handleStatsUpdate);
-    return () => {
-      window.removeEventListener('landing-stats-updated', handleStatsUpdate);
-    };
+    fetchStats();
   }, []);
 
   // 3D Card Interactive Tilt Mouse Tracking
@@ -156,8 +174,8 @@ export const LandingPage: React.FC = () => {
     {
       id: '1',
       title: 'Full Stack Software Engineer Intern',
-      company: 'Google',
-      logo: 'https://www.google.com/favicon.ico',
+      company: 'NovaTech Solutions',
+      logo: '',
       location: 'Remote / Hybrid',
       stipend: '₹45,000 / month',
       category: 'Software Engineering',
@@ -167,8 +185,8 @@ export const LandingPage: React.FC = () => {
     {
       id: '2',
       title: 'Frontend Developer Intern',
-      company: 'Microsoft',
-      logo: 'https://www.microsoft.com/favicon.ico',
+      company: 'Brightwave Digital',
+      logo: '',
       location: 'Bangalore, India',
       stipend: '₹40,000 / month',
       category: 'Frontend',
@@ -178,8 +196,8 @@ export const LandingPage: React.FC = () => {
     {
       id: '3',
       title: 'AI & Data Science Intern',
-      company: 'Amazon',
-      logo: 'https://www.amazon.com/favicon.ico',
+      company: 'Zenith Labs',
+      logo: '',
       location: 'Hyderabad, India',
       stipend: '₹50,000 / month',
       category: 'AI & Data Science',
@@ -438,12 +456,12 @@ export const LandingPage: React.FC = () => {
               {/* Headlines */}
               <div className="space-y-2">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-                  From Learning <br />
-                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Earning.</span>
+                  From Intern <br />
+                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Industry.</span>
                 </h1>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  From Intern to Industry.
-                </h2>
+                <p className="text-sm sm:text-base text-slate-500 font-semibold">
+                  Your journey from learning to earning starts here.
+                </p>
               </div>
 
               {/* Subtitle */}
@@ -461,6 +479,14 @@ export const LandingPage: React.FC = () => {
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
+                <button
+                  onClick={() => setIsCompanyModalOpen(true)}
+                  className="px-6 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Building2 className="w-4 h-4 text-blue-500" />
+                  <span>Hire Interns</span>
+                </button>
+
                 <a
                   href="#how-it-works"
                   className="px-6 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2"
@@ -472,73 +498,83 @@ export const LandingPage: React.FC = () => {
                 </a>
               </div>
 
-              {/* HERO STATS ROW (MATCHING REFERENCE IMAGE EXACTLY) */}
+              {/* HERO STATS ROW — LIVE DATA FROM BACKEND */}
               <div className="pt-6 relative rounded-2xl p-4 bg-white/60 backdrop-blur-md border border-white/90 shadow-sm">
                 {/* Subtle Background Dot Grid */}
                 <div className="absolute inset-0 opacity-40 pointer-events-none rounded-2xl bg-[radial-gradient(#93c5fd_1.2px,transparent_1.2px)] [background-size:18px_18px]" />
 
-                <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-                  
-                  {/* Top Companies */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#EBF3FF] border border-[#BFDBFE] text-[#2563EB] flex items-center justify-center shrink-0 shadow-xs">
-                      <Building2 className="w-5 h-5" />
+                <div className="relative z-10">
+                  {statsLoading ? (
+                    <div className="text-center py-2">
+                      <span className="text-xs text-slate-400 font-semibold">Loading platform data...</span>
                     </div>
-                    <div>
-                      <span className="block font-black text-slate-900 text-base leading-tight">
-                        {statsData.topCompanies}
-                      </span>
-                      <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                        Top <br /> Companies
-                      </span>
-                    </div>
-                  </div>
+                  ) : statsData && (statsData.companyCount >= 10 || statsData.studentsPlacedCount >= 50) ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-center">
+                      
+                      {/* Partner Companies — only show if >= 10 */}
+                      {statsData.companyCount >= 10 && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#EBF3FF] border border-[#BFDBFE] text-[#2563EB] flex items-center justify-center shrink-0 shadow-xs">
+                            <Building2 className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="block font-black text-slate-900 text-base leading-tight">
+                              {statsData.companyCount}+
+                            </span>
+                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
+                              Partner <br /> Companies
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Active Internships */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#F3E8FF] border border-[#E9D5FF] text-[#9333EA] flex items-center justify-center shrink-0 shadow-xs">
-                      <Briefcase className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="block font-black text-slate-900 text-base leading-tight">
-                        {statsData.activeInternships}
-                      </span>
-                      <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                        Active <br /> Internships
-                      </span>
-                    </div>
-                  </div>
+                      {/* Active Internships — only show if > 0 */}
+                      {statsData.activeInternshipsCount > 0 && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#F3E8FF] border border-[#E9D5FF] text-[#9333EA] flex items-center justify-center shrink-0 shadow-xs">
+                            <Briefcase className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="block font-black text-slate-900 text-base leading-tight">
+                              {statsData.activeInternshipsCount}
+                            </span>
+                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
+                              Active <br /> Internships
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Students Placed */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#DCFCE7] border border-[#BBF7D0] text-[#16A34A] flex items-center justify-center shrink-0 shadow-xs">
-                      <Users className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="block font-black text-slate-900 text-base leading-tight">
-                        {statsData.studentsPlaced}
-                      </span>
-                      <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                        Students <br /> Placed
-                      </span>
-                    </div>
-                  </div>
+                      {/* Students Placed — only show if >= 50 */}
+                      {statsData.studentsPlacedCount >= 50 && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#DCFCE7] border border-[#BBF7D0] text-[#16A34A] flex items-center justify-center shrink-0 shadow-xs">
+                            <Users className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="block font-black text-slate-900 text-base leading-tight">
+                              {statsData.studentsPlacedCount}+
+                            </span>
+                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
+                              Students <br /> Placed
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
-                  {/* User Rating */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#FEF3C7] border border-[#FDE68A] text-[#D97706] flex items-center justify-center shrink-0 shadow-xs">
-                      <Star className="w-5 h-5 fill-[#D97706] text-[#D97706]" />
-                    </div>
-                    <div>
-                      <span className="block font-black text-slate-900 text-base leading-tight">
-                        {statsData.userRating}
-                      </span>
-                      <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                        User <br /> Rating
-                      </span>
-                    </div>
-                  </div>
+                      {/* User Rating — NEVER show until real rating system exists */}
 
+                    </div>
+                  ) : (
+                    <div className="text-center py-2">
+                      <p className="text-sm font-bold text-slate-600">
+                        🚀 Now onboarding our first companies and interns
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Join us at the ground floor — be among the first to benefit.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -757,7 +793,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* FEATURE GRID SECTION */}
-      <section id="features" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="features" className="pt-16 pb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
@@ -862,12 +898,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Cursive Handwriting Accent Callout */}
-        <div className="mt-14 text-right pr-4 sm:pr-8">
-          <div className="inline-block transform -rotate-2 hover:rotate-0 transition-transform">
-            <span className="handwriting-font text-2xl sm:text-4xl text-blue-600 tracking-wide font-bold sm:whitespace-nowrap break-words block">
+        <div className="mt-6 mb-2 text-right pr-4 sm:pr-8 relative z-20 overflow-visible">
+          <div className="inline-block transform -rotate-1 hover:rotate-0 transition-transform origin-right">
+            <span className="handwriting-font text-xl sm:text-2xl md:text-3xl text-blue-600 tracking-wide font-bold block">
               Real Projects. Real Experience. Real Growth.
             </span>
-            <svg className="w-full h-3 text-blue-600 mt-0.5" viewBox="0 0 200 12" fill="none">
+            <svg className="w-full h-3 text-blue-600 mt-0.5" viewBox="0 0 200 12" fill="none" preserveAspectRatio="none">
               <path d="M4 8 C60 2, 140 10, 196 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </div>
@@ -876,17 +912,17 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* EXPLORE OPPORTUNITIES SECTION */}
-      <section id="explore-opportunities" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <section id="explore-opportunities" className="pt-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
             <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase block mb-1">
-              LIVE PLACEMENT PIPELINE
+              SAMPLE OPPORTUNITIES
             </span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Featured Internships & Opportunities
+              Sample Opportunities & Roles
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 font-semibold">
-              Explore opportunities pre-matched to industry readiness benchmarks.
+              Explore illustrative roles designed to give you real-world, industry-standard experience.
             </p>
           </div>
 
@@ -916,29 +952,39 @@ export const LandingPage: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/70 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
-                      {opp.logo ? (
-                        <img
-                          src={opp.logo}
-                          alt={opp.company || opp.companyName}
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-7 h-7 object-contain max-w-full h-auto"
-                        />
-                      ) : (
-                        <span className="font-black text-blue-600 text-lg">
-                          {(opp.company || opp.companyName || 'C')[0]}
-                        </span>
-                      )}
-                    </div>
+                    {(() => {
+                      const compName = opp.company || opp.companyName || 'Opportunity';
+                      const words = compName.split(' ').filter(Boolean);
+                      const initials = words.length >= 2
+                        ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+                        : compName.slice(0, 2).toUpperCase();
+                      
+                      const colorPalettes: Record<string, { bg: string; text: string; border: string }> = {
+                        'NovaTech Solutions': { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
+                        'Brightwave Digital': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
+                        'Zenith Labs': { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' },
+                        'InterHive Studio': { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
+                      };
+                      const theme = colorPalettes[compName] || {
+                        bg: 'bg-indigo-100',
+                        text: 'text-indigo-700',
+                        border: 'border-indigo-200',
+                      };
+
+                      return (
+                        <div className={`w-12 h-12 rounded-2xl ${theme.bg} border ${theme.border} flex items-center justify-center overflow-hidden shrink-0 shadow-xs`}>
+                          <span className={`font-black ${theme.text} text-sm tracking-wider`}>
+                            {initials}
+                          </span>
+                        </div>
+                      );
+                    })()}
                     <div>
                       <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors">
                         {opp.title || opp.position}
                       </h4>
                       <p className="text-xs text-slate-500 font-semibold">
-                        {opp.company || opp.companyName || 'Partner Company'}
+                        {opp.company || opp.companyName || 'Sample Partner'}
                       </p>
                     </div>
                   </div>
@@ -956,7 +1002,7 @@ export const LandingPage: React.FC = () => {
                     <span>{opp.location || opp.workType || 'Remote'}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                    <Wallet className="w-3.5 h-3.5 text-slate-400" />
                     <span>{opp.stipend?.max ? `₹${opp.stipend.max}/mo` : opp.stipend || '₹40,000 / month'}</span>
                   </div>
                 </div>
@@ -974,7 +1020,10 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-400">Apply via InterHive</span>
+                <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  Direct InterHive Application
+                </span>
                 <button
                   onClick={() => {
                     setSelectedProgramCategory(opp.category || opp.title || 'Software Engineering');
@@ -1018,16 +1067,31 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                Empowering students from learning to earning. Connecting talent with top companies worldwide.
+                From Intern to Industry. Connecting talent with real-world opportunities worldwide.
               </p>
             </div>
 
             <div>
               <h5 className="text-sm font-black text-white mb-4">For Students</h5>
               <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
-                <li><a href="#explore-opportunities" className="hover:text-blue-400 transition-colors">Explore Internships</a></li>
-                <li><a href="#how-it-works" className="hover:text-blue-400 transition-colors">Readiness Assessment</a></li>
-                <li><button onClick={() => setIsInternshipModalOpen(true)} className="hover:text-blue-400 transition-colors text-left cursor-pointer">Internship Application</button></li>
+                <li>
+                  <a href="#explore-opportunities" className="text-slate-300 hover:text-blue-400 hover:underline transition-all block">
+                    Explore Internships
+                  </a>
+                </li>
+                <li>
+                  <a href="#how-it-works" className="text-slate-300 hover:text-blue-400 hover:underline transition-all block">
+                    Readiness Assessment
+                  </a>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setIsInternshipModalOpen(true)} 
+                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer block"
+                  >
+                    Internship Application
+                  </button>
+                </li>
               </ul>
             </div>
 
@@ -1035,13 +1099,22 @@ export const LandingPage: React.FC = () => {
               <h5 className="text-sm font-black text-white mb-4">For Companies</h5>
               <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
                 <li>
-                  <button onClick={() => setIsCompanyModalOpen(true)} className="hover:text-blue-400 transition-colors text-left">
-                    Hire Trained Interns
+                  <button 
+                    onClick={() => setIsCompanyModalOpen(true)} 
+                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Hire Trained Interns</span>
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setIsCompanyModalOpen(true)} className="hover:text-blue-400 transition-colors text-left">
-                    Employer Credentials
+                  <button 
+                    onClick={() => setIsCompanyModalOpen(true)} 
+                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Employer Credentials</span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-slate-800 text-blue-400 rounded border border-blue-500/30">
+                      Partner Portal
+                    </span>
                   </button>
                 </li>
               </ul>

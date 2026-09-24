@@ -25,6 +25,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { CommunicationModule } from './modules/communication/communication.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
+import { StatsModule } from './modules/stats/stats.module';
 
 // Common
 import { DatabaseModule } from './common/database/database.module';
@@ -105,6 +106,7 @@ import { CorrelationIdMiddleware } from './core/middleware/correlation-id.middle
     AnalyticsModule,
     CommunicationModule,
     ApplicationsModule,
+    StatsModule,
   ],
   providers: [
     {

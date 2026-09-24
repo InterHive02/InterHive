@@ -9,6 +9,10 @@
       "destination": "https://interhive-backend.onrender.com/api/v1/:path*"
     },
     {
+      "source": "/api/stats",
+      "destination": "https://interhive-backend.onrender.com/api/stats"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

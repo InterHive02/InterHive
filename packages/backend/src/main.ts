@@ -10,6 +10,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import { StatsService } from './modules/stats/stats.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -124,6 +125,31 @@ async function bootstrap() {
 
   app.getHttpAdapter().get('/', healthHandler);
   app.getHttpAdapter().get('/health', healthHandler);
+
+  // Unversioned public stats endpoints (aliases for /api/stats and /stats)
+  try {
+    const statsService = app.get(StatsService);
+    const statsHandler = async (req: any, res: any) => {
+      try {
+        const data = await statsService.getPublicStats();
+        res.status(200).json({ success: true, data });
+      } catch (err: any) {
+        res.status(200).json({
+          success: true,
+          data: {
+            companyCount: 0,
+            activeInternshipsCount: 0,
+            studentsPlacedCount: 0,
+            averageRating: null,
+          },
+        });
+      }
+    };
+    app.getHttpAdapter().get('/api/stats', statsHandler);
+    app.getHttpAdapter().get('/stats', statsHandler);
+  } catch (statsInitErr) {
+    logger.warn('Stats endpoint fallback handler registration skipped');
+  }
 
   // Start server
   const port = configService.get('PORT', 3000);
