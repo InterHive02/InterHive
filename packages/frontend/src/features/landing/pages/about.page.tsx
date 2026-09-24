@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Cpu,
   Layers,
-  Award
+  Award,
+  Linkedin,
+  ExternalLink,
 } from 'lucide-react';
 import { PublicNavbar } from '../components/public-navbar';
 import { PublicFooter } from '../components/public-footer';
@@ -21,6 +23,7 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 export const AboutPage: React.FC = () => {
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [hoveredFounder, setHoveredFounder] = useState<'ankit-yadav' | 'ankit-soni' | null>(null);
 
   const steps = [
     {
@@ -258,37 +261,259 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* TEAM & FOUNDATION (HONEST PLACEHOLDER STRUCTURE) */}
+      {/* MEET THE FOUNDERS SECTION */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[2.5rem] p-8 sm:p-14 text-white relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 max-w-3xl">
-            <span className="text-xs font-extrabold text-blue-400 tracking-widest uppercase block mb-2">
-              OUR FOUNDATION
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
-              Built with High Standards by Engineers & Mentors
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed mb-8">
-              We are a dedicated group of software engineers, technical hiring managers, and academic mentors who experienced the broken talent pipeline firsthand. 
-              We are building InterHive with uncompromising product quality to give ambitious students a direct, credible bridge into tech careers.
-            </p>
+        
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>Meet the Founders</span>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-slate-800 text-left">
-              <div>
-                <span className="block font-black text-2xl text-blue-400">100%</span>
-                <span className="text-xs text-slate-400 font-semibold">Practical, project-based evaluation criteria</span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
+            Built by Students, <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+              for Students
+            </span>
+          </h2>
+
+          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+            We're two BTech IT students who built InterHive because we struggled to find real internships ourselves — and wanted to fix that for others.
+          </p>
+        </div>
+
+        {/* Interactive Founder Photo Card (Desktop & Tablet) */}
+        <div className="relative rounded-[2.5rem] overflow-hidden border border-slate-200/80 shadow-2xl bg-slate-950 max-w-4xl mx-auto group">
+          
+          {/* Main Founders Photo */}
+          <img
+            src="/founders.jpg"
+            alt="Ankit Yadav and Ankit Soni - Founders of InterHive"
+            className="w-full h-auto object-cover max-h-[620px] block transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+          />
+
+          {/* Desktop Visual Interaction Hint */}
+          <div
+            className={`hidden md:flex absolute top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300 ${
+              hoveredFounder ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
+            }`}
+          >
+            <div className="px-4 py-2 rounded-full bg-slate-900/80 backdrop-blur-md border border-white/20 text-white text-xs font-bold flex items-center gap-2 shadow-xl animate-pulse">
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>Hover over either founder to view bio</span>
+            </div>
+          </div>
+
+          {/* Dynamic Lighting Vignette on Hover */}
+          <div
+            className={`hidden md:block absolute inset-0 pointer-events-none transition-opacity duration-300 z-10 ${
+              hoveredFounder === 'ankit-yadav'
+                ? 'opacity-100 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/30'
+                : hoveredFounder === 'ankit-soni'
+                ? 'opacity-100 bg-gradient-to-l from-slate-950/70 via-transparent to-slate-950/30'
+                : 'opacity-0'
+            }`}
+          />
+
+          {/* Invisible Desktop Hover Trigger Zones */}
+          <div className="hidden md:block absolute inset-0 z-20">
+            {/* Left Zone: Ankit Yadav */}
+            <div
+              onMouseEnter={() => setHoveredFounder('ankit-yadav')}
+              onMouseLeave={() => setHoveredFounder(null)}
+              className="absolute inset-y-0 left-0 w-1/2 cursor-pointer"
+              title="Hover to meet Ankit Yadav"
+            />
+            {/* Right Zone: Ankit Soni */}
+            <div
+              onMouseEnter={() => setHoveredFounder('ankit-soni')}
+              onMouseLeave={() => setHoveredFounder(null)}
+              className="absolute inset-y-0 right-0 w-1/2 cursor-pointer"
+              title="Hover to meet Ankit Soni"
+            />
+          </div>
+
+          {/* Ankit Yadav Overlay Card (Desktop: Bottom-Left) */}
+          <div
+            onMouseEnter={() => setHoveredFounder('ankit-yadav')}
+            onMouseLeave={() => setHoveredFounder(null)}
+            className={`hidden md:block absolute bottom-6 left-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
+              hoveredFounder === 'ankit-yadav'
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4 pointer-events-none'
+            }`}
+          >
+            <div className="p-6 rounded-3xl bg-slate-950/90 backdrop-blur-xl border border-white/20 text-white shadow-2xl space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-black text-white">Ankit Yadav</h3>
+                  <span className="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                    Co-Founder, Product & Engineering
+                  </span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ankit Yadav LinkedIn Profile"
+                  className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md hover:scale-105 shrink-0 flex items-center justify-center cursor-pointer"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
               </div>
-              <div>
-                <span className="block font-black text-2xl text-indigo-400">Direct</span>
-                <span className="text-xs text-slate-400 font-semibold">Application flow through vetted employer channels</span>
-              </div>
-              <div>
-                <span className="block font-black text-2xl text-purple-400">Verified</span>
-                <span className="text-xs text-slate-400 font-semibold">Industry-aligned skill readiness benchmarks</span>
+              <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                BTech IT student, building InterHive's platform and product experience from the ground up.
+              </p>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <a
+                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  <span>Connect on LinkedIn</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <span className="text-[10px] text-slate-400 font-semibold">InterHive Core</span>
               </div>
             </div>
           </div>
+
+          {/* Ankit Soni Overlay Card (Desktop: Bottom-Right) */}
+          <div
+            onMouseEnter={() => setHoveredFounder('ankit-soni')}
+            onMouseLeave={() => setHoveredFounder(null)}
+            className={`hidden md:block absolute bottom-6 right-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
+              hoveredFounder === 'ankit-soni'
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4 pointer-events-none'
+            }`}
+          >
+            <div className="p-6 rounded-3xl bg-slate-950/90 backdrop-blur-xl border border-white/20 text-white shadow-2xl space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-black text-white">Ankit Soni</h3>
+                  <span className="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                    Co-Founder, Growth & Partnerships
+                  </span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/ankitsoni1203/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ankit Soni LinkedIn Profile"
+                  className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md hover:scale-105 shrink-0 flex items-center justify-center cursor-pointer"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                BTech IT student, focused on building InterHive's company partnerships and community.
+              </p>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <a
+                  href="https://www.linkedin.com/in/ankitsoni1203/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  <span>Connect on LinkedIn</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <span className="text-[10px] text-slate-400 font-semibold">InterHive Core</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+
+        {/* Mobile Cards (Visible by Default Without Requiring Hover) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 md:hidden max-w-4xl mx-auto">
+          
+          {/* Ankit Yadav Mobile Card */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Ankit Yadav</h3>
+                  <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                    Co-Founder, Product & Engineering
+                  </span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ankit Yadav LinkedIn"
+                  className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-xs"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed mt-3">
+                BTech IT student, building InterHive's platform and product experience from the ground up.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-slate-100 mt-4">
+              <a
+                href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600"
+              >
+                <span>View LinkedIn Profile</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Ankit Soni Mobile Card */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Ankit Soni</h3>
+                  <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Co-Founder, Growth & Partnerships
+                  </span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/ankitsoni1203/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ankit Soni LinkedIn"
+                  className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-xs"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed mt-3">
+                BTech IT student, focused on building InterHive's company partnerships and community.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-slate-100 mt-4">
+              <a
+                href="https://www.linkedin.com/in/ankitsoni1203/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600"
+              >
+                <span>View LinkedIn Profile</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Closing Line */}
+        <div className="text-center mt-12 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm font-bold text-slate-500 italic">
+            "Two students, one mission: helping students like us build real skills and land the internships and placements they deserve."
+          </p>
+        </div>
+
       </section>
 
       {/* BOTTOM CTA BANNER */}
