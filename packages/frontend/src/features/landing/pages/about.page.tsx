@@ -308,9 +308,9 @@ export const AboutPage: React.FC = () => {
           {/* Dynamic Lighting Vignette on Hover */}
           <div
             className={`hidden md:block absolute inset-0 pointer-events-none transition-opacity duration-300 z-10 ${
-              hoveredFounder === 'ankit-yadav'
+              hoveredFounder === 'ankit-soni'
                 ? 'opacity-100 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/30'
-                : hoveredFounder === 'ankit-soni'
+                : hoveredFounder === 'ankit-yadav'
                 ? 'opacity-100 bg-gradient-to-l from-slate-950/70 via-transparent to-slate-950/30'
                 : 'opacity-0'
             }`}
@@ -318,73 +318,27 @@ export const AboutPage: React.FC = () => {
 
           {/* Invisible Desktop Hover Trigger Zones */}
           <div className="hidden md:block absolute inset-0 z-20">
-            {/* Left Zone: Ankit Yadav */}
-            <div
-              onMouseEnter={() => setHoveredFounder('ankit-yadav')}
-              onMouseLeave={() => setHoveredFounder(null)}
-              className="absolute inset-y-0 left-0 w-1/2 cursor-pointer"
-              title="Hover to meet Ankit Yadav"
-            />
-            {/* Right Zone: Ankit Soni */}
+            {/* Left Zone: Ankit Soni */}
             <div
               onMouseEnter={() => setHoveredFounder('ankit-soni')}
               onMouseLeave={() => setHoveredFounder(null)}
-              className="absolute inset-y-0 right-0 w-1/2 cursor-pointer"
+              className="absolute inset-y-0 left-0 w-1/2 cursor-pointer"
               title="Hover to meet Ankit Soni"
+            />
+            {/* Right Zone: Ankit Yadav */}
+            <div
+              onMouseEnter={() => setHoveredFounder('ankit-yadav')}
+              onMouseLeave={() => setHoveredFounder(null)}
+              className="absolute inset-y-0 right-0 w-1/2 cursor-pointer"
+              title="Hover to meet Ankit Yadav"
             />
           </div>
 
-          {/* Ankit Yadav Overlay Card (Desktop: Bottom-Left) */}
-          <div
-            onMouseEnter={() => setHoveredFounder('ankit-yadav')}
-            onMouseLeave={() => setHoveredFounder(null)}
-            className={`hidden md:block absolute bottom-6 left-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
-              hoveredFounder === 'ankit-yadav'
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
-          >
-            <div className="p-6 rounded-3xl bg-slate-950/90 backdrop-blur-xl border border-white/20 text-white shadow-2xl space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-xl font-black text-white">Ankit Yadav</h3>
-                  <span className="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                    Co-Founder, Product & Engineering
-                  </span>
-                </div>
-                <a
-                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Ankit Yadav LinkedIn Profile"
-                  className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md hover:scale-105 shrink-0 flex items-center justify-center cursor-pointer"
-                >
-                  <Linkedin className="w-4 h-4" />
-                </a>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                BTech IT student, building InterHive's platform and product experience from the ground up.
-              </p>
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                <a
-                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
-                >
-                  <span>Connect on LinkedIn</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-                <span className="text-[10px] text-slate-400 font-semibold">InterHive Core</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Ankit Soni Overlay Card (Desktop: Bottom-Right) */}
+          {/* Ankit Soni Overlay Card (Desktop: Bottom-Left) */}
           <div
             onMouseEnter={() => setHoveredFounder('ankit-soni')}
             onMouseLeave={() => setHoveredFounder(null)}
-            className={`hidden md:block absolute bottom-6 right-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
+            className={`hidden md:block absolute bottom-6 left-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
               hoveredFounder === 'ankit-soni'
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 translate-y-4 pointer-events-none'
@@ -426,18 +380,21 @@ export const AboutPage: React.FC = () => {
             </div>
           </div>
 
-        </div>
-
-        {/* Mobile Cards (Visible by Default Without Requiring Hover) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 md:hidden max-w-4xl mx-auto">
-          
-          {/* Ankit Yadav Mobile Card */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-start justify-between gap-3 mb-2">
+          {/* Ankit Yadav Overlay Card (Desktop: Bottom-Right) */}
+          <div
+            onMouseEnter={() => setHoveredFounder('ankit-yadav')}
+            onMouseLeave={() => setHoveredFounder(null)}
+            className={`hidden md:block absolute bottom-6 right-6 max-w-sm z-30 transition-all duration-300 pointer-events-auto ${
+              hoveredFounder === 'ankit-yadav'
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4 pointer-events-none'
+            }`}
+          >
+            <div className="p-6 rounded-3xl bg-slate-950/90 backdrop-blur-xl border border-white/20 text-white shadow-2xl space-y-3">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Ankit Yadav</h3>
-                  <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                  <h3 className="text-xl font-black text-white">Ankit Yadav</h3>
+                  <span className="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-400/30">
                     Co-Founder, Product & Engineering
                   </span>
                 </div>
@@ -445,29 +402,35 @@ export const AboutPage: React.FC = () => {
                   href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Ankit Yadav LinkedIn"
-                  className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-xs"
+                  aria-label="Ankit Yadav LinkedIn Profile"
+                  className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md hover:scale-105 shrink-0 flex items-center justify-center cursor-pointer"
                 >
-                  <Linkedin className="w-5 h-5" />
+                  <Linkedin className="w-4 h-4" />
                 </a>
               </div>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed mt-3">
+              <p className="text-xs text-slate-300 leading-relaxed font-medium">
                 BTech IT student, building InterHive's platform and product experience from the ground up.
               </p>
-            </div>
-            <div className="pt-3 border-t border-slate-100 mt-4">
-              <a
-                href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600"
-              >
-                <span>View LinkedIn Profile</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <a
+                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  <span>Connect on LinkedIn</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <span className="text-[10px] text-slate-400 font-semibold">InterHive Core</span>
+              </div>
             </div>
           </div>
 
+        </div>
+
+        {/* Mobile Cards (Visible by Default Without Requiring Hover) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 md:hidden max-w-4xl mx-auto">
+          
           {/* Ankit Soni Mobile Card */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
             <div>
@@ -498,6 +461,43 @@ export const AboutPage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600"
+              >
+                <span>View LinkedIn Profile</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Ankit Yadav Mobile Card */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Ankit Yadav</h3>
+                  <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                    Co-Founder, Product & Engineering
+                  </span>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ankit Yadav LinkedIn"
+                  className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-xs"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed mt-3">
+                BTech IT student, building InterHive's platform and product experience from the ground up.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-slate-100 mt-4">
+              <a
+                href="https://www.linkedin.com/in/ankit-yadav-4b86b7294/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600"
               >
                 <span>View LinkedIn Profile</span>
                 <ExternalLink className="w-3.5 h-3.5" />
