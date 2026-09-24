@@ -18,14 +18,16 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           
           {/* Brand Column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white font-black flex items-center justify-center text-lg">
-                H
-              </div>
+            <Link to="/" className="flex items-center gap-3 group inline-flex">
+              <img
+                src="/logo.png"
+                alt="InterHive Logo"
+                className="h-10 w-10 object-contain shrink-0 group-hover:scale-105 transition-transform"
+              />
               <span className="text-xl font-black tracking-tight text-white">
                 Inter<span className="text-blue-500">Hive</span>
               </span>
-            </div>
+            </Link>
             <p className="text-xs text-slate-400 font-medium leading-relaxed">
               From Intern to Industry. Connecting talent with real-world opportunities worldwide.
             </p>

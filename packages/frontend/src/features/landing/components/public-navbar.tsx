@@ -31,13 +31,11 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
         {/* Logo */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-                <span className="font-black text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                  H
-                </span>
-              </div>
-            </div>
+            <img
+              src="/logo.png"
+              alt="InterHive Logo"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain shrink-0 group-hover:scale-105 transition-transform"
+            />
             <div className="flex flex-col">
               <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
                 Inter<span className="text-blue-600">Hive</span>
