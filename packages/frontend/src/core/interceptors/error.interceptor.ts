@@ -13,9 +13,10 @@ export interface ErrorResponse {
 
 export const handleApiError = (error: AxiosError<ErrorResponse>): string => {
   if (!error.response) {
-    // Network error
-    toast.error('Network error. Please check your connection.');
-    return 'Network error. Please check your connection.';
+    // Network error or server cold start
+    const msg = 'Server is waking up or network is slow. Please try again in a moment.';
+    toast.error(msg);
+    return msg;
   }
 
   const { status, data } = error.response;

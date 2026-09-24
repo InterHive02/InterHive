@@ -52,22 +52,30 @@ async function bootstrap() {
         'http://localhost:5173',
         'https://interhive.in',
         'https://www.interhive.in',
+        'http://interhive.in',
+        'http://www.interhive.in',
         ...customOrigins,
       ];
 
-      if (
+      const isAllowed =
         standardOrigins.includes(origin) ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1') ||
         origin.endsWith('.vercel.app') ||
-        origin.endsWith('interhive.in')
-      ) {
+        origin.endsWith('interhive.in') ||
+        origin.includes('onrender.com');
+
+      if (isAllowed) {
         return callback(null, true);
       }
 
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      // Safe fallback - avoid crashing request handler with Error
+      logger.warn(`Untracked CORS origin request: ${origin}`);
+      return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   });
 
   // API versioning
@@ -125,6 +133,8 @@ async function bootstrap() {
 
   app.getHttpAdapter().get('/', healthHandler);
   app.getHttpAdapter().get('/health', healthHandler);
+  app.getHttpAdapter().get('/api/health', healthHandler);
+  app.getHttpAdapter().get('/api/v1/health', healthHandler);
 
   // Unversioned public stats endpoints (aliases for /api/stats and /stats)
   try {

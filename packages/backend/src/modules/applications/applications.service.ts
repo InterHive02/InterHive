@@ -147,8 +147,23 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
+    const prevStatus = application.status;
     application.status = updateStatusDto.status as ApplicationWorkflowStatus;
     await application.save();
+
+    // If candidate was newly shortlisted, send notification email
+    if (updateStatusDto.status === 'shortlisted' && prevStatus !== 'shortlisted') {
+      try {
+        await this.mailService.sendShortlistedEmail({
+          to: application.email,
+          fullName: application.fullName,
+          position: application.degree ? `${application.degree} Intern` : undefined,
+        });
+        this.logger.log(`📧 Shortlisted notification email dispatched to ${application.email}`);
+      } catch (err: any) {
+        this.logger.error(`Failed to send shortlisted email to ${application.email}: ${err.message}`);
+      }
+    }
 
     return {
       success: true,
@@ -286,9 +301,10 @@ export class ApplicationsService {
     await application.save();
 
     // Send official email with credentials
-    const loginUrl = process.env.APP_URL
-      ? `${process.env.APP_URL}/login`
-      : 'http://localhost:5173/login';
+    const appUrl = (process.env.APP_URL && !process.env.APP_URL.includes('localhost'))
+      ? process.env.APP_URL
+      : (process.env.NODE_ENV === 'production' ? 'https://interhive.in' : 'http://localhost:5173');
+    const loginUrl = `${appUrl.replace(/\/$/, '')}/login`;
 
     try {
       await this.mailService.sendCredentialDeliveryEmail({

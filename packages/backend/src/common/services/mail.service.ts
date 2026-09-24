@@ -18,26 +18,32 @@ export class MailService {
   }
 
   private initializeTransporter() {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get('mail.host'),
-      port: this.configService.get('mail.port'),
-      secure: this.configService.get('mail.secure'),
-      auth: {
-        user: this.configService.get('mail.auth.user'),
-        pass: this.configService.get('mail.auth.pass'),
-      },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      rateDelta: 1000,
-      rateLimit: 5,
-    });
+    const user = this.configService.get('mail.auth.user') || process.env.SMTP_USER || 'interhive.info@gmail.com';
+    const pass = this.configService.get('mail.auth.pass') || process.env.SMTP_PASS || 'jyrt htfk ovif pzkw';
+    const host = this.configService.get('mail.host') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const port = Number(this.configService.get('mail.port')) || Number(process.env.SMTP_PORT) || 465;
+
+    const isGmail = host.includes('gmail') || user.includes('@gmail.com');
+
+    const transportOptions: any = isGmail
+      ? {
+          service: 'gmail',
+          auth: { user, pass },
+        }
+      : {
+          host,
+          port,
+          secure: port === 465,
+          auth: { user, pass },
+        };
+
+    this.transporter = nodemailer.createTransport(transportOptions);
 
     this.transporter.verify((error) => {
       if (error) {
-        this.logger.warn(`Mail transporter warning: ${error.message} (Email notifications disabled until valid SMTP credentials are set)`);
+        this.logger.warn(`Mail transporter warning: ${error.message} (Check SMTP credentials)`);
       } else {
-        this.logger.log('Mail transporter ready');
+        this.logger.log('📧 Mail transporter verified and ready to send emails via Gmail SMTP');
       }
     });
   }
@@ -571,6 +577,50 @@ export class MailService {
     return this.sendEmail(
       data.to,
       `InterHive Internship Application — Update on Your Application`,
+      html,
+    );
+  }
+
+  async sendShortlistedEmail(data: { to: string; fullName: string; position?: string }) {
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #4f46e5; margin: 0; font-size: 26px; font-weight: 800;">Congratulations! You're Shortlisted 🎉</h1>
+          <p style="color: #64748b; font-size: 14px; margin-top: 6px;">InterHive Internship Program</p>
+        </div>
+
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
+          Dear <strong>${data.fullName}</strong>,
+        </p>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.6;">
+          Great news! Following a thorough evaluation of your application, our HR review team has <strong>shortlisted</strong> you for an internship opportunity${data.position ? ` as <strong>${data.position}</strong>` : ''}.
+        </p>
+
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; border-radius: 14px; padding: 20px; margin: 24px 0;">
+          <h3 style="margin-top: 0; color: #166534; font-size: 15px;">🚀 What Happens Next?</h3>
+          <ul style="margin: 0; padding-left: 18px; color: #15803d; font-size: 14px; line-height: 1.8;">
+            <li>Our HR team is currently coordinating with the technical interview panel.</li>
+            <li>You will receive a separate email shortly with your scheduled interview date, time, and session link.</li>
+            <li>Make sure to keep your project portfolio and resume handy for discussion.</li>
+          </ul>
+        </div>
+
+        <p style="font-size: 14px; color: #475569; line-height: 1.6;">
+          Thank you for your patience and dedication. We are excited about the prospect of having you join InterHive!
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+          InterHive Inc. • Industry Readiness &amp; Talent Connect Platform<br />
+          If you have any questions, reach out to <a href="mailto:interhive.info@gmail.com" style="color: #6366f1;">interhive.info@gmail.com</a>.
+        </p>
+      </div>
+    `;
+
+    return this.sendEmail(
+      data.to,
+      `🎉 Update on Your Application: You've Been Shortlisted! - InterHive`,
       html,
     );
   }

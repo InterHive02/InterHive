@@ -27,7 +27,7 @@ class ApiClient {
 
     this.client = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseUrl,
-      timeout: 30000,
+      timeout: 60000, // 60 seconds to allow for Render free-tier cold starts
       withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
@@ -35,6 +35,7 @@ class ApiClient {
     });
 
     this.setupInterceptors();
+    this.warmUp();
   }
 
   public static getInstance(): ApiClient {
@@ -42,6 +43,16 @@ class ApiClient {
       ApiClient.instance = new ApiClient();
     }
     return ApiClient.instance;
+  }
+
+  // Pre-warm backend on page load so it is awake by the time user takes an action
+  public warmUp(): void {
+    if (typeof window !== 'undefined') {
+      const apiBase = import.meta.env.PROD
+        ? 'https://interhive-backend.onrender.com/api/v1'
+        : '/api/v1';
+      fetch(`${apiBase}/health`, { method: 'GET', mode: 'cors' }).catch(() => {});
+    }
   }
 
   private setupInterceptors(): void {
@@ -69,8 +80,23 @@ class ApiClient {
                                originalRequest?.url?.includes('/auth/login') ||
                                originalRequest?.url?.includes('/auth/register');
 
+        // Automatic retry for cloud cold-starts or network blips (Render free-tier spin-up)
+        const isNetworkOrTimeout = !error.response && (
+          error.code === 'ECONNABORTED' ||
+          error.message?.toLowerCase().includes('network') ||
+          error.message?.toLowerCase().includes('timeout') ||
+          !!error.request
+        );
+
+        if (isNetworkOrTimeout && originalRequest && !originalRequest._retryNetwork) {
+          originalRequest._retryNetwork = true;
+          console.warn('Backend waking up or network blip detected, retrying request in 2.5s...', originalRequest.url);
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+          return this.client(originalRequest);
+        }
+
         // Handle 401 - Unauthorized
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
           if (originalRequest.url?.includes('/auth/refresh') || isAuthEndpoint) {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
@@ -114,7 +140,8 @@ class ApiClient {
             toast.error(message);
           }
         } else if (error.request) {
-          toast.error('Network error. Please check your connection.');
+          // If already retried and still no response from server
+          toast.error('Server is waking up or network is slow. Please try again in a moment.');
         } else {
           toast.error('An unexpected error occurred');
         }

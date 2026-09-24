@@ -24,15 +24,15 @@ export interface MailConfig {
 
 export default registerAs('mail', (): MailConfig => ({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_SECURE === 'true',
+  port: parseInt(process.env.SMTP_PORT || '465', 10),
+  secure: process.env.SMTP_SECURE === 'true' || true,
   auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
+    user: process.env.SMTP_USER || 'interhive.info@gmail.com',
+    pass: process.env.SMTP_PASS || 'jyrt htfk ovif pzkw',
   },
   from: {
     name: process.env.MAIL_FROM_NAME || 'InterHive Team',
-    email: process.env.MAIL_FROM_EMAIL || 'noreply@interhive.in',
+    email: process.env.MAIL_FROM_EMAIL || 'interhive.info@gmail.com',
   },
   templates: {
     welcome: process.env.MAIL_TEMPLATE_WELCOME || 'welcome',
