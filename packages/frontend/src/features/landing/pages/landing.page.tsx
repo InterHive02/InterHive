@@ -29,6 +29,9 @@ import { companyApi } from '../../../api/endpoints/company.api';
 import { Logo } from '../../../shared/components/common/logo';
 import { getLandingStats, LandingStats } from '../../../shared/utils/landing-stats';
 import { InternshipApplicationModal } from '../components/internship-application-modal';
+import { PublicNavbar } from '../components/public-navbar';
+import { PublicFooter } from '../components/public-footer';
+import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,7 +39,6 @@ export const LandingPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [liveRequirements, setLiveRequirements] = useState<any[]>([]);
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [selectedProgramCategory, setSelectedProgramCategory] = useState('Software Engineering');
 
   // Dynamic Landing Page Metrics from live backend
@@ -99,43 +101,6 @@ export const LandingPage: React.FC = () => {
 
   // Company Partner Modal State
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
-  const [companyForm, setCompanyForm] = useState({
-    companyName: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    techStack: '',
-    internCount: '1-5',
-    message: '',
-  });
-  const [companySubmitted, setCompanySubmitted] = useState(false);
-  const [isSubmittingCompany, setIsSubmittingCompany] = useState(false);
-
-  const handleCompanySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmittingCompany(true);
-    try {
-      await companyApi.submitInquiry(companyForm);
-    } catch (err) {
-      // Fallback handling
-    } finally {
-      setIsSubmittingCompany(false);
-      setCompanySubmitted(true);
-      setTimeout(() => {
-        setCompanySubmitted(false);
-        setIsCompanyModalOpen(false);
-        setCompanyForm({
-          companyName: '',
-          contactPerson: '',
-          email: '',
-          phone: '',
-          techStack: '',
-          internCount: '1-5',
-          message: '',
-        });
-      }, 3500);
-    }
-  };
 
   // Fetch live company requirements
   useEffect(() => {
@@ -260,162 +225,11 @@ export const LandingPage: React.FC = () => {
       `}</style>
 
       {/* Header Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-200/60 shadow-xs transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform">
-                <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-                  <span className="font-black text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                    H
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
-                  Inter<span className="text-blue-600">Hive</span>
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 tracking-wide mt-0.5">
-                  From Intern to Industry
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Nav Links */}
-          <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-7 font-bold text-xs sm:text-sm text-slate-600">
-            <a href="#" className="text-blue-600 relative py-1 border-b-2 border-blue-600">
-              Home
-            </a>
-            <a href="#how-it-works" className="hover:text-blue-600 transition-colors">
-              About
-            </a>
-            <a href="#explore-opportunities" className="hover:text-blue-600 transition-colors">
-              Programs
-            </a>
-            <button
-              onClick={() => setIsInternshipModalOpen(true)}
-              className="hover:text-blue-600 transition-colors cursor-pointer font-bold"
-            >
-              For Interns
-            </button>
-            <button
-              onClick={() => setIsCompanyModalOpen(true)}
-              className="hover:text-blue-600 transition-colors cursor-pointer font-bold"
-            >
-              For Companies
-            </button>
-            <a href="#features" className="hover:text-blue-600 transition-colors">
-              Contact
-            </a>
-          </nav>
-
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center relative w-64">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search programs, skills..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-100/90 border border-slate-200/80 rounded-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white transition-all shadow-inner"
-            />
-          </div>
-
-          {/* Actions & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2">
-            <Link
-              to="/login"
-              className="px-4 sm:px-5 py-2 min-h-[44px] rounded-full font-extrabold text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-md shadow-slate-900/10 hover:shadow-slate-900/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-            >
-              <span>Login</span>
-              <span className="text-[10px] text-slate-400">→</span>
-            </Link>
-
-            {/* Mobile Hamburger Button */}
-            <button
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              aria-label="Toggle mobile menu"
-              className="md:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-            >
-              {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {isMobileNavOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-2xl border-b border-slate-200 shadow-2xl px-5 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200">
-            {/* Mobile Search */}
-            <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Search programs, skills..."
-                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-slate-100/90 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white transition-all shadow-inner"
-              />
-            </div>
-
-            {/* Mobile Nav Links */}
-            <div className="flex flex-col space-y-1 font-bold text-sm text-slate-700">
-              <a
-                href="#"
-                onClick={() => setIsMobileNavOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-between"
-              >
-                <span>Home</span>
-                <span className="text-xs text-blue-600 font-extrabold">Active</span>
-              </a>
-              <a
-                href="#how-it-works"
-                onClick={() => setIsMobileNavOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                About
-              </a>
-              <a
-                href="#explore-opportunities"
-                onClick={() => setIsMobileNavOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                Programs
-              </a>
-              <button
-                onClick={() => {
-                  setIsMobileNavOpen(false);
-                  setIsInternshipModalOpen(true);
-                }}
-                className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
-              >
-                <span>For Interns</span>
-                <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Apply</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsMobileNavOpen(false);
-                  setIsCompanyModalOpen(true);
-                }}
-                className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
-              >
-                <span>For Companies</span>
-                <span className="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Hire</span>
-              </button>
-              <a
-                href="#features"
-                onClick={() => setIsMobileNavOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
-        )}
-      </nav>
+      <PublicNavbar
+        activePage="home"
+        onOpenInternshipModal={() => setIsInternshipModalOpen(true)}
+        onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
+      />
 
       {/* 100% FULL-BLEED HERO SECTION WITH FULL PAGE COVERAGE */}
       <section className="relative pt-6 pb-28 overflow-hidden bg-gradient-to-br from-[#EBF3FF] via-[#F4F8FC] to-[#F3E8FF]">
@@ -1053,250 +867,16 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* FOOTER */}
-      <footer className="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-            
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white font-black flex items-center justify-center text-lg">
-                  H
-                </div>
-                <span className="text-xl font-black tracking-tight text-white">
-                  Inter<span className="text-blue-500">Hive</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                From Intern to Industry. Connecting talent with real-world opportunities worldwide.
-              </p>
-            </div>
-
-            <div>
-              <h5 className="text-sm font-black text-white mb-4">For Students</h5>
-              <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
-                <li>
-                  <a href="#explore-opportunities" className="text-slate-300 hover:text-blue-400 hover:underline transition-all block">
-                    Explore Internships
-                  </a>
-                </li>
-                <li>
-                  <a href="#how-it-works" className="text-slate-300 hover:text-blue-400 hover:underline transition-all block">
-                    Readiness Assessment
-                  </a>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => setIsInternshipModalOpen(true)} 
-                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer block"
-                  >
-                    Internship Application
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="text-sm font-black text-white mb-4">For Companies</h5>
-              <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
-                <li>
-                  <button 
-                    onClick={() => setIsCompanyModalOpen(true)} 
-                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>Hire Trained Interns</span>
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => setIsCompanyModalOpen(true)} 
-                    className="text-slate-300 hover:text-blue-400 hover:underline transition-all text-left cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>Employer Credentials</span>
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-slate-800 text-blue-400 rounded border border-blue-500/30">
-                      Partner Portal
-                    </span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="text-sm font-black text-white mb-4">Contact & Support</h5>
-              <p className="text-xs text-slate-400 font-medium mb-3">Have questions? Reach out to our team:</p>
-              <a href="mailto:interhive.info@gmail.com" className="text-xs font-extrabold text-blue-400 hover:text-blue-300 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>interhive.info@gmail.com</span>
-              </a>
-            </div>
-
-          </div>
-
-          <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
-            <p>&copy; {new Date().getFullYear()} InterHive Inc. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-white transition-colors">Security</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter
+        onOpenInternshipModal={() => setIsInternshipModalOpen(true)}
+        onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
+      />
 
       {/* Company Connection Modal */}
-      {isCompanyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-8 shadow-2xl border border-slate-100 relative max-h-[90dvh] overflow-y-auto">
-            <button
-              onClick={() => setIsCompanyModalOpen(false)}
-              aria-label="Close modal"
-              className="absolute top-4 right-4 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
-                <Building2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg sm:text-xl font-black text-slate-900">Partner With InterHive</h3>
-                <p className="text-xs text-slate-500 font-semibold">Submit details to get company portal login credentials</p>
-              </div>
-            </div>
-
-            {companySubmitted ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h4 className="text-lg font-black text-slate-900">Inquiry Submitted!</h4>
-                <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed font-semibold">
-                  Thank you! Your company hiring inquiry has been sent to the <strong>InterHive HR team</strong>. We will review your requirements and reach out shortly.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleCompanySubmit} className="space-y-4 text-left">
-                <div>
-                  <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                    Company Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={companyForm.companyName}
-                    onChange={e => setCompanyForm({ ...companyForm, companyName: e.target.value })}
-                    placeholder="e.g. Acme Technologies Inc."
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                      Contact Person *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={companyForm.contactPerson}
-                      onChange={e => setCompanyForm({ ...companyForm, contactPerson: e.target.value })}
-                      placeholder="John Doe"
-                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                      Work Email *
-                    </label>
-                    <input
-                      type="email"
-                      inputMode="email"
-                      required
-                      value={companyForm.email}
-                      onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })}
-                      placeholder="john@company.com"
-                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      inputMode="tel"
-                      required
-                      value={companyForm.phone}
-                      onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
-                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                      Interns Needed
-                    </label>
-                    <select
-                      value={companyForm.internCount}
-                      onChange={e => setCompanyForm({ ...companyForm, internCount: e.target.value })}
-                      className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                    >
-                      <option value="1-5">1-5 Interns</option>
-                      <option value="5-10">5-10 Interns</option>
-                      <option value="10-25">10-25 Interns</option>
-                      <option value="25+">25+ Interns</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                    Hiring Requirement / Tech Stack
-                  </label>
-                  <input
-                    type="text"
-                    value={companyForm.techStack}
-                    onChange={e => setCompanyForm({ ...companyForm, techStack: e.target.value })}
-                    placeholder="e.g. Full Stack (React, Node), AI/ML, UI/UX Design"
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-slate-700 uppercase mb-1">
-                    Message / Additional Notes
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={companyForm.message}
-                    onChange={e => setCompanyForm({ ...companyForm, message: e.target.value })}
-                    placeholder="Tell us about your project or talent timeline..."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/40 focus:outline-none resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmittingCompany}
-                  className="w-full py-3.5 min-h-[44px] rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmittingCompany ? (
-                    <span>Submitting Inquiry...</span>
-                  ) : (
-                    <>
-                      <span>Submit Partnership Inquiry</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      <CompanyInquiryModal
+        isOpen={isCompanyModalOpen}
+        onClose={() => setIsCompanyModalOpen(false)}
+      />
 
       {/* Controlled-Access Internship Application Modal */}
       <InternshipApplicationModal

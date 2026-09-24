@@ -17,8 +17,11 @@ import { ResetPasswordPage } from './features/auth/pages/reset-password.page';
 import { VerifyEmailPage } from './features/auth/pages/verify-email.page';
 import { SsoCallbackPage } from './features/auth/pages/sso-callback.page';
 
-// Pages - Landing
+// Pages - Landing & Public
 import { LandingPage } from './features/landing/pages/landing.page';
+import { AboutPage } from './features/landing/pages/about.page';
+import { ProgramsPage } from './features/landing/pages/programs.page';
+import { ContactPage } from './features/landing/pages/contact.page';
 
 // Pages - Dashboard
 import { DashboardPage } from './features/dashboard/pages/dashboard.page';
@@ -87,8 +90,11 @@ export const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      {/* Public Landing Page */}
+      {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/programs" element={<ProgramsPage />} />
+      <Route path="/contact" element={<ContactPage />} />
 
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>
