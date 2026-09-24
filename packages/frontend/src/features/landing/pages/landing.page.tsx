@@ -23,7 +23,9 @@ import {
   ExternalLink,
   Award,
   Layers,
-  BookOpen
+  BookOpen,
+  ChevronDown,
+  UserPlus
 } from 'lucide-react';
 import { companyApi } from '../../../api/endpoints/company.api';
 import { Logo } from '../../../shared/components/common/logo';
@@ -40,6 +42,97 @@ export const LandingPage: React.FC = () => {
   const [liveRequirements, setLiveRequirements] = useState<any[]>([]);
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
   const [selectedProgramCategory, setSelectedProgramCategory] = useState('Software Engineering');
+
+  // FAQ Accordion State
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  // Newsletter State
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterLoading(true);
+    try {
+      companyApi.submitInquiry({
+        companyName: `Newsletter Subscriber: ${newsletterEmail}`,
+        contactPerson: 'Early Access Subscriber',
+        email: newsletterEmail,
+        phone: '',
+        message: 'Subscribed to InterHive early access notifications on homepage.',
+      }).catch(() => {});
+    } catch (e) {}
+    setTimeout(() => {
+      setNewsletterLoading(false);
+      setNewsletterSubscribed(true);
+    }, 400);
+  };
+
+  const howItWorksSteps = [
+    {
+      step: '01',
+      label: 'Step 1',
+      title: 'Sign Up',
+      desc: 'Create your free InterHive profile in minutes.',
+      icon: UserPlus,
+      color: 'bg-blue-50 text-blue-600 border-blue-200/80',
+      hoverBg: 'group-hover:bg-blue-600',
+    },
+    {
+      step: '02',
+      label: 'Step 2',
+      title: 'Build Skills',
+      desc: 'Take our readiness assessment and access curated learning resources.',
+      icon: Code,
+      color: 'bg-indigo-50 text-indigo-600 border-indigo-200/80',
+      hoverBg: 'group-hover:bg-indigo-600',
+    },
+    {
+      step: '03',
+      label: 'Step 3',
+      title: 'Get Matched',
+      desc: 'Get matched to internships and roles that fit your skills.',
+      icon: Layers,
+      color: 'bg-purple-50 text-purple-600 border-purple-200/80',
+      hoverBg: 'group-hover:bg-purple-600',
+    },
+    {
+      step: '04',
+      label: 'Step 4',
+      title: 'Apply & Get Hired',
+      desc: 'Apply directly through InterHive and land your internship or placement.',
+      icon: GraduationCap,
+      color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
+      hoverBg: 'group-hover:bg-emerald-600',
+    },
+  ];
+
+  const faqItems = [
+    {
+      question: 'Is InterHive free for students?',
+      answer: 'Yes. Creating an account, taking our readiness assessment, and applying for internships through InterHive is completely free for students. We are committed to keeping career development accessible to all learners.',
+    },
+    {
+      question: 'How does the matching process work?',
+      answer: 'Instead of generic keyword matching, we evaluate your practical technical readiness and connect you directly with internships and companies looking for your specific skill profile.',
+      link: { text: 'View our programs & tracks', to: '/programs' },
+    },
+    {
+      question: 'What happens if I don\'t get placed?',
+      answer: 'If you aren\'t matched right away, you receive actionable feedback on skill gaps along with recommended learning paths on our Programs page so you can level up and re-apply for upcoming cohorts.',
+      link: { text: 'Explore learning paths', to: '/programs' },
+    },
+    {
+      question: 'How are companies and interns verified on InterHive?',
+      answer: 'We review company postings to verify real project scopes and fair stipends. For candidates, our practical assessments evaluate fundamental engineering skills before connecting them with hiring partners.',
+    },
+    {
+      question: 'Do I need prior experience to apply?',
+      answer: 'No prior internship or professional work experience is required. As long as you have learned core fundamentals in your domain, our readiness assessment helps you demonstrate that ability to employers.',
+    },
+  ];
 
   // Dynamic Landing Page Metrics from live backend
   const [statsData, setStatsData] = useState<{
@@ -606,6 +699,138 @@ export const LandingPage: React.FC = () => {
 
       </section>
 
+      {/* 1. HOW IT WORKS SECTION */}
+      <section id="how-it-works" className="pt-16 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-14 space-y-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>Simple 4-Step Process</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            How It Works
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-xl mx-auto">
+            From creating your profile to landing a verified internship or placement.
+          </p>
+        </div>
+
+        {/* 4 Steps Horizontal on Desktop, Stacking on Mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          {howItWorksSteps.map((step, idx) => (
+            <div key={idx} className="relative group">
+              <div className="h-full bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className={`w-13 h-13 rounded-2xl ${step.color} flex items-center justify-center font-bold shadow-xs group-hover:scale-110 ${step.hoverBg} group-hover:text-white transition-all`}>
+                      <step.icon className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200/60">
+                      {step.step}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-extrabold text-blue-600 tracking-wider uppercase mb-1">
+                    {step.label}
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+
+              {/* Connecting Progression Indicator for Desktop (steps 1, 2, 3) */}
+              {idx < howItWorksSteps.length - 1 && (
+                <div className="hidden lg:flex absolute top-1/2 -right-4 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border border-slate-200/90 shadow-xs items-center justify-center pointer-events-none text-slate-400">
+                  <ChevronRight className="w-4 h-4 text-blue-500" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 2. WHY INTERHIVE / TRUST & DIFFERENTIATION SECTION */}
+      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-2">
+          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
+            TRUST & DIFFERENTIATION
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            Why InterHive?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-xl mx-auto">
+            Honest, outcome-driven preparation connecting motivated students with forward-thinking companies.
+          </p>
+        </div>
+
+        {/* 3 Trust Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Structured Readiness Assessment */}
+          <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="w-13 h-13 rounded-2xl bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center font-bold mb-5 shadow-xs group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2">
+                Structured Readiness Assessment
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                We don't just list roles — we help you prepare for them first.
+              </p>
+            </div>
+          </div>
+
+          {/* Curated, Matched Opportunities */}
+          <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="w-13 h-13 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center font-bold mb-5 shadow-xs group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Layers className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2">
+                Curated, Matched Opportunities
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                Roles matched to your actual skills, not a generic job board.
+              </p>
+            </div>
+          </div>
+
+          {/* Real, Project-Based Experience */}
+          <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+            <div>
+              <div className="w-13 h-13 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center font-bold mb-5 shadow-xs group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2">
+                Real, Project-Based Experience
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                Internships built around real work, so companies get interns who are actually ready to contribute.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Small "Learn our story ->" Link */}
+        <div className="mt-8 text-center">
+          <Link
+            to="/about"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+          >
+            <span>Learn our story</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
       {/* FEATURE GRID SECTION */}
       <section id="features" className="pt-16 pb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -853,6 +1078,192 @@ export const LandingPage: React.FC = () => {
           ))}
         </div>
 
+      </section>
+
+      {/* 3. "FOR STUDENTS" VS "FOR COMPANIES" TRUST BLOCK */}
+      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          {/* Left Card — For Students */}
+          <div className="bg-white rounded-[2.2rem] p-8 sm:p-10 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div>
+              <div className="w-13 h-13 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200/80 flex items-center justify-center font-bold mb-6 shadow-xs">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-black text-blue-600 tracking-wider uppercase block mb-1">
+                FOR ASPIRING TALENT
+              </span>
+              <h3 className="text-2xl font-black text-slate-900 mb-3">
+                For Students
+              </h3>
+              <p className="text-sm text-slate-600 font-medium leading-relaxed mb-6">
+                Build real, job-ready skills and get matched to internships that actually lead somewhere.
+              </p>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+              <a
+                href="#explore-opportunities"
+                className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <span>Explore Internships</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <Link
+                to="/programs"
+                className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors"
+              >
+                View training tracks & programs →
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Card — For Companies */}
+          <div className="bg-white rounded-[2.2rem] p-8 sm:p-10 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div>
+              <div className="w-13 h-13 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200/80 flex items-center justify-center font-bold mb-6 shadow-xs">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-black text-indigo-600 tracking-wider uppercase block mb-1">
+                FOR HIRING PARTNERS
+              </span>
+              <h3 className="text-2xl font-black text-slate-900 mb-3">
+                For Companies
+              </h3>
+              <p className="text-sm text-slate-600 font-medium leading-relaxed mb-6">
+                Hire interns who've already been trained and assessed — not just resumes, but real, demonstrated skills.
+              </p>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+              <button
+                onClick={() => setIsCompanyModalOpen(true)}
+                className="px-6 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <Building2 className="w-4 h-4 text-blue-400" />
+                <span>Hire Interns</span>
+              </button>
+              <Link
+                to="/contact"
+                className="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors"
+              >
+                Learn about hiring partnership →
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. FAQ SECTION */}
+      <section className="py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center mb-10 space-y-2">
+          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
+            COMMON QUESTIONS
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold">
+            Clear, honest answers about how InterHive works.
+          </p>
+        </div>
+
+        {/* Accordion List */}
+        <div className="space-y-3">
+          {faqItems.map((faq, index) => {
+            const isOpen = openFaqIndex === index;
+            return (
+              <div
+                key={index}
+                className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-all duration-200 shadow-2xs"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors"
+                  aria-expanded={isOpen}
+                >
+                  <span className="font-extrabold text-slate-900 text-sm sm:text-base">
+                    {faq.question}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 text-blue-600' : ''
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed font-medium border-t border-slate-100">
+                    <p>{faq.answer}</p>
+                    {faq.link && (
+                      <div className="mt-2.5">
+                        <Link
+                          to={faq.link.to}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline"
+                        >
+                          <span>{faq.link.text}</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Small Outbound Help Link */}
+        <div className="mt-6 text-center text-xs text-slate-500 font-medium">
+          Have more questions?{' '}
+          <Link to="/contact" className="text-blue-600 font-bold hover:underline">
+            Reach out to our team
+          </Link>
+        </div>
+      </section>
+
+      {/* 5. NEWSLETTER / EARLY-ACCESS SIGNUP */}
+      <section className="py-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 rounded-3xl p-6 sm:p-8 border border-blue-100/90 text-center shadow-xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-200/60 text-blue-700 text-[11px] font-bold shadow-2xs mb-3">
+            <Sparkles className="w-3 h-3 text-blue-600" />
+            <span>Early Access Updates</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-2">
+            Be the first to know
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold mb-6 max-w-md mx-auto">
+            Get notified as we add new opportunities and companies.
+          </p>
+
+          {newsletterSubscribed ? (
+            <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>You're on the list! We'll notify you as new opportunities launch.</span>
+            </div>
+          ) : (
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-2.5 max-w-md mx-auto">
+              <input
+                type="email"
+                required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className="w-full sm:w-72 px-4 py-3 rounded-full bg-white border border-slate-200/90 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-2xs"
+              />
+              <button
+                type="submit"
+                disabled={newsletterLoading}
+                className="w-full sm:w-auto px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all shrink-0 cursor-pointer disabled:opacity-60"
+              >
+                <span>Notify Me</span>
+              </button>
+            </form>
+          )}
+        </div>
       </section>
 
       {/* RESTORED: COMPANY OUTREACH CONNECT BAR (ABOVE FOOTER) */}
