@@ -8,9 +8,10 @@ import * as path from 'path';
 
 @Injectable()
 export class MailService {
-  private transporter: Transporter;
+  private transporter: Transporter | null = null;
   private readonly logger = new Logger(MailService.name);
   private templates: Map<string, any> = new Map();
+  private resendApiKey: string | null = null;
 
   constructor(private configService: ConfigService) {
     this.initializeTransporter();
@@ -18,10 +19,17 @@ export class MailService {
   }
 
   private initializeTransporter() {
+    // Prefer Resend HTTP API (works on Render free tier where SMTP ports 25/465/587 are blocked)
+    this.resendApiKey = process.env.RESEND_API_KEY || this.configService.get('RESEND_API_KEY') || null;
+
+    if (this.resendApiKey) {
+      this.logger.log('📧 Mail service initialized with Resend HTTP API (bypasses SMTP port blocks)');
+    }
+
+    // Also initialize nodemailer as fallback for local development
     const user = this.configService.get('mail.auth.user') || process.env.SMTP_USER || 'interhive.info@gmail.com';
     const pass = this.configService.get('mail.auth.pass') || process.env.SMTP_PASS || 'jyrt htfk ovif pzkw';
     const host = this.configService.get('mail.host') || process.env.SMTP_HOST || 'smtp.gmail.com';
-    const port = Number(this.configService.get('mail.port')) || Number(process.env.SMTP_PORT) || 465;
 
     const isGmail = host.includes('gmail') || user.includes('@gmail.com');
 
@@ -29,20 +37,57 @@ export class MailService {
       host: isGmail ? 'smtp.gmail.com' : host,
       port: 465,
       secure: true,
-      family: 4, // Crucial for cloud hosts (Render/AWS): force IPv4 to avoid IPv6 drops
+      family: 4,
       auth: { user, pass },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 20000,
     } as any);
 
-    this.transporter.verify((error) => {
-      if (error) {
-        this.logger.warn(`Mail transporter warning: ${error.message} (Check SMTP credentials)`);
-      } else {
-        this.logger.log('📧 Mail transporter verified and ready to send emails via Gmail SMTP (IPv4/SSL 465)');
-      }
+    if (!this.resendApiKey) {
+      this.transporter.verify((error) => {
+        if (error) {
+          this.logger.warn(`Mail transporter warning: ${error.message} (Check SMTP credentials)`);
+        } else {
+          this.logger.log('📧 Mail transporter verified and ready to send emails via Gmail SMTP (IPv4/SSL 465)');
+        }
+      });
+    }
+  }
+
+  /**
+   * Send email via Resend HTTP API (no SDK needed, uses native fetch).
+   * Resend uses HTTPS port 443 which is never blocked by any cloud provider.
+   */
+  private async sendViaResend(to: string | string[], subject: string, html: string): Promise<any> {
+    const fromName = this.configService.get('mail.from.name') || 'InterHive Team';
+    const fromEmail = this.configService.get('mail.from.email') || 'interhive.info@gmail.com';
+    // Resend free tier requires onboarding@resend.dev; change after verifying your domain
+    const resendFrom = `${fromName} <onboarding@resend.dev>`;
+    const toAddresses = Array.isArray(to) ? to : [to];
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: resendFrom,
+        to: toAddresses,
+        reply_to: fromEmail,
+        subject,
+        html,
+      }),
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Resend API ${response.status}: ${JSON.stringify(data)}`);
+    }
+
+    return data;
   }
 
   private loadTemplates() {
@@ -63,26 +108,44 @@ export class MailService {
   }
 
   async sendEmail(to: string | string[], subject: string, html: string, from?: string) {
-    try {
-      const fromName = this.configService.get('mail.from.name') || 'InterHive Team';
-      const fromEmail = this.configService.get('mail.from.email') || 'interhive.info@gmail.com';
-      const defaultFrom = `"${fromName}" <${fromEmail}>`;
-
-      const mailOptions = {
-        from: from || defaultFrom,
-        replyTo: fromEmail,
-        to: Array.isArray(to) ? to.join(', ') : to,
-        subject,
-        html,
-      };
-
-      const info = await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Email sent to ${to}: ${info.messageId}`);
-      return info;
-    } catch (error) {
-      this.logger.error(`Failed to send email to ${to}: ${error.message}`);
-      return null;
+    // --- Primary: Resend HTTP API (works on Render free tier) ---
+    if (this.resendApiKey) {
+      try {
+        const data = await this.sendViaResend(to, subject, html);
+        this.logger.log(`📧 Email sent via Resend to ${to}: ${data?.id}`);
+        return data;
+      } catch (resendErr: any) {
+        this.logger.error(`Resend API error for ${to}: ${resendErr.message}`);
+        // Fall through to nodemailer fallback
+      }
     }
+
+    // --- Fallback: Nodemailer SMTP (works on localhost, blocked on Render free tier) ---
+    if (this.transporter) {
+      try {
+        const fromName = this.configService.get('mail.from.name') || 'InterHive Team';
+        const fromEmail = this.configService.get('mail.from.email') || 'interhive.info@gmail.com';
+        const defaultFrom = from || `"${fromName}" <${fromEmail}>`;
+
+        const mailOptions = {
+          from: defaultFrom,
+          replyTo: fromEmail,
+          to: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+          html,
+        };
+
+        const info = await this.transporter.sendMail(mailOptions);
+        this.logger.log(`📧 Email sent via SMTP to ${to}: ${info.messageId}`);
+        return info;
+      } catch (smtpErr: any) {
+        this.logger.error(`SMTP fallback also failed for ${to}: ${smtpErr.message}`);
+        return null;
+      }
+    }
+
+    this.logger.error(`No email transport available. Email to ${to} was not sent.`);
+    return null;
   }
 
   async sendTemplateEmail(
@@ -391,7 +454,7 @@ export class MailService {
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
         <p style="font-size: 12px; color: #94a3b8; text-align: center;">
-          InterHive Inc. • Industry Readiness & Talent Connect Platform<br />
+          InterHive Inc. • Industry Readiness &amp; Talent Connect Platform<br />
           If you have questions, please reach out to <a href="mailto:interhive.info@gmail.com" style="color: #6366f1;">interhive.info@gmail.com</a>.
         </p>
       </div>
