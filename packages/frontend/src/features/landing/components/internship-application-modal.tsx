@@ -30,6 +30,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -92,8 +93,8 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
       return;
     }
 
-    if (!formData.institution.trim() || !formData.degree.trim() || !formData.rollNumber.trim()) {
-      setErrorMessage('Please fill in your academic information.');
+    if (!formData.institution.trim() || !formData.degree.trim()) {
+      setErrorMessage('Please fill in your institution and degree.');
       setActiveTab('personal');
       return;
     }
@@ -106,6 +107,12 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
     if (!formData.reasonForApplying.trim()) {
       setErrorMessage('Please share why you want to join this program.');
+      setActiveTab('portfolio');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setErrorMessage('Please review and agree to the Terms of Service and Privacy Policy to proceed.');
       setActiveTab('portfolio');
       return;
     }
@@ -296,11 +303,10 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Roll Number / Student ID <span className="text-red-500">*</span>
+                        Roll Number / Student ID (Optional)
                       </label>
                       <input
                         type="text"
-                        required
                         value={formData.rollNumber}
                         onChange={e => setFormData({ ...formData, rollNumber: e.target.value })}
                         placeholder="e.g. 21CS042"
@@ -542,6 +548,39 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       placeholder="Availability dates, certifications, or specific questions"
                       className="w-full px-3.5 py-2.5 min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white"
                     />
+                  </div>
+
+                  <div className="pt-2 pb-1">
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 select-none">
+                      <input
+                        type="checkbox"
+                        required
+                        checked={agreedToTerms}
+                        onChange={e => setAgreedToTerms(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0"
+                      />
+                      <span>
+                        I declare that all submitted details are accurate and consent to InterHive collecting and processing this information for internship evaluation in accordance with the{' '}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-indigo-600 underline hover:text-indigo-800"
+                        >
+                          Privacy Policy
+                        </a>{' '}
+                        and{' '}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-indigo-600 underline hover:text-indigo-800"
+                        >
+                          Terms of Service
+                        </a>
+                        .
+                      </span>
+                    </label>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">

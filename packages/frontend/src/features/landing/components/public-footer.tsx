@@ -105,10 +105,11 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
 
         {/* Bottom Sub-footer */}
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
-          <p>&copy; {new Date().getFullYear()} InterHive Inc. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          <p>&copy; {new Date().getFullYear()} InterHive. Built in India for global tech careers. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-6">
+            <Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
+            <Link to="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</Link>
           </div>
         </div>
       </div>

@@ -183,6 +183,14 @@ export const CompanyInquiryModal: React.FC<CompanyInquiryModalProps> = ({ isOpen
               />
             </div>
 
+            <p className="text-[11px] text-slate-500 leading-normal">
+              By submitting this inquiry, you authorize InterHive to contact your organization regarding talent partnerships and confirm you have read our{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-600 underline hover:text-indigo-800">
+                Privacy Policy
+              </a>
+              .
+            </p>
+
             <button
               type="submit"
               disabled={isSubmittingCompany}

@@ -23,6 +23,9 @@ import { AboutPage } from './features/landing/pages/about.page';
 import { ProgramsPage } from './features/landing/pages/programs.page';
 import { ContactPage } from './features/landing/pages/contact.page';
 import { CertificatePage } from './features/dashboard/pages/certificate.page';
+import { PrivacyPage } from './features/legal/pages/privacy.page';
+import { TermsPage } from './features/legal/pages/terms.page';
+import { CookiePolicyPage } from './features/legal/pages/cookies.page';
 
 // Pages - Dashboard
 import { DashboardPage } from './features/dashboard/pages/dashboard.page';
@@ -97,6 +100,9 @@ export const AppRoutes: React.FC = () => {
       <Route path="/programs" element={<ProgramsPage />} />
       <Route path="/ppo-program" element={<ProgramsPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/cookies" element={<CookiePolicyPage />} />
 
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>

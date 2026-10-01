@@ -459,6 +459,18 @@ export const RegisterForm: React.FC = () => {
         </div>
       )}
 
+      <p className="text-[11px] text-center text-slate-500 leading-normal">
+        By creating an account, you agree to InterHive's{' '}
+        <Link to="/terms" className="text-blue-600 underline hover:text-blue-700 font-medium">
+          Terms of Service
+        </Link>{' '}
+        and acknowledge our{' '}
+        <Link to="/privacy" className="text-blue-600 underline hover:text-blue-700 font-medium">
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
       <p className="text-xs text-center text-slate-500 font-medium">
         Already have an account?{' '}
         <Link to="/login" className="font-bold text-blue-600 hover:text-blue-700">
