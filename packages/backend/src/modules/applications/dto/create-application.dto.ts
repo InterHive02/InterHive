@@ -106,6 +106,14 @@ export class CreateApplicationDto {
   @IsString()
   @IsOptional()
   additionalInfo?: string;
+
+  @IsString()
+  @IsOptional()
+  consentTimestamp?: string;
+
+  @IsString()
+  @IsOptional()
+  consentVersion?: string;
 }
 
 export class ScheduleInterviewDto {

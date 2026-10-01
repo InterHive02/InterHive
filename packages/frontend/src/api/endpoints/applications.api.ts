@@ -28,6 +28,8 @@ export interface InternshipApplicationData {
   portfolioUrl?: string;
   reasonForApplying: string;
   additionalInfo?: string;
+  consentTimestamp?: string;
+  consentVersion?: string;
   status:
     | 'new'
     | 'under_review'

@@ -3,6 +3,19 @@
   "framework": "vite",
   "buildCommand": "vite build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "interhive.in"
+        }
+      ],
+      "destination": "https://www.interhive.in/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/v1/:path*",

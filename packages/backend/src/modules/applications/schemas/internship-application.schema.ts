@@ -93,6 +93,12 @@ export class InternshipApplication {
   @Prop({ trim: true })
   additionalInfo?: string;
 
+  @Prop({ trim: true })
+  consentTimestamp?: string;
+
+  @Prop({ trim: true, default: 'v2026.1' })
+  consentVersion?: string;
+
   @Prop({
     type: String,
     enum: [
