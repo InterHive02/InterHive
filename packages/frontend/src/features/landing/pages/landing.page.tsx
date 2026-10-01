@@ -25,7 +25,12 @@ import {
   Layers,
   BookOpen,
   ChevronDown,
-  UserPlus
+  UserPlus,
+  Trophy,
+  Bell,
+  UserCheck,
+  Check,
+  Target
 } from 'lucide-react';
 import { companyApi } from '../../../api/endpoints/company.api';
 import { Logo } from '../../../shared/components/common/logo';
@@ -354,27 +359,54 @@ export const LandingPage: React.FC = () => {
             {/* HERO LEFT CONTENT */}
             <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
               
-              {/* Mission Pill */}
+              {/* PPO Track Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                <span>Your Career. Our Mission.</span>
+                <GraduationCap className="w-4 h-4 text-purple-600" />
+                <span>6-Month PPO Track: 2 Months Training + 4 Months Company Internship</span>
               </div>
 
               {/* Headlines */}
               <div className="space-y-2">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-                  From Intern <br />
-                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Industry.</span>
+                  From Selection <br />
+                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">PPO.</span>
                 </h1>
-                <p className="text-sm sm:text-base text-slate-500 font-semibold">
-                  Your journey from learning to earning starts here.
+                <p className="text-sm sm:text-base text-slate-600 font-semibold max-w-lg mx-auto lg:mx-0">
+                  We prepare you, connect you with partner companies, and create a clear pathway to your full-time career.
                 </p>
               </div>
 
-              {/* Subtitle */}
-              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0">
-                InterHive connects students with top companies, real-world internships, and job opportunities — while helping you build skills, gain experience and become industry-ready.
-              </p>
+              {/* 4 Feature Badges from Reference Image */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                <div className="flex flex-col items-center lg:items-start p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-1.5">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Industry Training</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">by InterHive</span>
+                </div>
+                <div className="flex flex-col items-center lg:items-start p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-1.5">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Partner</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Companies</span>
+                </div>
+                <div className="flex flex-col items-center lg:items-start p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs">
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-1.5">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Mentorship</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">& Real Projects</span>
+                </div>
+                <div className="flex flex-col items-center lg:items-start p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs">
+                  <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-1.5">
+                    <Briefcase className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">PPO</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Opportunity</span>
+                </div>
+              </div>
 
               {/* CTAs */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
@@ -382,16 +414,8 @@ export const LandingPage: React.FC = () => {
                   onClick={() => setIsInternshipModalOpen(true)}
                   className="px-7 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>Apply Now for Internship</span>
+                  <span>Join the PPO Track</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => setIsCompanyModalOpen(true)}
-                  className="px-6 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <Building2 className="w-4 h-4 text-blue-500" />
-                  <span>Hire Interns</span>
                 </button>
 
                 <a
@@ -405,103 +429,23 @@ export const LandingPage: React.FC = () => {
                 </a>
               </div>
 
-              {/* HERO STATS ROW — LIVE DATA FROM BACKEND */}
-              <div className="pt-6 relative rounded-2xl p-4 bg-white/60 backdrop-blur-md border border-white/90 shadow-sm">
-                {/* Subtle Background Dot Grid */}
-                <div className="absolute inset-0 opacity-40 pointer-events-none rounded-2xl bg-[radial-gradient(#93c5fd_1.2px,transparent_1.2px)] [background-size:18px_18px]" />
-
-                <div className="relative z-10">
-                  {statsLoading ? (
-                    <div className="text-center py-2">
-                      <span className="text-xs text-slate-400 font-semibold">Loading platform data...</span>
-                    </div>
-                  ) : statsData && (statsData.companyCount >= 10 || statsData.studentsPlacedCount >= 50) ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-center">
-                      
-                      {/* Partner Companies — only show if >= 10 */}
-                      {statsData.companyCount >= 10 && (
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-[#EBF3FF] border border-[#BFDBFE] text-[#2563EB] flex items-center justify-center shrink-0 shadow-xs">
-                            <Building2 className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="block font-black text-slate-900 text-base leading-tight">
-                              {statsData.companyCount}+
-                            </span>
-                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                              Partner <br /> Companies
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Active Internships — only show if > 0 */}
-                      {statsData.activeInternshipsCount > 0 && (
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-[#F3E8FF] border border-[#E9D5FF] text-[#9333EA] flex items-center justify-center shrink-0 shadow-xs">
-                            <Briefcase className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="block font-black text-slate-900 text-base leading-tight">
-                              {statsData.activeInternshipsCount}
-                            </span>
-                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                              Active <br /> Internships
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Students Placed — only show if >= 50 */}
-                      {statsData.studentsPlacedCount >= 50 && (
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-[#DCFCE7] border border-[#BBF7D0] text-[#16A34A] flex items-center justify-center shrink-0 shadow-xs">
-                            <Users className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="block font-black text-slate-900 text-base leading-tight">
-                              {statsData.studentsPlacedCount}+
-                            </span>
-                            <span className="block text-[11px] text-slate-500 font-extrabold leading-tight">
-                              Students <br /> Placed
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* User Rating — NEVER show until real rating system exists */}
-
-                    </div>
-                  ) : (
-                    <div className="text-center py-2">
-                      <p className="text-sm font-bold text-slate-600">
-                        🚀 Now onboarding our first companies and interns
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        Join us at the ground floor — be among the first to benefit.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
             </div>
 
-            {/* HERO RIGHT COLUMN (FLOATING 3D GLASS DASHBOARD) */}
+            {/* HERO RIGHT COLUMN (STUDENT DASHBOARD PREVIEW MATCHING REFERENCE IMAGE 1) */}
             <div className="lg:col-span-7 relative perspective-1000 py-6">
               
               <div 
                 ref={cardRef}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="relative mx-auto max-w-xl lg:max-w-none transition-transform duration-200 ease-out preserve-3d"
+                className="relative mx-auto max-w-2xl lg:max-w-none transition-transform duration-200 ease-out preserve-3d"
                 style={{
                   transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.01, 1.01, 1.01)`
                 }}
               >
                 
                 {/* 3D Glass Dashboard Card */}
-                <div className="w-full bg-white/95 backdrop-blur-2xl p-6 sm:p-8 rounded-[2.2rem] border border-white/90 shadow-2xl preserve-3d relative z-10">
+                <div className="w-full bg-white/95 backdrop-blur-2xl p-5 sm:p-7 rounded-[2.2rem] border border-white/90 shadow-2xl preserve-3d relative z-10">
                   
                   {/* Specular Light Overlay */}
                   <div 
@@ -513,168 +457,262 @@ export const LandingPage: React.FC = () => {
                   />
 
                   {/* Header Bar */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center text-xs shadow-md shadow-blue-500/30">
-                        H
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center text-xs shadow-xs">
+                          ih
+                        </div>
+                        <span className="font-extrabold text-slate-900 text-sm">InterHive</span>
                       </div>
-                      <span className="font-extrabold text-slate-900 text-sm">InterHive Dashboard</span>
+                      <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5 leading-none">
+                          Welcome, Ankit 👋
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                          Your PPO journey is in progress. Keep going!
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[10px] font-bold text-slate-400">Live Status</span>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                        <Bell className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex items-center gap-1.5 pl-2 border-l border-slate-100">
+                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
+                          A
+                        </div>
+                        <span className="text-xs font-bold text-slate-700 hidden sm:inline">Ankit Soni</span>
+                        <ChevronDown className="w-3 h-3 text-slate-400" />
+                      </div>
                     </div>
                   </div>
 
+                  {/* Inner Layout with Mini-Sidebar and Track View */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                     
-                    {/* Sidebar - Collapses on mobile for clean card presentation */}
-                    <div className="hidden sm:block sm:col-span-4 space-y-1.5 border-r border-slate-100 pr-3">
-                      <div className="px-3 py-2 rounded-xl bg-blue-50 text-blue-600 font-extrabold text-xs flex items-center gap-2 shadow-xs">
-                        <span>🏠</span>
-                        <span>Home</span>
+                    {/* Mini Sidebar */}
+                    <div className="hidden sm:block sm:col-span-3 space-y-1 border-r border-slate-100 pr-3">
+                      <div className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-extrabold text-[11px] flex items-center gap-2 shadow-2xs">
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Dashboard</span>
                       </div>
-                      <div className="px-3 py-2 text-slate-500 font-bold text-xs flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <span>💼</span>
-                        <span>Internships</span>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <GraduationCap className="w-3.5 h-3.5" />
+                        <span>My Program</span>
                       </div>
-                      <div className="px-3 py-2 text-slate-500 font-bold text-xs flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <span>👔</span>
-                        <span>Jobs</span>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>Training</span>
                       </div>
-                      <div className="px-3 py-2 text-slate-500 font-bold text-xs flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <span>📋</span>
-                        <span>My Apps</span>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <Code className="w-3.5 h-3.5" />
+                        <span>Projects</span>
                       </div>
-                      <div className="px-3 py-2 text-slate-500 font-bold text-xs flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors">
-                        <span>👤</span>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <Building2 className="w-3.5 h-3.5" />
+                        <span>Company Match</span>
+                      </div>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <Award className="w-3.5 h-3.5" />
+                        <span>Assessments</span>
+                      </div>
+                      <div className="px-2.5 py-1.5 text-slate-500 font-bold text-[11px] flex items-center gap-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                        <Users className="w-3.5 h-3.5" />
                         <span>Profile</span>
                       </div>
                     </div>
 
-                    {/* Main Content inside Card */}
-                    <div className="sm:col-span-8 space-y-3.5">
-                      <div>
-                        <h5 className="font-black text-slate-900 text-sm flex items-center gap-1.5">
-                          <span>Good Morning, Developer</span>
-                          <span>👋</span>
-                        </h5>
-                        <p className="text-[10px] text-slate-400 font-semibold">Your next big opportunity is just a step away.</p>
+                    {/* Main Track Progress Area */}
+                    <div className="sm:col-span-9 space-y-3.5">
+                      
+                      {/* PPO Track Card */}
+                      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/40 border border-slate-200/70 shadow-2xs">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                            PPO Track — Software Engineering
+                          </span>
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            In Progress
+                          </span>
+                        </div>
+
+                        {/* Progress Bar 60% */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[10px] font-extrabold text-slate-500">
+                            <span>Journey Progress</span>
+                            <span className="text-blue-600">60%</span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500" style={{ width: '60%' }} />
+                          </div>
+                        </div>
+
+                        {/* 7-Step Stepper Timeline matching Reference Image 1 */}
+                        <div className="pt-3 overflow-x-auto">
+                          <div className="flex items-center justify-between min-w-[340px] text-center">
+                            
+                            {/* Step 1: Applied */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow-xs">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                              <span className="text-[8px] font-black text-slate-600 mt-1">Applied</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-emerald-500 mx-1" />
+
+                            {/* Step 2: Selected */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow-xs">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                              <span className="text-[8px] font-black text-slate-600 mt-1">Selected</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-emerald-500 mx-1" />
+
+                            {/* Step 3: InterHive Training */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow-xs">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                              <span className="text-[8px] font-black text-slate-600 mt-1">InterHive Training</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-blue-600 mx-1" />
+
+                            {/* Step 4: Company Matching (ACTIVE) */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-xs ring-4 ring-blue-100">
+                                4
+                              </div>
+                              <span className="text-[8px] font-black text-blue-600 mt-1">Company Matching</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-slate-200 mx-1" />
+
+                            {/* Step 5: Company Internship */}
+                            <div className="flex flex-col items-center opacity-50">
+                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                5
+                              </div>
+                              <span className="text-[8px] font-bold text-slate-500 mt-1">Company Internship</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-slate-200 mx-1" />
+
+                            {/* Step 6: Evaluation */}
+                            <div className="flex flex-col items-center opacity-50">
+                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                6
+                              </div>
+                              <span className="text-[8px] font-bold text-slate-500 mt-1">Evaluation</span>
+                            </div>
+                            <div className="flex-1 h-0.5 bg-slate-200 mx-1" />
+
+                            {/* Step 7: PPO */}
+                            <div className="flex flex-col items-center opacity-50">
+                              <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                7
+                              </div>
+                              <span className="text-[8px] font-bold text-slate-500 mt-1">PPO</span>
+                            </div>
+
+                          </div>
+                        </div>
+
                       </div>
 
-                      {/* Mini Search */}
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-                        <div className="w-full pl-7 pr-3 py-1.5 bg-slate-50 border border-slate-200/70 rounded-lg text-[10px] text-slate-400 font-medium">
-                          Search internships, jobs, companies...
-                        </div>
-                      </div>
-
-                      {/* KPI Stat Cards */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center">
-                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
-                          <span className="block font-black text-slate-900 text-sm">12</span>
-                          <span className="text-[8px] text-slate-400 font-extrabold">Applied</span>
-                        </div>
-                        <div className="bg-blue-50/80 p-2 rounded-xl border border-blue-100/80">
-                          <span className="block font-black text-blue-600 text-sm">3</span>
-                          <span className="text-[8px] text-blue-500 font-extrabold">Shortlisted</span>
-                        </div>
-                        <div className="bg-purple-50/80 p-2 rounded-xl border border-purple-100/80">
-                          <span className="block font-black text-purple-600 text-sm">1</span>
-                          <span className="text-[8px] text-purple-500 font-extrabold">Interview</span>
-                        </div>
-                        <div className="bg-emerald-50/80 p-2 rounded-xl border border-emerald-100/80">
-                          <span className="block font-black text-emerald-600 text-sm">0</span>
-                          <span className="text-[8px] text-emerald-500 font-extrabold">Offer</span>
-                        </div>
-                      </div>
-
-                      {/* Recommended Opportunities */}
-                      <div className="space-y-2 pt-1">
-                        <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-500">
-                          <span>Recommended for you</span>
-                          <span className="text-blue-600 hover:underline cursor-pointer">View all →</span>
-                        </div>
-
-                        <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10px] hover:bg-slate-100/80 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src="https://www.google.com/favicon.ico"
-                              alt="Google"
-                              width={16}
-                              height={16}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-4 h-4 object-contain max-w-full h-auto"
-                            />
-                            <div>
-                              <span className="font-extrabold text-slate-900 block leading-none">Google</span>
-                              <span className="text-[9px] text-slate-500 font-semibold">Software Engineering Intern</span>
+                      {/* 2 Subcards Side by Side from Reference Image 1 */}
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        
+                        {/* Current Stage Card */}
+                        <div className="sm:col-span-7 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+                          <div>
+                            <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase block mb-1">
+                              Current Stage
+                            </span>
+                            <div className="flex items-start gap-2.5">
+                              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <Building2 className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h5 className="font-black text-slate-900 text-xs">
+                                  Company Matching
+                                </h5>
+                                <p className="text-[10px] text-slate-500 leading-tight mt-0.5 font-medium">
+                                  We are matching you with the best partner companies based on your skills and performance.
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <span className="text-[8px] font-black text-blue-600 bg-blue-100/80 px-1.5 py-0.5 rounded">Featured</span>
+                          
+                          <button
+                            onClick={() => setIsInternshipModalOpen(true)}
+                            className="mt-2.5 w-full py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-[10px] transition-colors cursor-pointer"
+                          >
+                            View Matched Companies →
+                          </button>
                         </div>
 
-                        <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10px] hover:bg-slate-100/80 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src="https://www.microsoft.com/favicon.ico"
-                              alt="Microsoft"
-                              width={16}
-                              height={16}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-4 h-4 object-contain max-w-full h-auto"
-                            />
-                            <div>
-                              <span className="font-extrabold text-slate-900 block leading-none">Microsoft</span>
-                              <span className="text-[9px] text-slate-500 font-semibold">Product Intern</span>
+                        {/* Training Completion Card */}
+                        <div className="sm:col-span-5 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase">
+                                Training Completion
+                              </span>
+                              <span className="text-[10px] font-black text-emerald-600">100%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full w-full" />
                             </div>
                           </div>
-                          <span className="text-[8px] font-bold text-slate-400">Hybrid</span>
+
+                          <div className="grid grid-cols-3 gap-1 pt-2 text-center border-t border-slate-100 mt-2">
+                            <div>
+                              <span className="block text-[8px] text-slate-400 font-bold uppercase">Modules</span>
+                              <span className="text-[10px] font-black text-slate-800">12/12</span>
+                            </div>
+                            <div>
+                              <span className="block text-[8px] text-slate-400 font-bold uppercase">Projects</span>
+                              <span className="text-[10px] font-black text-slate-800">5/5</span>
+                            </div>
+                            <div>
+                              <span className="block text-[8px] text-slate-400 font-bold uppercase">Tests</span>
+                              <span className="text-[10px] font-black text-slate-800">8/8</span>
+                            </div>
+                          </div>
                         </div>
+
                       </div>
 
                     </div>
+
                   </div>
 
                 </div>
 
-                {/* FLOATING 3D ACTION BADGES */}
+                {/* Floating 3D Pills */}
                 <div 
                   className="hidden sm:block absolute -top-4 -right-2 z-30 animate-float-slow"
                   style={{ transform: 'translateZ(50px)' }}
                 >
-                  <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2.5 transform hover:scale-110 transition-transform">
+                  <div className="px-4 py-2 rounded-2xl bg-white/95 backdrop-blur-xl shadow-xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                      <Code className="w-3.5 h-3.5" />
+                      <GraduationCap className="w-3.5 h-3.5" />
                     </div>
-                    <span>Build Skills</span>
+                    <span>2 Months Training</span>
                   </div>
                 </div>
 
                 <div 
-                  className="hidden sm:block absolute top-28 -right-6 sm:-right-8 z-30 animate-float-medium"
+                  className="hidden sm:block absolute bottom-4 -left-4 z-30 animate-float-medium"
                   style={{ transform: 'translateZ(65px)' }}
                 >
-                  <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2.5 transform hover:scale-110 transition-transform">
+                  <div className="px-4 py-2 rounded-2xl bg-white/95 backdrop-blur-xl shadow-xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
-                      <Briefcase className="w-3.5 h-3.5" />
+                      <Trophy className="w-3.5 h-3.5" />
                     </div>
-                    <span>Get Hired</span>
-                  </div>
-                </div>
-
-                <div 
-                  className="hidden sm:block absolute bottom-6 -right-3 sm:-right-5 z-30 animate-float-fast"
-                  style={{ transform: 'translateZ(55px)' }}
-                >
-                  <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2.5 transform hover:scale-110 transition-transform">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                      <TrendingUp className="w-3.5 h-3.5" />
-                    </div>
-                    <span>Grow</span>
+                    <span>Pre-Placement Offer</span>
                   </div>
                 </div>
 
@@ -697,6 +735,364 @@ export const LandingPage: React.FC = () => {
           </svg>
         </div>
 
+      </section>
+
+      {/* ============================================================== */}
+      {/* 1. YOUR JOURNEY TO A PPO (MATCHING REFERENCE IMAGE 1)          */}
+      {/* ============================================================== */}
+      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Your Journey to a PPO
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-1">
+              A structured 6-month pathway designed for your success.
+            </p>
+          </div>
+          <Link
+            to="/programs"
+            className="text-xs sm:text-sm font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 group shrink-0"
+          >
+            <span>See Detailed Program</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {/* 7 Horizontal Step Cards with Progression Connectors */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 relative">
+          
+          {/* Step 1: Apply & Assessment */}
+          <div className="bg-blue-50/70 border border-blue-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-2xs">
+                  <Target className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200/80">
+                  01
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                Apply & Assessment
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Create your profile and complete AI + skill assessments.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2: Selection */}
+          <div className="bg-purple-50/70 border border-purple-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-2xs">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200/80">
+                  02
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                Selection
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Qualified students enter the PPO Track.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3: 2-Month Training */}
+          <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-2xs">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200/80">
+                  03
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                2-Month Training at InterHive
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Industry-focused training, real projects and mentorship.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 4: Company Matching */}
+          <div className="bg-amber-50/70 border border-amber-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-2xs">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-amber-700 bg-white px-2 py-0.5 rounded-full border border-amber-200/80">
+                  04
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                Company Matching
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Get matched with our partner companies.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 5: 4-Month Company Internship */}
+          <div className="bg-rose-50/70 border border-rose-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-2xs">
+                  <Briefcase className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-rose-700 bg-white px-2 py-0.5 rounded-full border border-rose-200/80">
+                  05
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                4-Month Company Internship
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Work on real-world projects at the partner company.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 6: Performance Evaluation */}
+          <div className="bg-indigo-50/70 border border-indigo-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-2xs">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-200/80">
+                  06
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-slate-900 mb-1 leading-snug">
+                Performance Evaluation
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                Ongoing reviews and final evaluation.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 7: PPO */}
+          <div className="bg-blue-100/70 border border-blue-300/80 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-2xs">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-black text-blue-800 bg-white px-2 py-0.5 rounded-full border border-blue-300">
+                  07
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-blue-900 mb-1 leading-snug">
+                PPO
+              </h4>
+              <p className="text-[10px] text-blue-800 font-medium leading-relaxed">
+                Receive a Pre-Placement Offer based on performance.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 4 Feature Pills Below Steps */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">100+ Partner Companies</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Across multiple domains</p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">Industry-Ready Training</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Hands-on, practical learning</p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Code className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">Real Project Experience</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Build a strong portfolio</p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">Dedicated Mentorship</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Guidance from industry experts</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      {/* ============================================================== */}
+      {/* 2. OUR PARTNER COMPANIES (MATCHING REFERENCE IMAGE 1)         */}
+      {/* ============================================================== */}
+      <section className="py-12 bg-slate-50/70 border-y border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Our Partner Companies
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+                We work with leading companies through MOUs to provide internship and PPO opportunities.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsCompanyModalOpen(true)}
+              className="text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 group shrink-0 cursor-pointer"
+            >
+              <span>View All Partners</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          {/* Company Brand Badges Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
+            
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-slate-800 text-sm tracking-widest text-[#004B87]">TATA</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center gap-1.5 h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <div className="grid grid-cols-2 gap-0.5 w-3.5 h-3.5 shrink-0">
+                <span className="bg-[#F25022] rounded-2xs" />
+                <span className="bg-[#7FBA00] rounded-2xs" />
+                <span className="bg-[#00A4EF] rounded-2xs" />
+                <span className="bg-[#FFB900] rounded-2xs" />
+              </div>
+              <span className="font-bold text-slate-700 text-xs">Microsoft</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-bold text-sm tracking-tight">
+                <span className="text-[#4285F4]">G</span>
+                <span className="text-[#EA4335]">o</span>
+                <span className="text-[#FBBC05]">o</span>
+                <span className="text-[#4285F4]">g</span>
+                <span className="text-[#34A853]">l</span>
+                <span className="text-[#EA4335]">e</span>
+              </span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-slate-900 text-xs tracking-tight">amazon</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-[#007CC3] text-xs">Infosys</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-extrabold text-[#A100FF] text-xs">accenture</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-slate-900 text-xs">Deloitte<span className="text-[#86BC25]">.</span></span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-extrabold text-[#0070AD] text-[11px]">Capgemini</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-[#00529B] text-xs tracking-wider">HCL</span>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
+              <span className="font-black text-slate-800 text-xs">wipro<span className="text-orange-500">.</span></span>
+            </div>
+
+          </div>
+
+          {/* 4 Stats Cards matching Reference Image 1 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-200/70">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                  5,000+
+                </span>
+                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                  Students Trained
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                  1,200+
+                </span>
+                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                  Internships Provided
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                  80+
+                </span>
+                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                  Partner Companies
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                  70%+
+                </span>
+                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                  PPO Conversion (Target)
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </section>
 
       {/* 1. HOW IT WORKS SECTION */}

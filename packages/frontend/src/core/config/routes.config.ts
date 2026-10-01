@@ -67,16 +67,17 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
     { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
 
-  // 5. Intern Learning & Project Workspace
+  // 5. Intern Learning & Project Workspace (Matching PRD & Image 2)
   intern: [
     { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-    { path: '/profile', label: 'Profile', icon: 'User' },
-    { path: '/assessments', label: 'Assessments', icon: 'Award' },
     { path: '/training', label: 'Training', icon: 'BookOpen' },
+    { path: '/assessments', label: 'Assessments', icon: 'ClipboardCheck' },
     { path: '/projects', label: 'Projects', icon: 'FolderKanban' },
-    { path: '/attendance', label: 'Attendance', icon: 'Clock' },
-    { path: '/opportunities', label: 'Opportunities', icon: 'Target' },
+    { path: '/opportunities', label: 'Company Match', icon: 'Target' },
+    { path: '/internship', label: 'Internship', icon: 'Briefcase' },
+    { path: '/certificate', label: 'Certificate', icon: 'Award' },
     { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
+    { path: '/profile', label: 'Profile', icon: 'User' },
     { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
 

@@ -48,7 +48,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
         </div>
 
         {/* Nav Links */}
-        <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-7 font-bold text-xs sm:text-sm text-slate-600">
+        <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-6 lg:gap-7 font-bold text-xs sm:text-sm text-slate-600">
           <Link
             to="/"
             className={`relative py-1 transition-colors ${
@@ -60,16 +60,6 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             Home
           </Link>
           <Link
-            to="/about"
-            className={`relative py-1 transition-colors ${
-              activePage === 'about'
-                ? 'text-blue-600 border-b-2 border-blue-600 font-extrabold'
-                : 'hover:text-blue-600'
-            }`}
-          >
-            About
-          </Link>
-          <Link
             to="/programs"
             className={`relative py-1 transition-colors ${
               activePage === 'programs'
@@ -77,7 +67,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
                 : 'hover:text-blue-600'
             }`}
           >
-            Programs
+            PPO Program
           </Link>
           <button
             onClick={onOpenInternshipModal}
@@ -92,6 +82,16 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             For Companies
           </button>
           <Link
+            to="/about"
+            className={`relative py-1 transition-colors ${
+              activePage === 'about'
+                ? 'text-blue-600 border-b-2 border-blue-600 font-extrabold'
+                : 'hover:text-blue-600'
+            }`}
+          >
+            About
+          </Link>
+          <Link
             to="/contact"
             className={`relative py-1 transition-colors ${
               activePage === 'contact'
@@ -104,26 +104,32 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
         </nav>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative w-64">
+        <form onSubmit={handleSearchSubmit} className="hidden xl:flex items-center relative w-72">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search programs, skills..."
+            placeholder="Search programs, skills, companies..."
             className="w-full pl-10 pr-4 py-2 bg-slate-100/90 border border-slate-200/80 rounded-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white transition-all shadow-inner"
           />
         </form>
 
         {/* Actions & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
             to="/login"
-            className="px-4 sm:px-5 py-2 min-h-[44px] rounded-full font-extrabold text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-md shadow-slate-900/10 hover:shadow-slate-900/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+            className="px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-slate-700 hover:text-blue-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center"
           >
-            <span>Login</span>
-            <span className="text-[10px] text-slate-400">→</span>
+            Login
           </Link>
+
+          <button
+            onClick={onOpenInternshipModal}
+            className="px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+          >
+            Get Started
+          </button>
 
           {/* Mobile Hamburger Button */}
           <button
@@ -169,20 +175,6 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
               )}
             </Link>
             <Link
-              to="/about"
-              onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
-                activePage === 'about'
-                  ? 'bg-blue-50 text-blue-600 font-extrabold'
-                  : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
-              }`}
-            >
-              <span>About</span>
-              {activePage === 'about' && (
-                <span className="text-xs text-blue-600 font-extrabold">Active</span>
-              )}
-            </Link>
-            <Link
               to="/programs"
               onClick={() => setIsMobileNavOpen(false)}
               className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
@@ -191,7 +183,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
               }`}
             >
-              <span>Programs</span>
+              <span>PPO Program</span>
               {activePage === 'programs' && (
                 <span className="text-xs text-blue-600 font-extrabold">Active</span>
               )}
@@ -216,6 +208,20 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
               <span>For Companies</span>
               <span className="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Hire</span>
             </button>
+            <Link
+              to="/about"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+                activePage === 'about'
+                  ? 'bg-blue-50 text-blue-600 font-extrabold'
+                  : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
+              }`}
+            >
+              <span>About</span>
+              {activePage === 'about' && (
+                <span className="text-xs text-blue-600 font-extrabold">Active</span>
+              )}
+            </Link>
             <Link
               to="/contact"
               onClick={() => setIsMobileNavOpen(false)}

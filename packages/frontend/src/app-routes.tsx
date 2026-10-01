@@ -22,6 +22,7 @@ import { LandingPage } from './features/landing/pages/landing.page';
 import { AboutPage } from './features/landing/pages/about.page';
 import { ProgramsPage } from './features/landing/pages/programs.page';
 import { ContactPage } from './features/landing/pages/contact.page';
+import { CertificatePage } from './features/dashboard/pages/certificate.page';
 
 // Pages - Dashboard
 import { DashboardPage } from './features/dashboard/pages/dashboard.page';
@@ -94,6 +95,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/programs" element={<ProgramsPage />} />
+      <Route path="/ppo-program" element={<ProgramsPage />} />
       <Route path="/contact" element={<ContactPage />} />
 
       {/* Auth Routes */}
@@ -127,11 +129,13 @@ export const AppRoutes: React.FC = () => {
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/:id" element={<TrainingDetailsPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/internship" element={<ProjectsPage />} />
         <Route path="/projects/create" element={<Navigate to="/projects" replace />} />
         <Route path="/projects/:id" element={<ProjectDetailsPage />} />
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/opportunities" element={<OpportunitiesPage />} />
         <Route path="/opportunities/:id" element={<MatchDetailsPage />} />
+        <Route path="/certificate" element={<CertificatePage />} />
         <Route path="/communication" element={<CommunicationPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
