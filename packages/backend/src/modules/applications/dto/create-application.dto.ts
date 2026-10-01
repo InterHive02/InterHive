@@ -20,8 +20,24 @@ export class CreateApplicationDto {
   phone: string;
 
   @IsString()
-  @IsNotEmpty()
-  rollNumber: string;
+  @IsOptional()
+  countryCode?: string;
+
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  state?: string;
+
+  @IsString()
+  @IsOptional()
+  rollNumber?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -32,8 +48,24 @@ export class CreateApplicationDto {
   degree: string;
 
   @IsString()
+  @IsOptional()
+  branch?: string;
+
+  @IsString()
   @IsNotEmpty()
   semester: string;
+
+  @IsString()
+  @IsOptional()
+  graduationYear?: string;
+
+  @IsString()
+  @IsOptional()
+  cgpa?: string;
+
+  @IsString()
+  @IsOptional()
+  availability?: string;
 
   @IsArray()
   @IsOptional()

@@ -23,8 +23,20 @@ export class InternshipApplication {
   @Prop({ required: true, trim: true })
   phone: string;
 
-  @Prop({ required: true, trim: true })
-  rollNumber: string;
+  @Prop({ trim: true, default: '+91' })
+  countryCode?: string;
+
+  @Prop({ trim: true, default: '' })
+  gender?: string;
+
+  @Prop({ trim: true, default: '' })
+  city?: string;
+
+  @Prop({ trim: true, default: '' })
+  state?: string;
+
+  @Prop({ trim: true, default: '' })
+  rollNumber?: string;
 
   @Prop({ required: true, trim: true })
   institution: string;
@@ -32,8 +44,20 @@ export class InternshipApplication {
   @Prop({ required: true, trim: true })
   degree: string;
 
+  @Prop({ trim: true, default: '' })
+  branch?: string;
+
   @Prop({ required: true, trim: true })
   semester: string;
+
+  @Prop({ trim: true, default: '' })
+  graduationYear?: string;
+
+  @Prop({ trim: true, default: '' })
+  cgpa?: string;
+
+  @Prop({ trim: true, default: '' })
+  availability?: string;
 
   @Prop({ type: [String], default: [] })
   skills: string[];
