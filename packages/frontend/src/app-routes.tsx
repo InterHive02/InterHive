@@ -26,6 +26,7 @@ import { CertificatePage } from './features/dashboard/pages/certificate.page';
 import { PrivacyPage } from './features/legal/pages/privacy.page';
 import { TermsPage } from './features/legal/pages/terms.page';
 import { CookiePolicyPage } from './features/legal/pages/cookies.page';
+import { RefundPolicyPage } from './features/legal/pages/refund.page';
 
 // Pages - Dashboard
 import { DashboardPage } from './features/dashboard/pages/dashboard.page';
@@ -103,6 +104,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/cookies" element={<CookiePolicyPage />} />
+      <Route path="/refund" element={<RefundPolicyPage />} />
 
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>

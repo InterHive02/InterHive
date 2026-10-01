@@ -109,6 +109,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           <div className="flex flex-wrap items-center gap-6">
             <Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
+            <Link to="/refund" className="hover:text-blue-400 transition-colors">Refund Policy</Link>
             <Link to="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</Link>
           </div>
         </div>

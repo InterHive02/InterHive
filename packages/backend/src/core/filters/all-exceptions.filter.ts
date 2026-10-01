@@ -67,34 +67,41 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   private handleMongoError(error: MongoError): { status: number; message: string; error: any } {
+    const isDev = process.env.NODE_ENV === 'development';
     switch (error.code) {
       case 11000: // Duplicate key error
         return {
           status: HttpStatus.CONFLICT,
-          message: 'Duplicate entry found',
-          error: {
-            code: error.code,
-            keyPattern: error['keyPattern'],
-            keyValue: error['keyValue'],
-          },
+          message: 'A record with this information already exists.',
+          error: isDev
+            ? {
+                code: error.code,
+                keyPattern: error['keyPattern'],
+                keyValue: error['keyValue'],
+              }
+            : undefined,
         };
       case 121: // Document validation error
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Document validation failed',
-          error: {
-            code: error.code,
-            message: error.message,
-          },
+          message: 'Data validation failed.',
+          error: isDev
+            ? {
+                code: error.code,
+                message: error.message,
+              }
+            : undefined,
         };
       default:
         return {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Database error occurred',
-          error: {
-            code: error.code,
-            message: error.message,
-          },
+          message: 'An internal error occurred. Please try again later.',
+          error: isDev
+            ? {
+                code: error.code,
+                message: error.message,
+              }
+            : undefined,
         };
     }
   }
