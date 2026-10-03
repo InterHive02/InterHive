@@ -33,6 +33,7 @@ import {
   Target
 } from 'lucide-react';
 import { companyApi } from '../../../api/endpoints/company.api';
+import { statsApi, LandingStatItem } from '../../../api/endpoints/stats.api';
 import { Logo } from '../../../shared/components/common/logo';
 import { getLandingStats, LandingStats } from '../../../shared/utils/landing-stats';
 import { InternshipApplicationModal } from '../components/internship-application-modal';
@@ -139,7 +140,7 @@ export const LandingPage: React.FC = () => {
     },
   ];
 
-  // Dynamic Landing Page Metrics from live backend
+  // Dynamic Landing Page Metrics from live backend / admin overrides
   const [statsData, setStatsData] = useState<{
     companyCount: number;
     activeInternshipsCount: number;
@@ -147,6 +148,7 @@ export const LandingPage: React.FC = () => {
     averageRating: number | null;
   } | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [dynamicLandingStats, setDynamicLandingStats] = useState<LandingStatItem[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -161,12 +163,63 @@ export const LandingPage: React.FC = () => {
           }
         }
       } catch (err) {
-        // Stats fetch failed — will show onboarding message
+        // Stats fetch failed
       } finally {
         setStatsLoading(false);
       }
     };
     fetchStats();
+
+    const loadLandingStats = () => {
+      // 1. Try reading from cached stat items
+      try {
+        const cached = localStorage.getItem('interhive_landing_stat_items');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setDynamicLandingStats(parsed);
+          }
+        }
+      } catch (e) {}
+
+      // 2. Try reading from legacy landing stats editor key (topCompanies, activeInternships, etc)
+      try {
+        const legacy = localStorage.getItem('interhive_landing_stats');
+        if (legacy) {
+          const parsed = JSON.parse(legacy);
+          if (parsed) {
+            setDynamicLandingStats([
+              { key: 'students_trained', label: 'Students Trained', value: parsed.studentsPlaced || '50K+', suffix: '', icon: 'Users', order: 1, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
+              { key: 'internships_provided', label: 'Internships Provided', value: parsed.activeInternships || '10K+', suffix: '', icon: 'Briefcase', order: 2, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
+              { key: 'partner_companies', label: 'Partner Companies', value: parsed.topCompanies || '500+', suffix: '', icon: 'Building2', order: 3, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
+              { key: 'ppo_conversion', label: 'User Rating / Conversion', value: parsed.userRating || '4.8/5', suffix: '', icon: 'Trophy', order: 4, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
+            ]);
+          }
+        }
+      } catch (e) {}
+
+      // 3. Fetch from backend API
+      statsApi.getLandingStats()
+        .then(res => {
+          if (res.data?.success && Array.isArray(res.data?.data) && res.data.data.length > 0) {
+            setDynamicLandingStats(res.data.data);
+            try {
+              localStorage.setItem('interhive_landing_stat_items', JSON.stringify(res.data.data));
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    };
+
+    loadLandingStats();
+
+    const handleUpdate = () => loadLandingStats();
+    window.addEventListener('landing-stats-updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('landing-stats-updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   // 3D Card Interactive Tilt Mouse Tracking
@@ -1033,63 +1086,40 @@ export const LandingPage: React.FC = () => {
 
           </div>
 
-          {/* 4 Stats Cards matching Reference Image 1 */}
+          {/* 4 Stats Cards dynamically loaded from Admin / System sync */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-200/70">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
-                  5,000+
-                </span>
-                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
-                  Students Trained
-                </span>
-              </div>
-            </div>
+            {(dynamicLandingStats.length > 0 ? dynamicLandingStats : [
+              { key: 'students_trained', label: 'Students Trained', value: 5000, suffix: '+', icon: 'Users' },
+              { key: 'internships_provided', label: 'Internships Provided', value: 1200, suffix: '+', icon: 'Briefcase' },
+              { key: 'partner_companies', label: 'Partner Companies', value: 80, suffix: '+', icon: 'Building2' },
+              { key: 'ppo_conversion', label: 'PPO Conversion Rate', value: 70, suffix: '%+', icon: 'Trophy' },
+            ]).map((stat, idx) => {
+              const iconMap: Record<string, { comp: any; color: string }> = {
+                students_trained: { comp: Users, color: 'bg-blue-50 text-blue-600' },
+                internships_provided: { comp: Briefcase, color: 'bg-indigo-50 text-indigo-600' },
+                partner_companies: { comp: Building2, color: 'bg-purple-50 text-purple-600' },
+                ppo_conversion: { comp: Trophy, color: 'bg-emerald-50 text-emerald-600' },
+              };
+              const meta = iconMap[stat.key] || { comp: Trophy, color: 'bg-blue-50 text-blue-600' };
+              const IconComponent = meta.comp;
+              const formattedVal = typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value;
 
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                <Briefcase className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
-                  1,200+
-                </span>
-                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
-                  Internships Provided
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
-                  80+
-                </span>
-                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
-                  Partner Companies
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <Trophy className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
-                  70%+
-                </span>
-                <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
-                  PPO Conversion (Target)
-                </span>
-              </div>
-            </div>
+              return (
+                <div key={stat.key || idx} className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-xl ${meta.color} flex items-center justify-center shrink-0`}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                      {formattedVal}{stat.suffix || ''}
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                      {stat.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
         </div>

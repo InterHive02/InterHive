@@ -6,6 +6,7 @@ import { Company, CompanySchema } from '../companies/schemas/company.schema';
 import { CompanyRequirement, CompanyRequirementSchema } from '../companies/schemas/company-requirement.schema';
 import { InternshipApplication, InternshipApplicationSchema } from '../applications/schemas/internship-application.schema';
 import { InternApplication, InternApplicationSchema } from '../interns/schemas/intern-application.schema';
+import { PlatformStat, PlatformStatSchema } from './schemas/platform-stat.schema';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { InternApplication, InternApplicationSchema } from '../interns/schemas/i
       { name: CompanyRequirement.name, schema: CompanyRequirementSchema },
       { name: InternshipApplication.name, schema: InternshipApplicationSchema },
       { name: InternApplication.name, schema: InternApplicationSchema },
+      { name: PlatformStat.name, schema: PlatformStatSchema },
     ]),
   ],
   controllers: [StatsController],

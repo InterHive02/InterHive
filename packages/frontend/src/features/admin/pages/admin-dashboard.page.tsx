@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Users, Building2, BookOpen, Award, TrendingUp, Calendar, Activity, Bell, Settings } from 'lucide-react';
+import { Users, Building2, BookOpen, Award, Activity, Bell, Settings, BarChart2 } from 'lucide-react';
 import { UserManagement } from '../components/user-management';
 import { CompanyManagement } from '../components/company-management';
 import { ProgramManagement } from '../components/program-management';
 import { SystemSettings } from '../components/system-settings';
+import { AdminLandingStats } from '../components/admin-landing-stats';
 import { useAdmin } from '../hooks/use-admin';
 
-type TabType = 'overview' | 'users' | 'companies' | 'programs' | 'settings';
+type TabType = 'overview' | 'users' | 'companies' | 'programs' | 'stats' | 'settings';
 
 export const AdminDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -144,6 +145,17 @@ export const AdminDashboardPage: React.FC = () => {
             Programs
           </button>
           <button
+            onClick={() => setActiveTab('stats')}
+            className={`px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'stats'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            <BarChart2 className="w-4 h-4 inline mr-2" />
+            Landing Stats
+          </button>
+          <button
             onClick={() => setActiveTab('settings')}
             className={`px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === 'settings'
@@ -206,6 +218,10 @@ export const AdminDashboardPage: React.FC = () => {
               onPublish={(id) => console.log('Publish program:', id)}
               onArchive={(id) => console.log('Archive program:', id)}
             />
+          )}
+
+          {activeTab === 'stats' && (
+            <AdminLandingStats />
           )}
 
           {activeTab === 'settings' && (

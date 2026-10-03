@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getLandingStats, saveLandingStats, LandingStats, DEFAULT_LANDING_STATS } from '../../utils/landing-stats';
+import { statsApi, LandingStatItem } from '../../../api/endpoints/stats.api';
 import { Sliders, Save, RefreshCw, CheckCircle2, Building2, Briefcase, Users, Star } from 'lucide-react';
 
 export const LandingStatsEditor: React.FC = () => {
   const [stats, setStats] = useState<LandingStats>(getLandingStats());
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     saveLandingStats(stats);
+
+    try {
+      const topCompNum = parseInt(stats.topCompanies.replace(/\D/g, ''), 10) || 80;
+      const activeIntNum = parseInt(stats.activeInternships.replace(/\D/g, ''), 10) || 1200;
+      const studentsPlacedNum = parseInt(stats.studentsPlaced.replace(/\D/g, ''), 10) || 5000;
+      const ratingNum = parseInt(stats.userRating.replace(/\D/g, ''), 10) || 70;
+
+      await Promise.allSettled([
+        statsApi.updateStat('partner_companies', { manualValue: topCompNum, useManualValue: true }),
+        statsApi.updateStat('internships_provided', { manualValue: activeIntNum, useManualValue: true }),
+        statsApi.updateStat('students_trained', { manualValue: studentsPlacedNum, useManualValue: true }),
+        statsApi.updateStat('ppo_conversion', { manualValue: ratingNum, useManualValue: true }),
+      ]);
+    } catch (err) {}
+
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
