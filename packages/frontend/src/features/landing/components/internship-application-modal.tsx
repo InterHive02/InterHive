@@ -29,7 +29,7 @@ const COUNTRIES: CountryDialCode[] = [
   { country: 'United States', code: '+1', flag: '🇺🇸', minDigits: 10, maxDigits: 10, placeholder: '202 555 0123' },
   { country: 'United Kingdom', code: '+44', flag: '🇬🇧', minDigits: 10, maxDigits: 10, placeholder: '7911 123456' },
   { country: 'United Arab Emirates', code: '+971', flag: '🇦🇪', minDigits: 9, maxDigits: 9, placeholder: '50 123 4567' },
-  { country: 'Canada', code: '+1', flag: '🇨🇦', minDigits: 10, maxDigits: 10, placeholder: '416 555 0199' },
+  { country: 'Canada', code: '+1-CA', flag: '🇨🇦', minDigits: 10, maxDigits: 10, placeholder: '416 555 0199' },
   { country: 'Singapore', code: '+65', flag: '🇸🇬', minDigits: 8, maxDigits: 8, placeholder: '8123 4567' },
   { country: 'Australia', code: '+61', flag: '🇦🇺', minDigits: 9, maxDigits: 9, placeholder: '412 345 678' },
   { country: 'Germany', code: '+49', flag: '🇩🇪', minDigits: 10, maxDigits: 11, placeholder: '151 23456789' },
@@ -39,6 +39,9 @@ const COUNTRIES: CountryDialCode[] = [
   { country: 'Nepal', code: '+977', flag: '🇳🇵', minDigits: 10, maxDigits: 10, placeholder: '984 1234567' },
   { country: 'Other', code: '+', flag: '🌐', minDigits: 7, maxDigits: 15, placeholder: 'Phone digits' },
 ];
+
+// Resolve display dial code from internal country code (Canada uses +1-CA internally)
+const getDisplayCode = (code: string) => code === '+1-CA' ? '+1' : code;
 
 const GENDER_OPTIONS = [
   { value: 'male', label: 'Male' },
@@ -56,6 +59,9 @@ const TRACK_OPTIONS = [
   'UI/UX Design',
   'DevOps & Cloud',
   'Mobile App Development',
+  'Cybersecurity',
+  'Blockchain & Web3',
+  'Other',
 ];
 
 const WORKPLACE_OPTIONS = [
@@ -66,15 +72,16 @@ const WORKPLACE_OPTIONS = [
 
 const AVAILABILITY_OPTIONS = [
   { value: 'Immediate (Within 1 week)', label: 'Immediate' },
-  { value: 'Within 2-3 weeks', label: '2-3 weeks' },
+  { value: 'Within 2-3 weeks', label: '2–3 Weeks' },
   { value: 'Next Month (Semester Break)', label: 'Next Month' },
   { value: 'Flexible / Discuss during interview', label: 'Flexible' },
+  { value: 'Other', label: 'Other' },
 ];
 
 const SUGGESTED_SKILLS = [
   'React', 'TypeScript', 'Node.js', 'Python', 'Next.js',
   'Tailwind CSS', 'SQL', 'MongoDB', 'Docker', 'AWS',
-  'FastAPI', 'Figma', 'GraphQL', 'Git'
+  'FastAPI', 'Figma', 'GraphQL', 'Git',
 ];
 
 const INDIAN_STATES = [
@@ -85,7 +92,55 @@ const INDIAN_STATES = [
   'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
   'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
   'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
-  'Outside India / Other'
+  'Outside India / Other',
+];
+
+const DEGREE_OPTIONS = [
+  'B.Tech / B.E.',
+  'BCA (Computer Applications)',
+  'MCA (Computer Applications)',
+  'B.Sc Computer Science / IT',
+  'M.Tech / M.E.',
+  'MBA',
+  'BBA',
+  'B.Com',
+  'B.Sc (Non-CS)',
+  'Dual Degree / Integrated',
+  'Diploma in Engineering',
+  'Ph.D.',
+  'Other',
+];
+
+const BRANCH_OPTIONS = [
+  'Computer Science & Engineering',
+  'Information Technology',
+  'Electronics & Communication Engineering',
+  'Electrical Engineering',
+  'Mechanical Engineering',
+  'Civil Engineering',
+  'Chemical Engineering',
+  'Artificial Intelligence & Machine Learning',
+  'Data Science',
+  'Cybersecurity',
+  'Biotechnology',
+  'Physics',
+  'Mathematics & Statistics',
+  'Commerce',
+  'Management',
+  'Not Applicable',
+  'Other',
+];
+
+const SEMESTER_OPTIONS = [
+  { value: '1st Semester', label: '1st Semester (1st Year)' },
+  { value: '2nd Semester', label: '2nd Semester (1st Year)' },
+  { value: '3rd Semester', label: '3rd Semester (2nd Year)' },
+  { value: '4th Semester', label: '4th Semester (2nd Year)' },
+  { value: '5th Semester', label: '5th Semester (3rd Year)' },
+  { value: '6th Semester', label: '6th Semester (3rd Year)' },
+  { value: '7th Semester', label: '7th Semester (4th Year)' },
+  { value: '8th Semester', label: '8th Semester (4th Year)' },
+  { value: 'Recent Graduate (Passout)', label: 'Recent Graduate / Passout' },
 ];
 
 const STEPS = [
@@ -114,13 +169,21 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   // Validation feedback states
   const [nameError, setNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [pinError, setPinError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<CountryDialCode>(COUNTRIES[0]);
-  
+
   // Explicit unbundled consents
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToDataProcessing, setAgreedToDataProcessing] = useState(false);
   const [confirmedLinkPublic, setConfirmedLinkPublic] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  // "Other" expansion state
+  const [otherDegreeText, setOtherDegreeText] = useState('');
+  const [otherBranchText, setOtherBranchText] = useState('');
+  const [otherStateText, setOtherStateText] = useState('');
+  const [otherTrackText, setOtherTrackText] = useState('');
+  const [otherAvailabilityText, setOtherAvailabilityText] = useState('');
 
   const fileInputId = useId();
 
@@ -133,16 +196,16 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     gender: '', // Unselected by default for DPDP data minimisation
     city: '',
     state: 'Karnataka',
+    pinCode: '',
     countryCode: '+91',
 
     // Step 2: Academic
     institution: '',
     degree: 'B.Tech / B.E.',
     branch: 'Computer Science & Engineering',
-    semester: '6th Semester (3rd Year)',
+    semester: '6th Semester',
     graduationYear: String(currentYear + 1),
     cgpa: '',
-    rollNumber: '',
 
     // Step 3: Domain & Skills
     skills: '',
@@ -164,7 +227,26 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
   if (!isOpen) return null;
 
-  // Strict Name Character Validation (Unicode-letter pattern supporting accented letters, apostrophes, hyphens)
+  // ──────────────────── helpers ────────────────────
+
+  const isOutsideIndia = formData.state === 'Outside India / Other';
+  const isDegreeOther = formData.degree === 'Other';
+  const isBranchOther = formData.branch === 'Other';
+  const isAvailabilityOther = formData.availability === 'Other';
+  const hasOtherTrack = formData.areasOfInterest.includes('Other');
+
+  // Resolved values for submission (replace "Other" with user-typed text)
+  const resolvedDegree = isDegreeOther ? otherDegreeText.trim() : formData.degree;
+  const resolvedBranch = isBranchOther ? otherBranchText.trim() : formData.branch;
+  const resolvedState = isOutsideIndia ? (otherStateText.trim() || 'Outside India / Other') : formData.state;
+  const resolvedAvailability = isAvailabilityOther
+    ? (otherAvailabilityText.trim() || 'Flexible / Discuss during interview')
+    : formData.availability;
+  const resolvedInterests = formData.areasOfInterest.map(t =>
+    t === 'Other' ? (otherTrackText.trim() || 'Other') : t
+  );
+
+  // Strict Name Character Validation (Unicode-letter pattern supporting accented letters)
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = e.target.value;
     if (/^[\p{L}\p{M}\s.'-]*$/u.test(rawVal)) {
@@ -185,7 +267,18 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     }
   };
 
-  // Strict Phone Digits Validation according to Selected Country
+  // PIN Code validation (6-digit numeric for India, skipped for outside India)
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setFormData(prev => ({ ...prev, pinCode: digitsOnly }));
+    if (digitsOnly.length > 0 && digitsOnly.length < 6) {
+      setPinError('PIN code must be exactly 6 digits.');
+    } else {
+      setPinError(null);
+    }
+  };
+
+  // Strict Phone Digits Validation
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digitsOnly = e.target.value.replace(/\D/g, '');
     if (digitsOnly.length <= selectedCountry.maxDigits) {
@@ -197,9 +290,9 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   };
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const found = COUNTRIES.find(c => c.code === e.target.value) || COUNTRIES[0];
+    const found = COUNTRIES.find(c => c.country === e.target.value) || COUNTRIES[0];
     setSelectedCountry(found);
-    setFormData(prev => ({ ...prev, countryCode: found.code, phone: '' }));
+    setFormData(prev => ({ ...prev, countryCode: getDisplayCode(found.code), phone: '' }));
     setPhoneError(null);
   };
 
@@ -207,15 +300,9 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     setFormData(prev => {
       const exists = prev.areasOfInterest.includes(interest);
       if (exists) {
-        return {
-          ...prev,
-          areasOfInterest: prev.areasOfInterest.filter(i => i !== interest),
-        };
+        return { ...prev, areasOfInterest: prev.areasOfInterest.filter(i => i !== interest) };
       } else {
-        return {
-          ...prev,
-          areasOfInterest: [...prev.areasOfInterest, interest],
-        };
+        return { ...prev, areasOfInterest: [...prev.areasOfInterest, interest] };
       }
     });
   };
@@ -258,25 +345,31 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
       const base64Data = reader.result as string;
       setFormData(prev => ({ ...prev, resumeUrl: base64Data }));
       setUploadedFileName(file.name);
-      setConfirmedLinkPublic(true); // Uploaded directly, no link access issue
+      setConfirmedLinkPublic(true);
       toast.success(`Attached ${file.name} (${(file.size / 1024).toFixed(0)} KB)`);
     };
     reader.readAsDataURL(file);
   };
 
-  // Step 1 Validation
+  // ──────────────────── step validators ────────────────────
+
   const validateStep1 = () => {
     setErrorMessage(null);
+
     if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
-      setErrorMessage('Please enter your full official name.');
+      setErrorMessage('Please enter your full official name (at least 2 characters).');
+      return false;
+    }
+    if (formData.fullName.trim().length > 100) {
+      setErrorMessage('Full name cannot exceed 100 characters.');
       return false;
     }
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       setErrorMessage('Please enter a valid email address.');
       return false;
     }
-    
-    // Strict Indian phone validation: ^[6-9]\d{9}$
+
+    // Strict Indian phone validation
     if (selectedCountry.code === '+91') {
       if (!/^[6-9]\d{9}$/.test(formData.phone)) {
         setPhoneError('Indian mobile numbers must be 10 digits starting with 6, 7, 8, or 9.');
@@ -295,47 +388,88 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
       setErrorMessage('Please enter your current city.');
       return false;
     }
+
+    // PIN code: required for India residents, optional for outside India
+    if (!isOutsideIndia) {
+      if (!formData.pinCode || formData.pinCode.length !== 6) {
+        setPinError('Please enter a valid 6-digit PIN code.');
+        setErrorMessage('Please enter your 6-digit PIN / Postal code.');
+        return false;
+      }
+    } else if (formData.pinCode && formData.pinCode.length > 0 && formData.pinCode.length < 6) {
+      setPinError('PIN code must be exactly 6 digits.');
+      setErrorMessage('Please enter a valid PIN code.');
+      return false;
+    }
+
+    // If state is outside India, require the custom text
+    if (isOutsideIndia && !otherStateText.trim()) {
+      setErrorMessage('Please specify your country / region since you selected "Outside India / Other".');
+      return false;
+    }
+
     return true;
   };
 
-  // Step 2 Validation (including Cross-field checks)
   const validateStep2 = () => {
     setErrorMessage(null);
+
     if (!formData.institution.trim()) {
       setErrorMessage('Please enter your college or university name.');
       return false;
     }
+    if (formData.institution.trim().length > 150) {
+      setErrorMessage('Institution name cannot exceed 150 characters.');
+      return false;
+    }
+
     if (!formData.degree.trim()) {
-      setErrorMessage('Please select or specify your degree program.');
+      setErrorMessage('Please select your degree program.');
+      return false;
+    }
+    if (isDegreeOther && !otherDegreeText.trim()) {
+      setErrorMessage('Please specify your degree / qualification in the "Other" field.');
+      return false;
+    }
+    if (isBranchOther && !otherBranchText.trim()) {
+      setErrorMessage('Please specify your branch / specialization in the "Other" field.');
       return false;
     }
 
     // Cross-field validation: Recent graduate vs future graduation year
     const gradYearNum = parseInt(formData.graduationYear, 10);
-    const isRecentGrad = formData.semester.toLowerCase().includes('recent graduate');
+    const isRecentGrad = formData.semester === 'Recent Graduate (Passout)';
 
     if (isRecentGrad && gradYearNum > currentYear) {
-      setErrorMessage(`A recent graduate cannot have a future graduation year (${formData.graduationYear}). Please adjust your graduation year or semester.`);
+      setErrorMessage(`A recent graduate cannot have a future graduation year (${formData.graduationYear}). Please adjust your graduation year.`);
       return false;
     }
 
-    if (!isRecentGrad && gradYearNum < currentYear) {
-      setErrorMessage(`Selected graduation year (${formData.graduationYear}) has already passed. Please select 'Recent Graduate' or choose your expected future graduation year.`);
+    if (!isRecentGrad && gradYearNum < currentYear - 1) {
+      setErrorMessage(`Selected graduation year (${formData.graduationYear}) seems too far in the past. Please select 'Recent Graduate' or choose your expected graduation year.`);
       return false;
     }
 
     return true;
   };
 
-  // Step 3 Validation
   const validateStep3 = () => {
     setErrorMessage(null);
+
     if (!formData.skills.trim()) {
-      setErrorMessage('Please enter at least one technical skill or select from the tags.');
+      setErrorMessage('Please enter at least one technical skill or select from the suggestions.');
       return false;
     }
     if (formData.areasOfInterest.length === 0) {
       setErrorMessage('Please choose at least one track or area of interest.');
+      return false;
+    }
+    if (hasOtherTrack && !otherTrackText.trim()) {
+      setErrorMessage('Please specify your track in the "Other" field below the track selector.');
+      return false;
+    }
+    if (isAvailabilityOther && !otherAvailabilityText.trim()) {
+      setErrorMessage('Please specify your availability in the "Other" field.');
       return false;
     }
     return true;
@@ -379,27 +513,27 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
         .map(s => s.trim())
         .filter(Boolean);
 
-      const fullPhoneNumber = `${selectedCountry.code} ${formData.phone}`;
+      const fullPhoneNumber = `${getDisplayCode(selectedCountry.code)} ${formData.phone}`;
 
       await applicationsApi.submitApplication({
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
         phone: fullPhoneNumber,
-        countryCode: selectedCountry.code,
+        countryCode: getDisplayCode(selectedCountry.code),
         gender: formData.gender || undefined,
         city: formData.city.trim(),
-        state: formData.state.trim(),
+        state: resolvedState,
         institution: formData.institution.trim(),
-        degree: formData.degree.trim(),
-        branch: formData.branch.trim(),
-        semester: formData.semester.trim(),
+        degree: resolvedDegree,
+        branch: resolvedBranch,
+        semester: formData.semester,
         graduationYear: formData.graduationYear,
         cgpa: formData.cgpa.trim(),
-        rollNumber: formData.rollNumber.trim(),
+        rollNumber: '',
         skills: parsedSkills.length > 0 ? parsedSkills : ['JavaScript', 'React'],
-        areasOfInterest: formData.areasOfInterest,
+        areasOfInterest: resolvedInterests,
         internshipPreference: formData.internshipPreference,
-        availability: formData.availability,
+        availability: resolvedAvailability,
         previousExperience: formData.previousExperience.trim(),
         resumeUrl: formData.resumeUrl.trim(),
         linkedInUrl: formData.linkedInUrl.trim(),
@@ -431,19 +565,34 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     setErrorMessage(null);
     setNameError(null);
     setPhoneError(null);
+    setPinError(null);
     setAgreedToTerms(false);
     setAgreedToDataProcessing(false);
     setConfirmedLinkPublic(false);
     setUploadedFileName(null);
+    setOtherDegreeText('');
+    setOtherBranchText('');
+    setOtherStateText('');
+    setOtherTrackText('');
+    setOtherAvailabilityText('');
   };
 
   const firstName = formData.fullName.trim().split(' ')[0] || 'Applicant';
 
+  // ──────────────────── shared class helpers ────────────────────
+
+  const inputCls = 'w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none';
+  const selectCls = `${inputCls} cursor-pointer`;
+  const labelCls = 'block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5';
+  const hintCls = 'text-[12.5px] text-slate-500 dark:text-slate-400 mt-1';
+  const errorHintCls = 'text-[12.5px] font-medium text-red-500 mt-1';
+  const otherInputCls = `${inputCls} mt-2`;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
-      {/* Centered card: max 760px, 1px border, large radius (16px), subtle shadow */}
+      {/* Centered card */}
       <div className="relative w-full max-w-[760px] bg-surface dark:bg-surface-dark border border-slate-200 dark:border-[#2D3347] rounded-[16px] shadow-custom flex flex-col max-h-[92dvh] overflow-hidden text-slate-900 dark:text-slate-100">
-        
+
         {/* ================= ZONE 1: HEADER ================= */}
         <div className="px-6 pt-6 pb-5 relative shrink-0 border-b border-slate-200 dark:border-[#2D3347]">
           {/* Close button */}
@@ -475,7 +624,6 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
           {/* Hexagon Step Indicator */}
           {!isSubmitted && (
             <div className="mt-6">
-              {/* Desktop & Tablet Hexagon Stepper */}
               <div className="relative flex items-center justify-between">
                 {/* Connecting thin line */}
                 <div className="absolute left-[17px] right-[17px] top-[19px] -translate-y-1/2 h-[1.5px] bg-slate-200 dark:bg-slate-700 z-0" />
@@ -486,15 +634,10 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                   const isUpcoming = currentStep < step.number;
 
                   return (
-                    <div
-                      key={step.number}
-                      className="relative z-10 flex flex-col items-center group"
-                    >
+                    <div key={step.number} className="relative z-10 flex flex-col items-center group">
                       <button
                         type="button"
-                        onClick={() => {
-                          if (isCompleted) setCurrentStep(step.number as any);
-                        }}
+                        onClick={() => { if (isCompleted) setCurrentStep(step.number as any); }}
                         disabled={isUpcoming}
                         aria-label={`Step ${step.number}: ${step.name}`}
                         className={`w-[34px] h-[38px] flex items-center justify-center transition-colors duration-150 ${
@@ -504,9 +647,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                             ? 'bg-primary text-white shadow-xs cursor-default'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-default'
                         }`}
-                        style={{
-                          clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                        }}
+                        style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                       >
                         {isCompleted ? (
                           <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -515,7 +656,6 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         )}
                       </button>
 
-                      {/* Step Name */}
                       <span
                         className={`mt-1.5 text-[12.5px] transition-colors duration-150 ${
                           isCurrent
@@ -539,7 +679,6 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                 </span>
               </div>
 
-              {/* Helper Line below Header */}
               <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
                 Step {currentStep} of 4. Fields marked <span className="text-red-500">*</span> are required.
               </p>
@@ -547,7 +686,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
           )}
         </div>
 
-        {/* ================= ZONE 2: FORM BODY (2-Column Grid) ================= */}
+        {/* ================= ZONE 2: FORM BODY ================= */}
         <div className="p-6 overflow-y-auto flex-1">
           {isSubmitted ? (
             /* Success State */
@@ -582,29 +721,31 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
           ) : (
             <form onSubmit={handleSubmit} id="application-form">
               {errorMessage && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border-[1.5px] border-red-500 rounded-[10px] text-[12.5px] font-medium text-red-500">
+                <div role="alert" className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border-[1.5px] border-red-500 rounded-[10px] text-[12.5px] font-medium text-red-500">
                   {errorMessage}
                 </div>
               )}
 
-              {/* Grid: 2 columns with 16px col gap, 18px row gap, collapses under 600px */}
+              {/* Grid: 2 columns, collapses under 600px */}
               <div className="grid grid-cols-1 min-[600px]:grid-cols-2 gap-x-[16px] gap-y-[18px]">
-                
+
                 {/* ================= STEP 1: PERSONAL ================= */}
                 {currentStep === 1 && (
                   <>
-                    {/* Full Name (spans 2 cols) with Unicode-letter pattern */}
+                    {/* Full Name */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         required
+                        maxLength={100}
                         value={formData.fullName}
                         onChange={handleNameChange}
                         onKeyDown={handleNameKeyDown}
-                        placeholder="e.g. John Doe or Renée Müller"
+                        placeholder="e.g. Ankit Yadav or Renée Müller"
+                        aria-describedby="name-hint"
                         className={`w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:outline-none ${
                           nameError
                             ? 'border-red-500 focus:border-red-500 focus:ring-[3px] focus:ring-red-500/25'
@@ -612,17 +753,15 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         }`}
                       />
                       {nameError ? (
-                        <p className="text-[12.5px] font-medium text-red-500 mt-1">{nameError}</p>
+                        <p id="name-hint" className={errorHintCls}>{nameError}</p>
                       ) : (
-                        <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">Accepts alphabetical and accented letters. No numbers permitted.</p>
+                        <p id="name-hint" className={hintCls}>Letters only — no numbers or special symbols.</p>
                       )}
                     </div>
 
-                    {/* Gender (Optional under data minimisation, unselected by default) */}
+                    {/* Gender (Optional) */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Gender (Optional)
-                      </label>
+                      <label className={labelCls}>Gender (Optional)</label>
                       <div className="grid grid-cols-2 min-[600px]:grid-cols-4 gap-2">
                         {GENDER_OPTIONS.map((opt) => {
                           const isSelected = formData.gender === opt.value;
@@ -631,17 +770,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                               key={opt.value}
                               type="button"
                               onClick={() => setFormData({ ...formData, gender: isSelected ? '' : opt.value })}
+                              aria-pressed={isSelected}
                               className={`min-h-[44px] px-3.5 rounded-[10px] border-[1.5px] text-[14px] transition-colors duration-150 flex items-center gap-2.5 cursor-pointer text-left ${
                                 isSelected
                                   ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
                                   : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300'
                               }`}
                             >
-                              <span
-                                className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
-                                  isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'
-                                }`}
-                              >
+                              <span className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
                                 {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </span>
                               <span className="truncate">{opt.label}</span>
@@ -651,24 +787,25 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </div>
                     </div>
 
-                    {/* Email Address with short placeholder */}
+                    {/* Email */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Email Address <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
                         inputMode="email"
                         required
+                        maxLength={254}
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
                         placeholder="name@example.com"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
-                      <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">Review feedback delivered within 7 days.</p>
+                      <p className={hintCls}>Review feedback delivered within 7 days.</p>
                     </div>
 
-                    {/* Phone field joined as one control with digit counter on label */}
+                    {/* Phone */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200">
@@ -679,26 +816,22 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         </span>
                       </div>
 
-                      <div
-                        className={`flex min-h-[44px] rounded-[10px] border-[1.5px] bg-slate-50 dark:bg-[#12151E] transition-colors duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/25 ${
-                          phoneError ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500/25' : 'border-slate-200 dark:border-[#2D3347]'
-                        }`}
-                      >
-                        {/* Select on the left: flag + dial code, no gap, shared border */}
+                      <div className={`flex min-h-[44px] rounded-[10px] border-[1.5px] bg-slate-50 dark:bg-[#12151E] transition-colors duration-150 focus-within:border-primary focus-within:ring-[3px] focus-within:ring-primary/25 ${
+                        phoneError ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500/25' : 'border-slate-200 dark:border-[#2D3347]'
+                      }`}>
                         <select
-                          value={selectedCountry.code}
+                          value={selectedCountry.country}
                           onChange={handleCountryChange}
                           aria-label="Country dial code"
                           className="px-[12px] min-h-[44px] bg-transparent text-[14px] font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200 dark:border-[#2D3347] focus:outline-none cursor-pointer shrink-0"
                         >
                           {COUNTRIES.map(c => (
-                            <option key={c.country + c.code} value={c.code} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
-                              {c.flag} {c.code}
+                            <option key={c.country} value={c.country} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                              {c.flag} {getDisplayCode(c.code)}
                             </option>
                           ))}
                         </select>
 
-                        {/* Digits input */}
                         <input
                           type="tel"
                           inputMode="numeric"
@@ -711,42 +844,72 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </div>
 
                       {phoneError ? (
-                        <p className="text-[12.5px] font-medium text-red-500 mt-1">{phoneError}</p>
+                        <p className={errorHintCls}>{phoneError}</p>
                       ) : (
-                        <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">
-                          {selectedCountry.code === '+91' ? 'Must be 10 digits starting with 6, 7, 8, or 9.' : 'Numeric digits only.'}
+                        <p className={hintCls}>
+                          {selectedCountry.code === '+91' ? 'Must start with 6, 7, 8, or 9 — 10 digits.' : 'Numeric digits only.'}
                         </p>
                       )}
                     </div>
 
-                    {/* Current City (Unicode support for apostrophes & accents) */}
+                    {/* Current City */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Current City <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         required
+                        maxLength={80}
                         value={formData.city}
                         onChange={e => {
                           if (/^[\p{L}\p{M}\s.'-]*$/u.test(e.target.value)) {
                             setFormData({ ...formData, city: e.target.value });
                           }
                         }}
-                        placeholder="e.g. Bengaluru, Pune, or D'souza Nagar"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        placeholder="e.g. Bengaluru, Pune, Mumbai"
+                        className={inputCls}
                       />
                     </div>
 
-                    {/* State / Union Territory Dropdown (prevents clash like UP vs Uttar Pradesh) */}
+                    {/* PIN / Postal Code */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
+                        PIN / Postal Code{!isOutsideIndia && <span className="text-red-500"> *</span>}
+                        {isOutsideIndia && <span className="text-slate-500 font-normal"> (Optional)</span>}
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.pinCode}
+                        onChange={handlePinChange}
+                        placeholder={isOutsideIndia ? 'Postal code (if applicable)' : '6-digit PIN code'}
+                        maxLength={6}
+                        className={`w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:outline-none ${
+                          pinError
+                            ? 'border-red-500 focus:border-red-500 focus:ring-[3px] focus:ring-red-500/25'
+                            : 'border-slate-200 dark:border-[#2D3347] focus:border-primary focus:ring-[3px] focus:ring-primary/25'
+                        }`}
+                      />
+                      {pinError ? (
+                        <p className={errorHintCls}>{pinError}</p>
+                      ) : (
+                        <p className={hintCls}>{isOutsideIndia ? 'Enter your local postal code.' : 'Must be exactly 6 digits (India).'}</p>
+                      )}
+                    </div>
+
+                    {/* State / UT Dropdown */}
+                    <div className="min-[600px]:col-span-2">
+                      <label className={labelCls}>
                         State / Union Territory <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={formData.state}
-                        onChange={e => setFormData({ ...formData, state: e.target.value })}
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        onChange={e => {
+                          setFormData({ ...formData, state: e.target.value });
+                          if (e.target.value !== 'Outside India / Other') setOtherStateText('');
+                        }}
+                        className={selectCls}
                       >
                         {INDIAN_STATES.map(st => (
                           <option key={st} value={st} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
@@ -754,6 +917,18 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           </option>
                         ))}
                       </select>
+                      {/* Dynamic "Other" text field */}
+                      {isOutsideIndia && (
+                        <input
+                          type="text"
+                          required
+                          maxLength={80}
+                          value={otherStateText}
+                          onChange={e => setOtherStateText(e.target.value)}
+                          placeholder="Specify your country / region"
+                          className={otherInputCls}
+                        />
+                      )}
                     </div>
                   </>
                 )}
@@ -761,102 +936,122 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                 {/* ================= STEP 2: ACADEMIC ================= */}
                 {currentStep === 2 && (
                   <>
-                    {/* Institution (spans 2 cols) */}
+                    {/* Institution */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         College / Institution Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         required
+                        maxLength={150}
                         value={formData.institution}
                         onChange={e => setFormData({ ...formData, institution: e.target.value })}
-                        placeholder="e.g. National Institute of Technology"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        placeholder="e.g. National Institute of Technology, Bengaluru"
+                        className={inputCls}
                       />
                     </div>
 
                     {/* Degree */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Degree / Program <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={formData.degree}
                         onChange={e => setFormData({ ...formData, degree: e.target.value })}
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={selectCls}
                       >
-                        <option value="B.Tech / B.E.">B.Tech / B.E.</option>
-                        <option value="BCA">BCA (Computer Applications)</option>
-                        <option value="MCA">MCA (Computer Applications)</option>
-                        <option value="B.Sc Computer Science / IT">B.Sc Computer Science / IT</option>
-                        <option value="M.Tech / M.E.">M.Tech / M.E.</option>
-                        <option value="Dual Degree / Integrated">Dual Degree / Integrated</option>
-                        <option value="Diploma in Engineering">Diploma in Engineering</option>
-                        <option value="Other Degree">Other Degree</option>
+                        {DEGREE_OPTIONS.map(d => (
+                          <option key={d} value={d} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                            {d}
+                          </option>
+                        ))}
                       </select>
+                      {/* Dynamic "Other" field */}
+                      {isDegreeOther && (
+                        <input
+                          type="text"
+                          required
+                          maxLength={100}
+                          value={otherDegreeText}
+                          onChange={e => setOtherDegreeText(e.target.value)}
+                          placeholder="Specify your degree / qualification"
+                          className={otherInputCls}
+                        />
+                      )}
                     </div>
 
                     {/* Branch */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Branch / Specialization <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        required
+                      <select
                         value={formData.branch}
                         onChange={e => setFormData({ ...formData, branch: e.target.value })}
-                        placeholder="e.g. Computer Science & Engineering"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
-                      />
+                        className={selectCls}
+                      >
+                        {BRANCH_OPTIONS.map(b => (
+                          <option key={b} value={b} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                            {b}
+                          </option>
+                        ))}
+                      </select>
+                      {/* Dynamic "Other" field */}
+                      {isBranchOther && (
+                        <input
+                          type="text"
+                          required
+                          maxLength={100}
+                          value={otherBranchText}
+                          onChange={e => setOtherBranchText(e.target.value)}
+                          placeholder="Specify your branch / specialization"
+                          className={otherInputCls}
+                        />
+                      )}
                     </div>
 
                     {/* Current Semester */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Current Semester <span className="text-red-500">*</span>
+                      <label className={labelCls}>
+                        Current Semester / Status <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={formData.semester}
                         onChange={e => setFormData({ ...formData, semester: e.target.value })}
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={selectCls}
                       >
-                        <option value="1st Semester">1st Semester (1st Yr)</option>
-                        <option value="2nd Semester">2nd Semester (1st Yr)</option>
-                        <option value="3rd Semester">3rd Semester (2nd Yr)</option>
-                        <option value="4th Semester">4th Semester (2nd Yr)</option>
-                        <option value="5th Semester">5th Semester (3rd Yr)</option>
-                        <option value="6th Semester (3rd Year)">6th Semester (3rd Yr)</option>
-                        <option value="7th Semester">7th Semester (4th Yr)</option>
-                        <option value="8th Semester">8th Semester (4th Yr)</option>
-                        <option value="Recent Graduate (Passout)">Recent Graduate (Passout)</option>
+                        {SEMESTER_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                            {opt.label}
+                          </option>
+                        ))}
                       </select>
+                      <p className={hintCls}>Select "Recent Graduate" if you have already completed your degree.</p>
                     </div>
 
-                    {/* Graduation Year (Dynamically generated from current year) */}
+                    {/* Graduation Year */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Graduation Year <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={formData.graduationYear}
                         onChange={e => setFormData({ ...formData, graduationYear: e.target.value })}
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={selectCls}
                       >
                         {GRADUATION_YEARS.map(year => (
-                          <option key={year} value={year}>
-                            {year} {parseInt(year, 10) < currentYear ? '(Passout)' : ''}
+                          <option key={year} value={year} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                            {year}{parseInt(year, 10) < currentYear ? ' (Passout)' : ''}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    {/* CGPA */}
+                    {/* CGPA (Optional) */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        CGPA / Percentage
-                      </label>
+                      <label className={labelCls}>CGPA / Percentage</label>
                       <input
                         type="text"
                         value={formData.cgpa}
@@ -866,25 +1061,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                             setFormData({ ...formData, cgpa: val });
                           }
                         }}
-                        placeholder="e.g. 8.5 / 10"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        placeholder="e.g. 8.5 or 85%"
+                        maxLength={8}
+                        className={inputCls}
                       />
-                      <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">Optional academic score.</p>
-                    </div>
-
-                    {/* Roll Number (Optional) */}
-                    <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Roll Number / Student ID
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.rollNumber}
-                        onChange={e => setFormData({ ...formData, rollNumber: e.target.value })}
-                        placeholder="e.g. 21CS042"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
-                      />
-                      <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">Optional college identification ID.</p>
+                      <p className={hintCls}>Optional. Enter CGPA (e.g. 8.5) or percentage (e.g. 85%).</p>
                     </div>
                   </>
                 )}
@@ -892,10 +1073,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                 {/* ================= STEP 3: TRACK & SKILLS ================= */}
                 {currentStep === 3 && (
                   <>
-                    {/* Track Selection (multi-choice with rounded-square marker) - spans 2 cols */}
+                    {/* Track Selection */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Target Track <span className="text-red-500">*</span>
+                        <span className="text-slate-400 font-normal text-[12.5px] ml-1">(select all that apply)</span>
                       </label>
                       <div className="grid grid-cols-1 min-[600px]:grid-cols-2 gap-2">
                         {TRACK_OPTIONS.map((track) => {
@@ -905,17 +1087,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                               key={track}
                               type="button"
                               onClick={() => toggleInterest(track)}
+                              aria-pressed={isSelected}
                               className={`min-h-[44px] px-3.5 rounded-[10px] border-[1.5px] text-[14px] transition-colors duration-150 flex items-center gap-2.5 cursor-pointer text-left ${
                                 isSelected
                                   ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
                                   : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300'
                               }`}
                             >
-                              <span
-                                className={`w-4 h-4 rounded-[4px] border-[1.5px] flex items-center justify-center shrink-0 ${
-                                  isSelected ? 'border-primary bg-primary text-white' : 'border-slate-300 dark:border-slate-600'
-                                }`}
-                              >
+                              <span className={`w-4 h-4 rounded-[4px] border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary text-white' : 'border-slate-300 dark:border-slate-600'}`}>
                                 {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                               </span>
                               <span className="truncate">{track}</span>
@@ -923,15 +1102,26 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           );
                         })}
                       </div>
+                      {/* Dynamic "Other" track field */}
+                      {hasOtherTrack && (
+                        <input
+                          type="text"
+                          required
+                          maxLength={80}
+                          value={otherTrackText}
+                          onChange={e => setOtherTrackText(e.target.value)}
+                          placeholder="Specify your area of interest"
+                          className={otherInputCls}
+                        />
+                      )}
                     </div>
 
-                    {/* Technical Skills: Chips above input, input, suggested pills below (spans 2 cols) */}
+                    {/* Technical Skills */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Technical Skills <span className="text-red-500">*</span>
                       </label>
 
-                      {/* Selected skills as small rounded chips with × button above input */}
                       {currentSkillsList.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-2">
                           {currentSkillsList.map(skill => (
@@ -956,13 +1146,13 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       <input
                         type="text"
                         required
+                        maxLength={500}
                         value={formData.skills}
                         onChange={e => setFormData({ ...formData, skills: e.target.value })}
                         placeholder="Type skills separated by commas (e.g. React, TypeScript, Python)"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
 
-                      {/* Suggested skills as small outlined pills with a "+" prefix below input */}
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {SUGGESTED_SKILLS.map(skill => (
                           <button
@@ -977,9 +1167,9 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </div>
                     </div>
 
-                    {/* Workplace Preference (Single choice pills with radio circles) */}
+                    {/* Workplace Preference */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Workplace Preference <span className="text-red-500">*</span>
                       </label>
                       <div className="grid grid-cols-3 gap-2">
@@ -990,17 +1180,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                               key={opt.value}
                               type="button"
                               onClick={() => setFormData({ ...formData, internshipPreference: opt.value as any })}
+                              aria-pressed={isSelected}
                               className={`min-h-[44px] px-3.5 rounded-[10px] border-[1.5px] text-[14px] transition-colors duration-150 flex items-center justify-center gap-2 cursor-pointer ${
                                 isSelected
                                   ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
                                   : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300'
                               }`}
                             >
-                              <span
-                                className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
-                                  isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'
-                                }`}
-                              >
+                              <span className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
                                 {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </span>
                               <span>{opt.label}</span>
@@ -1010,12 +1197,12 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </div>
                     </div>
 
-                    {/* Availability (Single choice pills with radio circles) */}
+                    {/* Availability */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Earliest Availability <span className="text-red-500">*</span>
                       </label>
-                      <div className="grid grid-cols-2 min-[600px]:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 min-[600px]:grid-cols-5 gap-2">
                         {AVAILABILITY_OPTIONS.map(opt => {
                           const isSelected = formData.availability === opt.value;
                           return (
@@ -1023,17 +1210,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                               key={opt.value}
                               type="button"
                               onClick={() => setFormData({ ...formData, availability: opt.value })}
+                              aria-pressed={isSelected}
                               className={`min-h-[44px] px-3 rounded-[10px] border-[1.5px] text-[14px] transition-colors duration-150 flex items-center gap-2 cursor-pointer text-left ${
                                 isSelected
                                   ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
                                   : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300'
                               }`}
                             >
-                              <span
-                                className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${
-                                  isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'
-                                }`}
-                              >
+                              <span className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
                                 {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </span>
                               <span className="truncate">{opt.label}</span>
@@ -1041,21 +1225,37 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           );
                         })}
                       </div>
+                      {/* Dynamic "Other" availability field */}
+                      {isAvailabilityOther && (
+                        <input
+                          type="text"
+                          required
+                          maxLength={100}
+                          value={otherAvailabilityText}
+                          onChange={e => setOtherAvailabilityText(e.target.value)}
+                          placeholder="Specify your earliest availability (e.g. After 15th December)"
+                          className={otherInputCls}
+                        />
+                      )}
                     </div>
 
-                    {/* Past Experience (spans 2 cols) */}
+                    {/* Past Experience */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Past Experience or Projects
-                      </label>
-                      <input
-                        type="text"
+                      <label className={labelCls}>Past Experience or Projects</label>
+                      <textarea
+                        rows={3}
+                        maxLength={600}
                         value={formData.previousExperience}
                         onChange={e => setFormData({ ...formData, previousExperience: e.target.value })}
-                        placeholder="e.g. Built full-stack dashboard, completed React hackathon"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        placeholder="e.g. Built a full-stack dashboard with React and Node.js; completed a hackathon project on real-time data visualization."
+                        className="w-full min-h-[80px] p-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none resize-none"
                       />
-                      <p className="text-[12.5px] text-slate-500 dark:text-slate-400 mt-1">Brief summary of prior projects or internships.</p>
+                      <div className="flex justify-between text-[12.5px] mt-1">
+                        <span className={hintCls}>Optional — brief summary of prior projects or internships.</span>
+                        <span className={`font-medium ${formData.previousExperience.length > 550 ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                          {formData.previousExperience.length}/600
+                        </span>
+                      </div>
                     </div>
                   </>
                 )}
@@ -1063,11 +1263,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                 {/* ================= STEP 4: RESUME & SOP ================= */}
                 {currentStep === 4 && (
                   <>
-                    {/* Resume / CV Link with PDF file upload toggle (spans 2 cols) */}
+                    {/* Resume / CV */}
                     <div className="min-[600px]:col-span-2">
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200">
-                          Resume / CV Link <span className="text-red-500">*</span>
+                          Resume / CV <span className="text-red-500">*</span>
                         </label>
                         <label
                           htmlFor={fileInputId}
@@ -1108,14 +1308,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           type="url"
                           inputMode="url"
                           required
+                          maxLength={500}
                           value={formData.resumeUrl}
                           onChange={e => setFormData({ ...formData, resumeUrl: e.target.value })}
                           placeholder="https://drive.google.com/file/d/your-resume-link"
-                          className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                          className={inputCls}
                         />
                       )}
 
-                      {/* Explicit Confirmation Checkbox for Link Access */}
                       {!uploadedFileName && (
                         <label className="flex items-start gap-2.5 mt-2 cursor-pointer select-none">
                           <input
@@ -1131,59 +1331,57 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       )}
                     </div>
 
-                    {/* GitHub Link */}
+                    {/* GitHub */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        GitHub Profile
-                      </label>
+                      <label className={labelCls}>GitHub Profile</label>
                       <input
                         type="url"
                         inputMode="url"
+                        maxLength={200}
                         value={formData.githubUrl}
                         onChange={e => setFormData({ ...formData, githubUrl: e.target.value })}
                         placeholder="https://github.com/username"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
                     </div>
 
-                    {/* LinkedIn Link */}
+                    {/* LinkedIn */}
                     <div>
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        LinkedIn Profile
-                      </label>
+                      <label className={labelCls}>LinkedIn Profile</label>
                       <input
                         type="url"
                         inputMode="url"
+                        maxLength={200}
                         value={formData.linkedInUrl}
                         onChange={e => setFormData({ ...formData, linkedInUrl: e.target.value })}
                         placeholder="https://linkedin.com/in/username"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
                     </div>
 
-                    {/* Portfolio Link (spans 2 cols) */}
+                    {/* Portfolio */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Portfolio or Live Demo
-                      </label>
+                      <label className={labelCls}>Portfolio or Live Demo</label>
                       <input
                         type="url"
                         inputMode="url"
+                        maxLength={200}
                         value={formData.portfolioUrl}
                         onChange={e => setFormData({ ...formData, portfolioUrl: e.target.value })}
                         placeholder="https://yourportfolio.dev"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
                     </div>
 
-                    {/* Reason for Applying (SOP - Min 150 characters, live counter) */}
+                    {/* Reason for Applying (SOP — min 150 chars) */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                      <label className={labelCls}>
                         Why do you want to join InterHive? <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         required
                         rows={4}
+                        maxLength={2000}
                         value={formData.reasonForApplying}
                         onChange={e => setFormData({ ...formData, reasonForApplying: e.target.value })}
                         placeholder="Share your technical goals, what projects you hope to contribute to, and why you are interested in hands-on production experience (minimum 150 characters)..."
@@ -1191,33 +1389,26 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       />
                       <div className="flex items-center justify-between text-[12.5px] mt-1">
                         <span className="text-slate-500 dark:text-slate-400">Explain your learning goals in detail.</span>
-                        <span
-                          className={`font-semibold ${
-                            formData.reasonForApplying.trim().length >= 150
-                              ? 'text-emerald-500'
-                              : 'text-amber-500'
-                          }`}
-                        >
-                          {formData.reasonForApplying.trim().length} / 150 characters min
+                        <span className={`font-semibold ${formData.reasonForApplying.trim().length >= 150 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                          {formData.reasonForApplying.trim().length} / 150 min
                         </span>
                       </div>
                     </div>
 
-                    {/* Additional Info (spans 2 cols) */}
+                    {/* Additional Notes */}
                     <div className="min-[600px]:col-span-2">
-                      <label className="block text-[14px] font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Additional Notes (Optional)
-                      </label>
+                      <label className={labelCls}>Additional Notes (Optional)</label>
                       <input
                         type="text"
+                        maxLength={300}
                         value={formData.additionalInfo}
                         onChange={e => setFormData({ ...formData, additionalInfo: e.target.value })}
                         placeholder="Certifications, specific tech stack interests, or queries"
-                        className="w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none"
+                        className={inputCls}
                       />
                     </div>
 
-                    {/* Unbundled Consent 1: Terms of Service */}
+                    {/* Consent 1: Terms */}
                     <div className="min-[600px]:col-span-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                       <label className="flex items-start gap-3 cursor-pointer select-none">
                         <input
@@ -1229,12 +1420,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         />
                         <span className="text-[14px] leading-relaxed text-slate-700 dark:text-slate-300">
                           I have read and agree to the InterHive{' '}
-                          <a
-                            href="/terms"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline font-medium"
-                          >
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                             Terms of Service
                           </a>{' '}
                           and internship program rules.
@@ -1242,7 +1428,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       </label>
                     </div>
 
-                    {/* Unbundled Consent 2: DPDP Act Data Processing Consent with Grievance Officer */}
+                    {/* Consent 2: DPDP */}
                     <div className="min-[600px]:col-span-2">
                       <label className="flex items-start gap-3 cursor-pointer select-none">
                         <input
@@ -1254,19 +1440,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         />
                         <span className="text-[14px] leading-relaxed text-slate-700 dark:text-slate-300">
                           I consent to InterHive processing my academic and contact details for internship evaluation under the Digital Personal Data Protection (DPDP) Act, 2023. Grievance Contact: Ankit Yadav (
-                          <a
-                            href="mailto:interhive.info@gmail.com"
-                            className="text-primary hover:underline font-medium"
-                          >
+                          <a href="mailto:interhive.info@gmail.com" className="text-primary hover:underline font-medium">
                             interhive.info@gmail.com
                           </a>
                           ). View{' '}
-                          <a
-                            href="/privacy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline font-medium"
-                          >
+                          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                             Privacy Policy
                           </a>
                           .
@@ -1283,7 +1461,6 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
         {/* ================= ZONE 3: FOOTER BAR ================= */}
         {!isSubmitted && (
           <div className="px-6 py-4 border-t border-slate-200 dark:border-[#2D3347] flex items-center justify-between gap-3 shrink-0 bg-surface dark:bg-surface-dark">
-            {/* Back button (outlined) on the left */}
             <div>
               {currentStep > 1 ? (
                 <button
@@ -1298,14 +1475,11 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
               )}
             </div>
 
-            {/* Primary Action on the right */}
             <div>
               {currentStep === 1 && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (validateStep1()) setCurrentStep(2);
-                  }}
+                  onClick={() => { if (validateStep1()) setCurrentStep(2); }}
                   className="min-h-[46px] px-6 rounded-[12px] bg-primary hover:bg-primary-dark text-white font-semibold text-[15px] transition-colors duration-150 cursor-pointer shadow-custom focus:outline-none focus:ring-[3px] focus:ring-primary/25"
                 >
                   Next: Academic
@@ -1315,9 +1489,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
               {currentStep === 2 && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (validateStep2()) setCurrentStep(3);
-                  }}
+                  onClick={() => { if (validateStep2()) setCurrentStep(3); }}
                   className="min-h-[46px] px-6 rounded-[12px] bg-primary hover:bg-primary-dark text-white font-semibold text-[15px] transition-colors duration-150 cursor-pointer shadow-custom focus:outline-none focus:ring-[3px] focus:ring-primary/25"
                 >
                   Next: Skills & Track
@@ -1327,9 +1499,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
               {currentStep === 3 && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (validateStep3()) setCurrentStep(4);
-                  }}
+                  onClick={() => { if (validateStep3()) setCurrentStep(4); }}
                   className="min-h-[46px] px-6 rounded-[12px] bg-primary hover:bg-primary-dark text-white font-semibold text-[15px] transition-colors duration-150 cursor-pointer shadow-custom focus:outline-none focus:ring-[3px] focus:ring-primary/25"
                 >
                   Next: Resume & Statement
