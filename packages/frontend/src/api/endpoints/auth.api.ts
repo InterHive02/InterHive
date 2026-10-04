@@ -68,12 +68,6 @@ export const authApi = {
   getProfile: () =>
     apiClient.get<{ user: any }>('/auth/me'),
 
-  getLoginActivity: () =>
-    apiClient.get<{ loginHistory: any[] }>('/auth/login-activity'),
-
-  validateToken: () =>
-    apiClient.get<{ user: any }>('/auth/validate-token'),
-
   sendOtp: (email: string) =>
     apiClient.post<{ success: boolean; message: string }>('/auth/send-otp', { email }),
 

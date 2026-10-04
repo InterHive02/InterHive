@@ -73,7 +73,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refresh(@Req() request: Request) {
-    const refreshToken = request.cookies['refresh_token'];
+    const refreshToken = request.cookies['refresh_token'] || (request.body && request.body.refreshToken);
     return this.authService.refreshToken(refreshToken);
   }
 

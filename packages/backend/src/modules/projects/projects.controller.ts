@@ -78,6 +78,83 @@ export class ProjectsController {
     return this.projectsService.getStats();
   }
 
+  // Tasks
+  @Post(':projectId/tasks')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Create task for project' })
+  @ApiResponse({ status: 201, description: 'Task created successfully' })
+  async createTask(
+    @Param('projectId') projectId: string,
+    @Body() createTaskDto: any,
+  ) {
+    return this.projectsService.createTask(projectId, createTaskDto);
+  }
+
+  @Put('tasks/:taskId')
+  @ApiOperation({ summary: 'Update task' })
+  @ApiResponse({ status: 200, description: 'Task updated successfully' })
+  async updateTask(
+    @Param('taskId') taskId: string,
+    @Body() updateTaskDto: any,
+  ) {
+    return this.projectsService.updateTask(taskId, updateTaskDto);
+  }
+
+  @Post('tasks/:taskId/status')
+  @ApiOperation({ summary: 'Update task status' })
+  @ApiResponse({ status: 200, description: 'Task status updated successfully' })
+  async updateTaskStatus(
+    @Param('taskId') taskId: string,
+    @Body('status') status: string,
+  ) {
+    return this.projectsService.updateTaskStatus(taskId, status);
+  }
+
+  @Delete('tasks/:taskId')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete task' })
+  @ApiResponse({ status: 204, description: 'Task deleted successfully' })
+  async deleteTask(@Param('taskId') taskId: string) {
+    await this.projectsService.deleteTask(taskId);
+  }
+
+  // Uploads
+  @Delete('uploads/:uploadId')
+  @ApiOperation({ summary: 'Delete upload' })
+  @ApiResponse({ status: 200, description: 'Upload deleted successfully' })
+  async deleteUpload(
+    @CurrentUser() user: User,
+    @Param('uploadId') uploadId: string,
+  ) {
+    return this.projectsService.deleteUpload(user.id, uploadId);
+  }
+
+  @Post(':projectId/uploads')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiOperation({ summary: 'Upload project files' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
+  async uploadFiles(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('taskId') taskId?: string,
+  ) {
+    return this.projectsService.uploadFiles(user.id, projectId, files, taskId);
+  }
+
+  @Get(':projectId/uploads')
+  @ApiOperation({ summary: 'Get project uploads' })
+  @ApiResponse({ status: 200, description: 'Uploads retrieved successfully' })
+  async getUploads(
+    @Param('projectId') projectId: string,
+    @Query('taskId') taskId?: string,
+  ) {
+    return this.projectsService.getUploads(projectId, taskId);
+  }
+
+  // Project ID Wildcards
   @Get(':id')
   @ApiOperation({ summary: 'Get project by ID' })
   @ApiResponse({ status: 200, description: 'Project retrieved successfully' })
@@ -129,81 +206,5 @@ export class ProjectsController {
   @ApiResponse({ status: 200, description: 'Project completed successfully' })
   async completeProject(@Param('id') id: string) {
     return this.projectsService.completeProject(id);
-  }
-
-  // Tasks
-  @Post(':projectId/tasks')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @ApiOperation({ summary: 'Create task for project' })
-  @ApiResponse({ status: 201, description: 'Task created successfully' })
-  async createTask(
-    @Param('projectId') projectId: string,
-    @Body() createTaskDto: any,
-  ) {
-    return this.projectsService.createTask(projectId, createTaskDto);
-  }
-
-  @Put('tasks/:taskId')
-  @ApiOperation({ summary: 'Update task' })
-  @ApiResponse({ status: 200, description: 'Task updated successfully' })
-  async updateTask(
-    @Param('taskId') taskId: string,
-    @Body() updateTaskDto: any,
-  ) {
-    return this.projectsService.updateTask(taskId, updateTaskDto);
-  }
-
-  @Post('tasks/:taskId/status')
-  @ApiOperation({ summary: 'Update task status' })
-  @ApiResponse({ status: 200, description: 'Task status updated successfully' })
-  async updateTaskStatus(
-    @Param('taskId') taskId: string,
-    @Body('status') status: string,
-  ) {
-    return this.projectsService.updateTaskStatus(taskId, status);
-  }
-
-  @Delete('tasks/:taskId')
-  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete task' })
-  @ApiResponse({ status: 204, description: 'Task deleted successfully' })
-  async deleteTask(@Param('taskId') taskId: string) {
-    await this.projectsService.deleteTask(taskId);
-  }
-
-  // Uploads
-  @Post(':projectId/uploads')
-  @UseInterceptors(FilesInterceptor('files'))
-  @ApiOperation({ summary: 'Upload project files' })
-  @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
-  async uploadFiles(
-    @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
-    @UploadedFiles() files: Express.Multer.File[],
-    @Body('taskId') taskId?: string,
-  ) {
-    return this.projectsService.uploadFiles(user.id, projectId, files, taskId);
-  }
-
-  @Get(':projectId/uploads')
-  @ApiOperation({ summary: 'Get project uploads' })
-  @ApiResponse({ status: 200, description: 'Uploads retrieved successfully' })
-  async getUploads(
-    @Param('projectId') projectId: string,
-    @Query('taskId') taskId?: string,
-  ) {
-    return this.projectsService.getUploads(projectId, taskId);
-  }
-
-  @Delete('uploads/:uploadId')
-  @ApiOperation({ summary: 'Delete upload' })
-  @ApiResponse({ status: 200, description: 'Upload deleted successfully' })
-  async deleteUpload(
-    @CurrentUser() user: User,
-    @Param('uploadId') uploadId: string,
-  ) {
-    return this.projectsService.deleteUpload(user.id, uploadId);
   }
 }

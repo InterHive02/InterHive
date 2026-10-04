@@ -140,6 +140,13 @@ export class AttendanceController {
     );
   }
 
+  @Get('stats/overview')
+  @ApiOperation({ summary: 'Get overall attendance statistics' })
+  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
+  async getOverallStats() {
+    return this.attendanceService.getOverallStats();
+  }
+
   @Get('user/:userId')
   @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
   @ApiOperation({ summary: 'Get attendance for a specific user' })
@@ -166,12 +173,5 @@ export class AttendanceController {
     @Body() correctionData: any,
   ) {
     return this.attendanceService.correctAttendance(id, correctionData);
-  }
-
-  @Get('stats/overview')
-  @ApiOperation({ summary: 'Get overall attendance statistics' })
-  @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getOverallStats() {
-    return this.attendanceService.getOverallStats();
   }
 }
