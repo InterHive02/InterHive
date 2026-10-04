@@ -94,13 +94,6 @@ export class UsersController {
     return this.usersService.search(query);
   }
 
-  @Get('me/profile')
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Current profile retrieved successfully' })
-  async getMyProfile(@CurrentUser() user: any) {
-    return this.usersService.findById(user.id || user._id);
-  }
-
   @Put('me/profile')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
