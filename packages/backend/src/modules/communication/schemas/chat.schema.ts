@@ -48,6 +48,28 @@ export class Chat {
   isActive: boolean;
 
   @Prop({
+    type: String,
+  })
+  relatedDomain: string;
+
+  @Prop({
+    type: {
+      fullName: { type: String },
+      domain: { type: String },
+      applicationStatus: { type: String },
+      degree: { type: String },
+      institution: { type: String },
+    },
+  })
+  studentMetadata: {
+    fullName?: string;
+    domain?: string;
+    applicationStatus?: string;
+    degree?: string;
+    institution?: string;
+  };
+
+  @Prop({
     type: {
       pinned: { type: Boolean, default: false },
       muted: { type: Boolean, default: false },

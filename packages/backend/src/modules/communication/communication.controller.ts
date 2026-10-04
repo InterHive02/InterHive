@@ -57,6 +57,24 @@ export class CommunicationController {
     return this.communicationService.pinAnnouncement(id, isPinned);
   }
 
+  // Manager Group Creation
+  @Post('groups')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Manager group chat creation for intern domains' })
+  async createGroup(
+    @CurrentUser() user: User,
+    @Body() body: { name: string; domain?: string; studentIds: string[] },
+  ) {
+    return this.communicationService.createGroupChatForManager(user.id, body);
+  }
+
+  @Get('students')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.HR)
+  @ApiOperation({ summary: 'Get list of students by domain for group creation' })
+  async getStudents(@Query('domain') domain?: string) {
+    return this.communicationService.getStudentsForManager(domain);
+  }
+
   // Chats
   @Post('chats')
   @ApiOperation({ summary: 'Create a new chat' })

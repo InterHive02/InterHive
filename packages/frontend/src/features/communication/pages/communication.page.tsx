@@ -4,6 +4,7 @@ import { useAuth } from '../../../api/hooks/use-auth';
 import { ChatList } from '../components/chat-list';
 import { ChatWindow } from '../components/chat-window';
 import { AnnouncementList } from '../components/announcement-list';
+import { CreateGroupModal } from '../components/create-group-modal';
 import { useChat } from '../hooks/use-chat';
 import { MessageSquare, Megaphone, Users } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export const CommunicationPage: React.FC = () => {
   const { socket, isConnected } = useSocket();
   const [activeTab, setActiveTab] = useState<TabType>('chats');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
 
   const {
     chats,
@@ -23,6 +25,7 @@ export const CommunicationPage: React.FC = () => {
     markAnnouncementAsRead,
     pinAnnouncement,
     isLoading,
+    loadChats,
     loadMessages,
   } = useChat(user?.id || '');
 
@@ -106,6 +109,7 @@ export const CommunicationPage: React.FC = () => {
                 activeChatId={activeChatId || undefined}
                 currentUserId={user?.id || ''}
                 onChatSelect={handleChatSelect}
+                onCreateGroupClick={() => setIsCreateGroupOpen(true)}
               />
             </div>
 
@@ -172,6 +176,13 @@ export const CommunicationPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Manager Group Creation Modal */}
+      <CreateGroupModal
+        isOpen={isCreateGroupOpen}
+        onClose={() => setIsCreateGroupOpen(false)}
+        onGroupCreated={() => loadChats()}
+      />
     </div>
   );
 };

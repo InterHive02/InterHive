@@ -18,4 +18,10 @@ export const communicationApi = {
 
   pinAnnouncement: (id: string, isPinned: boolean) =>
     apiClient.patch(`/communication/announcements/${id}/pin`, { isPinned }),
+
+  createGroup: (data: { name: string; domain?: string; studentIds: string[] }) =>
+    apiClient.post<{ success: boolean; message: string; data: any }>('/communication/groups', data),
+
+  getStudents: (domain?: string) =>
+    apiClient.get<{ success: boolean; data: any[] }>('/communication/students', { params: { domain } }),
 };

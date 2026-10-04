@@ -23,10 +23,10 @@ import { UserRole } from '@interhive/shared';
 // Key = requesting user's role → Value = array of roles they may chat with
 const ALLOWED_CHAT_ROLES: Record<string, string[]> = {
   [UserRole.ADMIN]: [UserRole.COMPANY, UserRole.HR, UserRole.MANAGER],
-  [UserRole.COMPANY]: [UserRole.ADMIN, UserRole.MANAGER],
+  [UserRole.COMPANY]: [UserRole.ADMIN],
   [UserRole.MANAGER]: [UserRole.ADMIN, UserRole.HR, UserRole.INTERN],
-  [UserRole.HR]: [UserRole.MANAGER],
-  [UserRole.INTERN]: [UserRole.MANAGER],
+  [UserRole.HR]: [UserRole.ADMIN, UserRole.MANAGER, UserRole.INTERN],
+  [UserRole.INTERN]: [UserRole.HR, UserRole.MANAGER],
 };
 
 @Injectable()
@@ -53,35 +53,86 @@ export class CommunicationService {
   }
 
   /**
-   * Ensure 1-on-1 chats exist for a user based on their role.
-   * Creates missing chats silently.
+   * Centralized Relationship & Access Control Engine:
+   * 1. Deactivates/purges any unauthorized 1-on-1 chats that violate the access matrix.
+   * 2. Auto-provisions missing authorized 1-on-1 chats with populated metadata (Student domain, role title, application status).
    */
   async ensureRoleBasedChatsForUser(userId: string): Promise<void> {
     const userObjId = this.toObjectId(userId);
     if (!userObjId) return;
 
-    const userDoc = await this.userModel.findById(userObjId).select('role').lean();
+    const userDoc = await this.userModel.findById(userObjId).select('role email firstName lastName position department').lean();
     if (!userDoc) return;
 
-    const allowedRoles = ALLOWED_CHAT_ROLES[userDoc.role as string] || [];
+    const userRole = (userDoc.role as string) || UserRole.INTERN;
+    const allowedRoles = ALLOWED_CHAT_ROLES[userRole] || [];
+
+    // Step 1: Purge/deactivate unauthorized 1-on-1 chats for this user
+    const userChats = await this.chatModel
+      .find({ participants: userObjId, isGroupChat: false, isActive: true })
+      .populate('participants', 'role email')
+      .lean();
+
+    for (const chat of userChats) {
+      if (chat.participants && chat.participants.length === 2) {
+        const otherP = chat.participants.find((p: any) => p._id.toString() !== userId);
+        if (otherP) {
+          const otherRole = (otherP.role as string) || UserRole.INTERN;
+          if (!allowedRoles.includes(otherRole)) {
+            // Deactivate unauthorized chat
+            await this.chatModel.findByIdAndUpdate(chat._id, { isActive: false });
+          }
+        }
+      }
+    }
+
     if (allowedRoles.length === 0) return;
 
-    // Find all users whose roles we're allowed to chat with
+    // Step 2: Auto-create missing authorized chats with target users
     const targets = await this.userModel
       .find({ role: { $in: allowedRoles }, isActive: true })
-      .select('_id role firstName lastName')
+      .select('_id role firstName lastName email position department skills')
       .lean();
+
+    // Fetch internship application collection for metadata if target or current user is student
+    const appsCollection = this.userModel.db.collection('internshipapplications');
 
     for (const target of targets) {
       const targetId = target._id.toString();
       if (targetId === userId) continue;
 
+      const targetRole = target.role as string;
+
+      // Double check permission matrix from both sides
+      const targetAllowed = ALLOWED_CHAT_ROLES[targetRole] || [];
+      if (!allowedRoles.includes(targetRole) || !targetAllowed.includes(userRole)) {
+        continue;
+      }
+
       // Check if 1-on-1 chat already exists
       const existing = await this.chatModel.findOne({
         isGroupChat: false,
         participants: { $all: [userObjId, this.toObjectId(targetId)], $size: 2 },
-        isActive: true,
       });
+
+      // Metadata calculation if student is involved
+      let studentMeta: any = undefined;
+      const studentUser = userRole === UserRole.INTERN ? userDoc : targetRole === UserRole.INTERN ? target : null;
+
+      if (studentUser) {
+        const studentEmail = (studentUser as any).email;
+        const app = await appsCollection.findOne({ email: studentEmail });
+        const domain = app?.areasOfInterest?.[0] || app?.degree || (studentUser as any).position || 'Full Stack Developer';
+        const appStatus = app?.status || 'Active Intern';
+        
+        studentMeta = {
+          fullName: `${(studentUser as any).firstName || ''} ${(studentUser as any).lastName || ''}`.trim(),
+          domain: domain,
+          applicationStatus: appStatus,
+          degree: app?.degree || 'Computer Science',
+          institution: app?.institution || 'InterHive Tech',
+        };
+      }
 
       if (!existing) {
         const chat = new this.chatModel({
@@ -89,16 +140,108 @@ export class CommunicationService {
           participants: [userObjId, this.toObjectId(targetId)],
           createdBy: userObjId,
           isActive: true,
+          studentMetadata: studentMeta,
+          relatedDomain: studentMeta?.domain,
         });
         await chat.save();
 
-        // Notify both users via WebSocket
         try {
           this.chatGateway.sendChatCreated(userId, chat);
           this.chatGateway.sendChatCreated(targetId, chat);
         } catch (_) {}
+      } else if (!existing.isActive) {
+        existing.isActive = true;
+        if (studentMeta && !existing.studentMetadata) {
+          existing.studentMetadata = studentMeta;
+          existing.relatedDomain = studentMeta.domain;
+        }
+        await existing.save();
       }
     }
+  }
+
+  /**
+   * Manager Domain-Based Group Creation
+   */
+  async createGroupChatForManager(
+    managerId: string,
+    data: { name: string; domain?: string; studentIds: string[] },
+  ) {
+    const managerDoc = await this.userModel.findById(managerId).select('role').lean();
+    if (!managerDoc || (managerDoc.role !== UserRole.MANAGER && managerDoc.role !== UserRole.ADMIN)) {
+      throw new ForbiddenException('Only Managers and Admins can create domain-based intern groups.');
+    }
+
+    const { name, domain, studentIds } = data;
+    if (!name || !name.trim()) {
+      throw new BadRequestException('Group name is required.');
+    }
+
+    const uniqueStudentIds = [...new Set(studentIds || [])];
+    const allParticipants = [managerId, ...uniqueStudentIds].map(id => this.toObjectId(id)!);
+
+    const chat = new this.chatModel({
+      isGroupChat: true,
+      name: name.trim(),
+      relatedDomain: domain || 'General',
+      createdBy: this.toObjectId(managerId)!,
+      participants: allParticipants,
+      isActive: true,
+    });
+
+    await chat.save();
+
+    for (const pid of allParticipants) {
+      try {
+        this.chatGateway.sendChatCreated(pid.toString(), chat);
+      } catch (_) {}
+    }
+
+    return {
+      success: true,
+      message: `Group chat "${name}" created successfully.`,
+      data: chat,
+    };
+  }
+
+  /**
+   * Fetch eligible students/interns for Manager group creation
+   */
+  async getStudentsForManager(domain?: string) {
+    const students = await this.userModel
+      .find({ role: UserRole.INTERN, isActive: true })
+      .select('_id firstName lastName email profilePhoto position skills department')
+      .lean();
+
+    const appsCollection = this.userModel.db.collection('internshipapplications');
+
+    const formattedStudents = await Promise.all(
+      students.map(async (st) => {
+        const app = await appsCollection.findOne({ email: st.email });
+        const studentDomain = app?.areasOfInterest?.[0] || st.position || 'Full Stack Developer';
+        const degree = app?.degree || 'B.Tech CS';
+        const status = app?.status || 'Selected';
+
+        return {
+          id: st._id.toString(),
+          fullName: `${st.firstName} ${st.lastName}`.trim(),
+          email: st.email,
+          profilePhoto: st.profilePhoto,
+          domain: studentDomain,
+          degree,
+          status,
+        };
+      }),
+    );
+
+    const filtered = domain
+      ? formattedStudents.filter(s => s.domain.toLowerCase().includes(domain.toLowerCase()))
+      : formattedStudents;
+
+    return {
+      success: true,
+      data: filtered,
+    };
   }
 
   // ─── Public API ───────────────────────────────────────────────────────────
