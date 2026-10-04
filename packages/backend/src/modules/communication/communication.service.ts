@@ -75,9 +75,9 @@ export class CommunicationService {
 
     for (const chat of userChats) {
       if (chat.participants && chat.participants.length === 2) {
-        const otherP = chat.participants.find((p: any) => p._id.toString() !== userId);
+        const otherP = chat.participants.find((p: any) => p._id?.toString() !== userId);
         if (otherP) {
-          const otherRole = (otherP.role as string) || UserRole.INTERN;
+          const otherRole = ((otherP as any).role as string) || UserRole.INTERN;
           if (!allowedRoles.includes(otherRole)) {
             // Deactivate unauthorized chat
             await this.chatModel.findByIdAndUpdate(chat._id, { isActive: false });
