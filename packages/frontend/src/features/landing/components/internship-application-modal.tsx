@@ -170,6 +170,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   const [nameError, setNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [pinError, setPinError] = useState<string | null>(null);
+  const [genderError, setGenderError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<CountryDialCode>(COUNTRIES[0]);
 
   // Explicit unbundled consents
@@ -268,13 +269,31 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   };
 
   // PIN Code validation (6-digit numeric for India, skipped for outside India)
-  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePinChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 6);
     setFormData(prev => ({ ...prev, pinCode: digitsOnly }));
     if (digitsOnly.length > 0 && digitsOnly.length < 6) {
       setPinError('PIN code must be exactly 6 digits.');
     } else {
       setPinError(null);
+    }
+    // Auto-fill city from PIN (India only)
+    if (!isOutsideIndia && digitsOnly.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${digitsOnly}`);
+        const json = await res.json();
+        if (json?.[0]?.Status === 'Success' && json[0].PostOffice?.length > 0) {
+          const po = json[0].PostOffice[0];
+          setFormData(prev => ({
+            ...prev,
+            pinCode: digitsOnly,
+            city: po.District || po.Block || prev.city,
+            state: po.State || prev.state,
+          }));
+        }
+      } catch {
+        // Silently ignore lookup errors
+      }
     }
   };
 
@@ -383,6 +402,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
         return false;
       }
     }
+
+    // Gender is mandatory
+    if (!formData.gender) {
+      setGenderError('Please select your gender.');
+      setErrorMessage('Gender is required. Please select an option.');
+      return false;
+    }
+    setGenderError(null);
 
     if (!formData.city.trim()) {
       setErrorMessage('Please enter your current city.');
@@ -566,6 +593,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     setNameError(null);
     setPhoneError(null);
     setPinError(null);
+    setGenderError(null);
     setAgreedToTerms(false);
     setAgreedToDataProcessing(false);
     setConfirmedLinkPublic(false);
@@ -759,22 +787,25 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       )}
                     </div>
 
-                    {/* Gender (Optional) */}
+                    {/* Gender (Required) */}
                     <div className="min-[600px]:col-span-2">
-                      <label className={labelCls}>Gender (Optional)</label>
-                      <div className="grid grid-cols-2 min-[600px]:grid-cols-4 gap-2">
-                        {GENDER_OPTIONS.map((opt) => {
+                      <label className={labelCls}>
+                        Gender <span className="text-red-500">*</span>
+                      </label>
+                      {/* Main options: Male, Female — full size */}
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        {GENDER_OPTIONS.filter(o => o.value === 'male' || o.value === 'female').map((opt) => {
                           const isSelected = formData.gender === opt.value;
                           return (
                             <button
                               key={opt.value}
                               type="button"
-                              onClick={() => setFormData({ ...formData, gender: isSelected ? '' : opt.value })}
+                              onClick={() => { setFormData({ ...formData, gender: isSelected ? '' : opt.value }); setGenderError(null); }}
                               aria-pressed={isSelected}
                               className={`min-h-[44px] px-3.5 rounded-[10px] border-[1.5px] text-[14px] transition-colors duration-150 flex items-center gap-2.5 cursor-pointer text-left ${
                                 isSelected
                                   ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
-                                  : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300'
+                                  : `border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-700 dark:text-slate-300 font-normal hover:border-slate-300 ${genderError ? 'border-red-400' : ''}`
                               }`}
                             >
                               <span className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
@@ -785,6 +816,31 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           );
                         })}
                       </div>
+                      {/* Compact row: Other + Prefer not to say */}
+                      <div className="flex gap-2">
+                        {GENDER_OPTIONS.filter(o => o.value === 'other' || o.value === 'prefer_not_to_say').map((opt) => {
+                          const isSelected = formData.gender === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => { setFormData({ ...formData, gender: isSelected ? '' : opt.value }); setGenderError(null); }}
+                              aria-pressed={isSelected}
+                              className={`min-h-[36px] px-3 rounded-[8px] border-[1.5px] text-[12px] transition-colors duration-150 flex items-center gap-1.5 cursor-pointer text-left ${
+                                isSelected
+                                  ? 'border-primary bg-primary/5 text-primary dark:text-primary-light font-semibold'
+                                  : 'border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-slate-500 dark:text-slate-400 font-normal hover:border-slate-300'
+                              }`}
+                            >
+                              <span className={`w-3 h-3 rounded-full border-[1.5px] flex items-center justify-center shrink-0 ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
+                                {isSelected && <span className="w-1 h-1 rounded-full bg-white" />}
+                              </span>
+                              <span className="truncate">{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {genderError && <p className={errorHintCls}>{genderError}</p>}
                     </div>
 
                     {/* Email */}

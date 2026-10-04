@@ -1,17 +1,58 @@
 import React, { useState } from 'react';
 import { Users, Building2, BookOpen, Award, Activity, Bell, Settings, BarChart2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { UserManagement } from '../components/user-management';
 import { CompanyManagement } from '../components/company-management';
 import { ProgramManagement } from '../components/program-management';
 import { SystemSettings } from '../components/system-settings';
 import { AdminLandingStats } from '../components/admin-landing-stats';
 import { useAdmin } from '../hooks/use-admin';
+import { companyApi } from '../../../api/endpoints/company.api';
+import { toast } from 'react-hot-toast';
 
 type TabType = 'overview' | 'users' | 'companies' | 'programs' | 'stats' | 'settings';
 
 export const AdminDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const { users, companies, programs, isLoading } = useAdmin();
+  const queryClient = useQueryClient();
+
+  const handleAddCompany = async (data: any) => {
+    try {
+      await companyApi.create({
+        companyInfo: {
+          name: data.name,
+          legalName: data.legalName,
+          registrationNumber: '',
+          industry: data.industry,
+          size: data.size,
+          website: data.website,
+        },
+        contact: {
+          primaryContact: {
+            email: data.email,
+            phone: data.phone,
+          },
+        },
+      });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] });
+      toast.success(`${data.name} has been added successfully.`);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to add company.';
+      toast.error(msg);
+      throw err;
+    }
+  };
+
+  const handleDeleteCompany = async (id: string) => {
+    try {
+      await companyApi.delete(id);
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] });
+      toast.success('Company removed successfully.');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to remove company.');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -202,8 +243,9 @@ export const AdminDashboardPage: React.FC = () => {
           {activeTab === 'companies' && (
             <CompanyManagement
               companies={companies || []}
+              onAdd={handleAddCompany}
               onEdit={(id) => console.log('Edit company:', id)}
-              onDelete={(id) => console.log('Delete company:', id)}
+              onDelete={handleDeleteCompany}
               onVerify={(id) => console.log('Verify company:', id)}
               onSuspend={(id) => console.log('Suspend company:', id)}
             />

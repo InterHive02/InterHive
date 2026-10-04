@@ -1381,13 +1381,13 @@ export const LandingPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
             <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase block mb-1">
-              SAMPLE OPPORTUNITIES
+              FEATURED OPPORTUNITIES
             </span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Sample Opportunities & Roles
+              Featured Opportunities & Roles
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 font-semibold">
-              Explore illustrative roles designed to give you real-world, industry-standard experience.
+              Explore curated roles designed to give you real-world, industry-standard experience.
             </p>
           </div>
 
