@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 interface PublicNavbarProps {
@@ -14,6 +14,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   onOpenCompanyModal,
 }) => {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-200/60 shadow-xs transition-all">
@@ -104,7 +105,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
           </Link>
 
           <button
-            onClick={onOpenInternshipModal}
+            onClick={() => navigate('/register')}
             className="px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
           >
             Get Started
@@ -160,12 +161,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <button
               onClick={() => {
                 setIsMobileNavOpen(false);
-                onOpenInternshipModal();
+                navigate('/register');
               }}
               className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
             >
               <span>For Interns</span>
-              <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Apply</span>
+              <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Get Started</span>
             </button>
             <button
               onClick={() => {
