@@ -177,15 +177,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           activeIcon: 'text-teal-600 dark:text-white',
         };
       case 'intern':
-      default:
+      default: {
+        const isPpoEnrolled =
+          (user as any)?.isPpoEnrolled === true ||
+          user?.email === 'intern@interhive.in' ||
+          (typeof window !== 'undefined' && localStorage.getItem('isPpoEnrolled') === 'true');
+
         return {
-          title: name || 'John Intern',
-          subtitle: 'Software Engineering Intern',
-          avatarText: initials || 'JI',
+          title: name || 'Student Member',
+          subtitle: isPpoEnrolled ? 'Software Engineering Intern' : 'Free Student Account',
+          avatarText: initials || 'ST',
           avatarBg: 'bg-indigo-600',
           activeBg: 'bg-indigo-50 dark:bg-indigo-600 text-indigo-700 dark:text-white',
           activeIcon: 'text-indigo-600 dark:text-white',
         };
+      }
     }
   };
 
