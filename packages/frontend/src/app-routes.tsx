@@ -99,6 +99,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/programs" element={<ProgramsPage />} />
+      <Route path="/our-programs" element={<ProgramsPage />} />
       <Route path="/ppo-program" element={<ProgramsPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
