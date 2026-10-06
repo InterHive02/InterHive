@@ -85,36 +85,36 @@ export const LandingPage: React.FC = () => {
     {
       step: '01',
       label: 'Step 1',
-      title: 'Sign Up',
-      desc: 'Create your free InterHive profile in minutes.',
-      icon: UserPlus,
+      title: 'Choose Your Year Program',
+      desc: 'Select the program matched to your current college year (1st Year CRT foundation, 2nd/3rd Year industrial training, or Final Year placement sprint).',
+      icon: GraduationCap,
       color: 'bg-blue-50 text-blue-600 border-blue-200/80',
       hoverBg: 'group-hover:bg-blue-600',
     },
     {
       step: '02',
       label: 'Step 2',
-      title: 'Build Skills',
-      desc: 'Take our readiness assessment and access curated learning resources.',
-      icon: Code,
+      title: 'Get Screened & Approved',
+      desc: 'Undergo our skill evaluation and HR assessment to activate your official Premium Intern account.',
+      icon: UserCheck,
       color: 'bg-indigo-50 text-indigo-600 border-indigo-200/80',
       hoverBg: 'group-hover:bg-indigo-600',
     },
     {
       step: '03',
       label: 'Step 3',
-      title: 'Get Matched',
-      desc: 'Get matched to internships and roles that fit your skills.',
-      icon: Layers,
+      title: 'Build with Industry Mentors',
+      desc: 'Join team cohorts with dedicated Manager & HR communication, agile task boards, and daily work verification.',
+      icon: Users,
       color: 'bg-purple-50 text-purple-600 border-purple-200/80',
       hoverBg: 'group-hover:bg-purple-600',
     },
     {
       step: '04',
       label: 'Step 4',
-      title: 'Apply & Get Hired',
-      desc: 'Apply directly through InterHive and land your internship or placement.',
-      icon: GraduationCap,
+      title: 'Partner Company Hiring',
+      desc: 'Graduate with portfolio-grade work, verified project certificates, and direct interview opportunities with hiring partners.',
+      icon: Briefcase,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
       hoverBg: 'group-hover:bg-emerald-600',
     },
@@ -1230,13 +1230,13 @@ export const LandingPage: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-2">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Simple 4-Step Process</span>
+            <span>Year-Wise Career Architecture</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
             How It Works
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-xl mx-auto">
-            From creating your profile to landing a verified internship or placement.
+            Structured progression from college fundamentals to industry-ready hiring.
           </p>
         </div>
 
