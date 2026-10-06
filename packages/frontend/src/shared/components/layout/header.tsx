@@ -12,6 +12,7 @@ import {
   Sun
 } from 'lucide-react';
 import { useTheme } from '../../../core/providers/theme.provider';
+import { useAuth } from '../../../api/hooks/use-auth';
 import { NotificationBell } from '../common/notification-bell';
 
 interface HeaderProps {
@@ -35,13 +36,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { mode, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    navigate('/login');
+    logout();
   };
 
   const getUserDisplayName = () => {

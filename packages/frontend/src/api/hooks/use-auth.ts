@@ -10,6 +10,37 @@ export const useAuth = () => {
 
   const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken');
 
+  const clearAllSessionData = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('hasAppliedPpo') || key.startsWith('ih_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.clear();
+    }
+    queryClient.clear();
+  }, [queryClient]);
+
+  const getRoleDashboard = (userData: any) => {
+    if (!userData) return '/dashboard';
+    switch (userData.role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'hr':
+        return '/hr/dashboard';
+      case 'manager':
+        return '/manager/dashboard';
+      case 'company':
+        return '/company/dashboard';
+      default:
+        return '/dashboard';
+    }
+  };
+
   // Logout Handler
   const handleLogout = async () => {
     try {
@@ -17,10 +48,7 @@ export const useAuth = () => {
     } catch (e) {
       // Ignore API logout error
     }
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    queryClient.clear();
+    clearAllSessionData();
     toast.success('Logged out successfully');
     navigate('/login', { replace: true });
   };
@@ -44,9 +72,7 @@ export const useAuth = () => {
         const response = await authApi.getProfile();
         return response.data?.user || response.data;
       } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        clearAllSessionData();
         return null;
       }
     },
@@ -57,24 +83,30 @@ export const useAuth = () => {
 
   // Login
   const loginMutation = useMutation({
-    mutationFn: (data: LoginData) => authApi.login(data),
+    mutationFn: async (data: LoginData) => {
+      clearAllSessionData();
+      return authApi.login(data);
+    },
     onSuccess: (response: any) => {
+      queryClient.clear();
       const authData = response.data || response;
-      const { user, accessToken, refreshToken } = authData;
+      const { user: authUser, accessToken, refreshToken } = authData;
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
       }
       if (refreshToken) {
         localStorage.setItem('refreshToken', refreshToken);
       }
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        queryClient.setQueryData(['auth', 'me'], user);
+      if (authUser) {
+        localStorage.setItem('user', JSON.stringify(authUser));
+        queryClient.setQueryData(['auth', 'me'], authUser);
       }
       toast.success('Login successful!');
-      navigate('/dashboard');
+      const targetDashboard = getRoleDashboard(authUser);
+      navigate(targetDashboard, { replace: true });
     },
     onError: (error: any) => {
+      clearAllSessionData();
       const message = error.response?.data?.message || 'Login failed. Please try again.';
       toast.error(message);
     },
@@ -154,6 +186,7 @@ export const useAuth = () => {
     isResettingPassword: resetPasswordMutation.isLoading,
     verifyEmail: verifyEmailMutation.mutate,
     isVerifyingEmail: verifyEmailMutation.isLoading,
+    clearSession: clearAllSessionData,
     refetch,
   };
 };

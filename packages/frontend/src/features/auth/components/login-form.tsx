@@ -12,7 +12,7 @@ export const LoginForm: React.FC = () => {
   const location = useLocation();
   const prefilledEmail = (location.state as any)?.email || '';
 
-  const { login, isLoggingIn } = useAuth();
+  const { loginAsync, isLoggingIn } = useAuth();
   
   const [showPassword, setShowPassword] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -35,8 +35,8 @@ export const LoginForm: React.FC = () => {
   // Password Login Submit
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data);
-      navigate('/dashboard', { replace: true });
+      await loginAsync(data);
+      // Navigation is handled cleanly inside useAuth based on user's exact role
     } catch (error: any) {
       setError('root', {
         message: error.response?.data?.message || 'Login failed. Please check your credentials.',

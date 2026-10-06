@@ -37,8 +37,9 @@ export const FreeStudentDashboardPage: React.FC = () => {
   const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
-  // Check local storage for application submission state
-  const hasAppliedLocal = typeof window !== 'undefined' ? localStorage.getItem('hasAppliedPpo') === 'true' : false;
+  // Check local storage for application submission state scoped to current user
+  const appStorageKey = user?.id ? `hasAppliedPpo_${user.id}` : (user?.email ? `hasAppliedPpo_${user.email}` : 'hasAppliedPpo');
+  const hasAppliedLocal = typeof window !== 'undefined' ? localStorage.getItem(appStorageKey) === 'true' : false;
   const [hasApplied, setHasApplied] = useState(hasAppliedLocal);
 
   const studentName = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Student';
@@ -51,7 +52,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
   const handleApplicationSuccess = () => {
     setHasApplied(true);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('hasAppliedPpo', 'true');
+      localStorage.setItem(appStorageKey, 'true');
     }
   };
 

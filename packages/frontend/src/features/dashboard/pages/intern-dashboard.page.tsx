@@ -55,8 +55,8 @@ export const InternDashboardPage: React.FC = () => {
     return <LoadingSpinner label="Loading dashboard..." />;
   }
 
-  const firstName = profile?.personalInfo?.firstName || user?.firstName || 'Ankit';
-  const lastName = profile?.personalInfo?.lastName || user?.lastName || 'Soni';
+  const firstName = profile?.personalInfo?.firstName || user?.firstName || 'Intern';
+  const lastName = profile?.personalInfo?.lastName || user?.lastName || '';
 
   // Readiness data
   const readinessData = {

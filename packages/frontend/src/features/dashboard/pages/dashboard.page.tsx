@@ -6,11 +6,21 @@ import { CompanyDashboardPage } from './company-dashboard.page';
 import { ManagerDashboardPage } from './manager-dashboard.page';
 import { AdminDashboardPage } from './admin-dashboard.page';
 import { HrDashboardPage } from './hr-dashboard.page';
+import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  switch (user?.role) {
+  // Prevent premature dashboard mounting while authentication is loading
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F8FC]">
+        <LoadingSpinner label="Loading dashboard..." />
+      </div>
+    );
+  }
+
+  switch (user.role) {
     case 'admin':
       return <AdminDashboardPage />;
     case 'hr':
@@ -21,9 +31,15 @@ export const DashboardPage: React.FC = () => {
       return <CompanyDashboardPage />;
     case 'student':
       return <FreeStudentDashboardPage />;
-    case 'intern':
-    default: {
+    case 'intern': {
       const isPremium = (user as any)?.accessLevel === 'PREMIUM' || user?.email === 'intern@interhive.in';
+      if (isPremium) {
+        return <InternDashboardPage />;
+      }
+      return <FreeStudentDashboardPage />;
+    }
+    default: {
+      const isPremium = (user as any)?.accessLevel === 'PREMIUM';
       if (isPremium) {
         return <InternDashboardPage />;
       }

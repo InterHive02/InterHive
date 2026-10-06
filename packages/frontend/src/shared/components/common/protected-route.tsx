@@ -22,6 +22,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const localUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
   const localUser = localUserStr ? JSON.parse(localUserStr) : null;
+
+  if (hasLocalToken && !localUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F8FC]">
+        <LoadingSpinner label="Verifying session..." />
+      </div>
+    );
+  }
+
   const userRole = localUser?.role || 'student';
   const accessLevel = localUser?.accessLevel || (userRole === 'student' ? 'BASIC' : 'PREMIUM');
 

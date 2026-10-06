@@ -1,17 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/login-form';
 import { Logo } from '../../../shared/components/common/logo';
+import { useAuth } from '../../../api/hooks/use-auth';
+import { LogOut, User } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const hasLocalToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken');
-
-  useEffect(() => {
-    if (hasLocalToken) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [hasLocalToken, navigate]);
+  const { user, isAuthenticated, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-[#F4F8FC] text-slate-800 font-sans relative flex flex-col justify-between overflow-x-hidden">
@@ -34,6 +30,25 @@ export const LoginPage: React.FC = () => {
       {/* Main Login Card Section */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 relative z-10">
         <div className="w-full max-w-md">
+          {isAuthenticated && user && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900 shadow-xs flex items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <User className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="truncate">
+                  <span className="font-bold">Active Session:</span> {user.email}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="px-3 py-1.5 rounded-xl bg-amber-200/70 hover:bg-amber-200 text-amber-900 font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer text-[11px]"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Switch Account</span>
+              </button>
+            </div>
+          )}
+
           <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-blue-500/5 relative overflow-hidden">
             
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>

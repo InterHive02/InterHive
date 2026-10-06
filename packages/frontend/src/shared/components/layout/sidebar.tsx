@@ -31,6 +31,7 @@ import {
 import { getNavRoutes } from '../../../core/config/routes.config';
 import { UserRole } from '@interhive/shared';
 import { useTheme } from '../../../core/providers/theme.provider';
+import { useAuth } from '../../../api/hooks/use-auth';
 import { Logo } from '../common/logo';
 
 interface SidebarProps {
@@ -56,15 +57,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   const accessLevel = (user as any)?.accessLevel || (user?.role === 'student' ? 'BASIC' : 'PREMIUM');
   const userRole = user?.role || (accessLevel === 'BASIC' ? 'student' : 'intern');
   const routes = getNavRoutes(userRole, accessLevel);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    navigate('/login');
+    logout();
   };
 
   // Safe and comprehensive Lucide icon mapper
