@@ -23,9 +23,11 @@ import { Roles } from '../../core/decorators/roles.decorator';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { UserRole } from '@interhive/shared';
 import { User } from '../users/schemas/user.schema';
+import { PremiumGuard } from '../../core/guards/premium.guard';
 
 @ApiTags('Projects')
 @Controller('projects')
+@UseGuards(PremiumGuard)
 @ApiBearerAuth()
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}

@@ -19,19 +19,14 @@ export const DashboardPage: React.FC = () => {
       return <ManagerDashboardPage />;
     case 'company':
       return <CompanyDashboardPage />;
+    case 'student':
+      return <FreeStudentDashboardPage />;
     case 'intern':
     default: {
-      // Check if user is officially selected/enrolled in the PPO Program (e.g. demo account or HR enrolled)
-      const isPpoEnrolled =
-        (user as any)?.isPpoEnrolled === true ||
-        user?.email === 'intern@interhive.in' ||
-        (typeof window !== 'undefined' && localStorage.getItem('isPpoEnrolled') === 'true');
-
-      if (isPpoEnrolled) {
+      const isPremium = (user as any)?.accessLevel === 'PREMIUM' || user?.email === 'intern@interhive.in';
+      if (isPremium) {
         return <InternDashboardPage />;
       }
-
-      // Free registered students get the Free Student Dashboard showing the PPO program & application flow
       return <FreeStudentDashboardPage />;
     }
   }

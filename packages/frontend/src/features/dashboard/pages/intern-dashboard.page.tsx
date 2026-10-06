@@ -25,6 +25,8 @@ import { ReadinessScoreCard } from '../components/readiness-score-card';
 import { SkillBreakdown } from '../components/skill-breakdown';
 import { ProjectProgress } from '../components/project-progress';
 import { RecentActivity } from '../components/recent-activity';
+import { ProgramDetailsModal } from '../../landing/components/program-details-modal';
+import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
 import { useIntern } from '../../../api/hooks/use-intern';
 import { useProject } from '../../../api/hooks/use-project';
 import { useDashboard } from '../hooks/use-dashboard';
@@ -44,6 +46,8 @@ export const InternDashboardPage: React.FC = () => {
 
   // Active view tab inside dashboard
   const [activeTab, setActiveTab] = useState<'journey' | 'training' | 'assessments' | 'matching' | 'workspace'>('journey');
+  const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
+  const [selectedProgramKey, setSelectedProgramKey] = useState<ProgramTypeKey>('TWO_YEAR');
 
   const isLoading = profileLoading || readinessLoading || projectsLoading || activitiesLoading;
 
@@ -228,6 +232,13 @@ export const InternDashboardPage: React.FC = () => {
             </h3>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsProgramModalOpen(true)}
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer mr-2"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>View Full Roadmap</span>
+            </button>
             <span className="text-xs font-black text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
               Month 2 of 6
             </span>
@@ -815,6 +826,13 @@ export const InternDashboardPage: React.FC = () => {
         </div>
       )}
 
+      {/* Program Details Modal */}
+      <ProgramDetailsModal
+        isOpen={isProgramModalOpen}
+        onClose={() => setIsProgramModalOpen(false)}
+        programType={selectedProgramKey}
+        onEnroll={() => setIsProgramModalOpen(false)}
+      />
     </div>
   );
 };

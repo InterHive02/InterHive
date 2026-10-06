@@ -57,6 +57,14 @@ export class CreateApplicationDto {
 
   @IsString()
   @IsOptional()
+  programType?: string;
+
+  @IsString()
+  @IsOptional()
+  academicYear?: string;
+
+  @IsString()
+  @IsOptional()
   graduationYear?: string;
 
   @IsString()

@@ -56,8 +56,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useTheme();
-  const userRole: UserRole = user?.role || 'intern';
-  const routes = getNavRoutes(userRole);
+  const accessLevel = (user as any)?.accessLevel || (user?.role === 'student' ? 'BASIC' : 'PREMIUM');
+  const userRole = user?.role || (accessLevel === 'BASIC' ? 'student' : 'intern');
+  const routes = getNavRoutes(userRole, accessLevel);
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -176,17 +177,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           activeBg: 'bg-teal-50 dark:bg-teal-600 text-teal-700 dark:text-white',
           activeIcon: 'text-teal-600 dark:text-white',
         };
-      case 'intern':
-      default: {
-        const isPpoEnrolled =
-          (user as any)?.isPpoEnrolled === true ||
-          user?.email === 'intern@interhive.in' ||
-          (typeof window !== 'undefined' && localStorage.getItem('isPpoEnrolled') === 'true');
-
+      case 'student':
         return {
           title: name || 'Student Member',
-          subtitle: isPpoEnrolled ? 'Software Engineering Intern' : 'Free Student Account',
+          subtitle: 'Free Student Account',
           avatarText: initials || 'ST',
+          avatarBg: 'bg-slate-600',
+          activeBg: 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white',
+          activeIcon: 'text-slate-600 dark:text-white',
+        };
+      case 'intern':
+      default: {
+        return {
+          title: name || 'Premium Intern',
+          subtitle: 'Active Premium Intern',
+          avatarText: initials || 'IN',
           avatarBg: 'bg-indigo-600',
           activeBg: 'bg-indigo-50 dark:bg-indigo-600 text-indigo-700 dark:text-white',
           activeIcon: 'text-indigo-600 dark:text-white',

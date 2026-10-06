@@ -39,6 +39,8 @@ export const HrApplicationsPage: React.FC = () => {
     rejected: 0,
   });
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedProgramType, setSelectedProgramType] = useState<string>('all');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeApplicant, setActiveApplicant] = useState<InternshipApplicationData | null>(null);
@@ -74,6 +76,8 @@ export const HrApplicationsPage: React.FC = () => {
       const [appRes, statsRes] = await Promise.all([
         applicationsApi.getApplications({
           status: selectedStatus !== 'all' ? selectedStatus : undefined,
+          programType: selectedProgramType !== 'all' ? selectedProgramType : undefined,
+          academicYear: selectedAcademicYear !== 'all' ? selectedAcademicYear : undefined,
           search: searchQuery.trim() || undefined,
         }),
         applicationsApi.getStats(),
@@ -97,7 +101,7 @@ export const HrApplicationsPage: React.FC = () => {
 
   useEffect(() => {
     fetchApplications();
-  }, [selectedStatus]);
+  }, [selectedStatus, selectedProgramType, selectedAcademicYear]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -360,22 +364,54 @@ export const HrApplicationsPage: React.FC = () => {
           />
         </form>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-xs font-bold text-slate-500 shrink-0">Filter Status:</span>
-          <select
-            value={selectedStatus}
-            onChange={e => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-          >
-            <option value="all">All Applications</option>
-            <option value="new">New</option>
-            <option value="under_review">Under Review</option>
-            <option value="shortlisted">Shortlisted</option>
-            <option value="interview_scheduled">Interview Scheduled</option>
-            <option value="interview_completed">Interview Completed</option>
-            <option value="selected">Selected</option>
-            <option value="rejected">Rejected</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 shrink-0">Status:</span>
+            <select
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            >
+              <option value="all">All Statuses</option>
+              <option value="new">New</option>
+              <option value="under_review">Under Review</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="interview_scheduled">Interview Scheduled</option>
+              <option value="interview_completed">Interview Completed</option>
+              <option value="selected">Selected</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 shrink-0">Program:</span>
+            <select
+              value={selectedProgramType}
+              onChange={e => setSelectedProgramType(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            >
+              <option value="all">All Programs</option>
+              <option value="ONE_YEAR">1-Year Program (Final Year)</option>
+              <option value="TWO_YEAR">2-Year Program (3rd & Final Year)</option>
+              <option value="THREE_YEAR">3-Year Program (2nd Year Onwards)</option>
+              <option value="FOUR_YEAR">4-Year Program (1st Year Onwards)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 shrink-0">Year:</span>
+            <select
+              value={selectedAcademicYear}
+              onChange={e => setSelectedAcademicYear(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            >
+              <option value="all">All Years</option>
+              <option value="1st">1st Year</option>
+              <option value="2nd">2nd Year</option>
+              <option value="3rd">3rd Year</option>
+              <option value="Final">Final Year</option>
+            </select>
+          </div>
         </div>
       </div>
 

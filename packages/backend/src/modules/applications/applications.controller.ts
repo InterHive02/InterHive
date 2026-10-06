@@ -45,9 +45,11 @@ export class ApplicationsController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('status') status?: string,
+    @Query('programType') programType?: string,
+    @Query('academicYear') academicYear?: string,
     @Query('search') search?: string,
   ) {
-    return this.applicationsService.findAll({ page, limit, status, search });
+    return this.applicationsService.findAll({ page, limit, status, programType, academicYear, search });
   }
 
   @Get('stats')

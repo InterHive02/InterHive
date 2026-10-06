@@ -37,9 +37,11 @@ import { statsApi, LandingStatItem } from '../../../api/endpoints/stats.api';
 import { Logo } from '../../../shared/components/common/logo';
 import { getLandingStats, LandingStats } from '../../../shared/utils/landing-stats';
 import { InternshipApplicationModal } from '../components/internship-application-modal';
+import { ProgramDetailsModal } from '../components/program-details-modal';
 import { PublicNavbar } from '../components/public-navbar';
 import { PublicFooter } from '../components/public-footer';
 import { CompanyInquiryModal } from '../components/company-inquiry-modal';
+import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,6 +50,9 @@ export const LandingPage: React.FC = () => {
   const [liveRequirements, setLiveRequirements] = useState<any[]>([]);
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
   const [selectedProgramCategory, setSelectedProgramCategory] = useState('Software Engineering');
+  const [selectedProgramTypeForModal, setSelectedProgramTypeForModal] = useState<string | undefined>(undefined);
+  const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -1005,6 +1010,99 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ============================================================== */}
+      {/* STRUCTURED INDUSTRY-READINESS PROGRAMS (1, 2, 3 & 4 YEAR)     */}
+      {/* ============================================================== */}
+      <section id="our-programs" className="py-14 bg-gradient-to-b from-white via-slate-50/50 to-white border-y border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto mb-12 space-y-2">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
+              <GraduationCap className="w-4 h-4 text-blue-600" />
+              <span>Structured Academic Pathways</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Our Industry-Readiness Programs
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-2xl mx-auto">
+              Choose a program aligned with your academic year — designed to take you progressively from company readiness to industrial training, internships, and full-time hiring.
+            </p>
+          </div>
+
+          {/* 4 Program Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {(Object.values(PROGRAM_CONFIGS) as any[]).map((prog) => (
+              <div
+                key={prog.id}
+                className="bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
+                      {prog.badge}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {prog.duration}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-black text-slate-900 mb-1">
+                    {prog.title}
+                  </h3>
+                  
+                  <p className="text-[12px] font-semibold text-purple-700 mb-3">
+                    Target: {prog.targetAcademicYear}
+                  </p>
+
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed mb-4">
+                    {prog.shortDescription}
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Roadmap Target</span>
+                    <span className="text-[12px] font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      {prog.summaryTarget}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveDetailsProgramType(prog.id as ProgramTypeKey);
+                      setIsDetailsModalOpen(true);
+                    }}
+                    className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                    <span>View Program Roadmap</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedProgramTypeForModal(prog.id);
+                      setIsInternshipModalOpen(true);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>Enroll Now</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Disclaimer Note */}
+          <div className="mt-8 p-4 rounded-xl bg-slate-100/80 border border-slate-200/80 text-[12px] text-slate-600 font-medium text-center max-w-4xl mx-auto">
+            {PROGRAM_DISCLAIMER}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ============================================================== */}
       {/* 2. OUR PARTNER COMPANIES (MATCHING REFERENCE IMAGE 1)         */}
       {/* ============================================================== */}
       <section className="py-12 bg-slate-50/70 border-y border-slate-200/60">
@@ -1720,6 +1818,18 @@ export const LandingPage: React.FC = () => {
         isOpen={isInternshipModalOpen}
         onClose={() => setIsInternshipModalOpen(false)}
         preselectedCategory={selectedProgramCategory}
+        preselectedProgramType={selectedProgramTypeForModal}
+      />
+
+      {/* Program Details & Roadmap Modal */}
+      <ProgramDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        programType={activeDetailsProgramType}
+        onEnroll={(progType) => {
+          setSelectedProgramTypeForModal(progType);
+          setIsInternshipModalOpen(true);
+        }}
       />
 
     </div>

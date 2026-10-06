@@ -11,9 +11,11 @@ export interface MatchRequest {
 
 export interface Match {
   id: string;
-  internId: string;
-  companyId: string;
+  _id?: string;
+  internId: any;
+  companyId: any;
   requirementId: string;
+  requirement?: any;
   matchScore: number;
   breakdown: {
     skillMatch: number;
@@ -22,6 +24,9 @@ export interface Match {
     preferenceMatch: number;
   };
   status: 'pending' | 'accepted' | 'rejected' | 'interview_scheduled' | 'interview_completed' | 'offer_made' | 'offer_accepted' | 'offer_rejected' | 'hired' | 'expired';
+  createdAt?: string;
+  acceptedAt?: string;
+  hiredAt?: string;
   interview?: {
     scheduledDate: string;
     type: string;

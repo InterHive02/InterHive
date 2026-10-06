@@ -83,8 +83,38 @@ export enum UserRole {
   ADMIN = 'admin',
   HR = 'hr',
   MANAGER = 'manager',
+  STUDENT = 'student',
   INTERN = 'intern',
   COMPANY = 'company',
+}
+
+export enum UserAccessLevel {
+  BASIC = 'BASIC',
+  PREMIUM = 'PREMIUM',
+}
+
+export enum InternWorkflowStatus {
+  FREE = 'FREE',
+  APPLIED = 'APPLIED',
+  INTERVIEW = 'INTERVIEW',
+  SELECTED = 'SELECTED',
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  REVOKED = 'REVOKED',
+}
+
+export enum ProgramType {
+  ONE_YEAR = 'ONE_YEAR',
+  TWO_YEAR = 'TWO_YEAR',
+  THREE_YEAR = 'THREE_YEAR',
+  FOUR_YEAR = 'FOUR_YEAR',
+}
+
+export enum AcademicYear {
+  FIRST_YEAR = '1st',
+  SECOND_YEAR = '2nd',
+  THIRD_YEAR = '3rd',
+  FINAL_YEAR = 'Final',
 }
 
 export enum UserStatus {

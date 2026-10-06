@@ -19,9 +19,11 @@ import { Roles } from '../../core/decorators/roles.decorator';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { UserRole } from '@interhive/shared';
 import { User } from '../users/schemas/user.schema';
+import { PremiumGuard } from '../../core/guards/premium.guard';
 
 @ApiTags('Attendance')
 @Controller('attendance')
+@UseGuards(PremiumGuard)
 @ApiBearerAuth()
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}

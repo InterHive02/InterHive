@@ -67,17 +67,25 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
     { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
 
-  // 5. Intern Learning & Project Workspace (Matching PRD & Image 2)
+  // 5. Free Registered Student (Basic Dashboard)
+  student: [
+    { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+    { path: '/programs', label: 'Programs', icon: 'BookOpen' },
+    { path: '/training', label: 'Courses', icon: 'GraduationCap' },
+    { path: '/settings', label: 'Settings', icon: 'Settings' },
+  ],
+
+  // 6. Premium Intern Learning & Project Workspace
   intern: [
     { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-    { path: '/training', label: 'Training', icon: 'BookOpen' },
-    { path: '/assessments', label: 'Assessments', icon: 'ClipboardCheck' },
+    { path: '/programs', label: 'Programs', icon: 'BookOpen' },
+    { path: '/training', label: 'Courses', icon: 'GraduationCap' },
     { path: '/projects', label: 'Projects', icon: 'FolderKanban' },
-    { path: '/opportunities', label: 'Company Match', icon: 'Target' },
+    { path: '/attendance', label: 'Attendance', icon: 'Clock' },
+    { path: '/communication', label: 'Messages', icon: 'MessageSquare' },
     { path: '/internship', label: 'Internship', icon: 'Briefcase' },
-    { path: '/certificate', label: 'Certificate', icon: 'Award' },
-    { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
-    { path: '/profile', label: 'Profile', icon: 'User' },
+    { path: '/assessments', label: 'Performance', icon: 'ClipboardCheck' },
+    { path: '/certificate', label: 'Reports', icon: 'Award' },
     { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
 
@@ -165,14 +173,17 @@ export const PUBLIC_ROUTES = [
   ...AUTH_ROUTES,
 ];
 
-// Get parent routes for navigation based on user role
-export const getNavRoutes = (role: UserRole): RouteConfig[] => {
-  return ROLE_NAVIGATION[role] || ROLE_NAVIGATION.intern;
+// Get parent routes for navigation based on user role & access level
+export const getNavRoutes = (role: UserRole | string, accessLevel?: string): RouteConfig[] => {
+  if (role === 'student' || accessLevel === 'BASIC') {
+    return ROLE_NAVIGATION.student;
+  }
+  return ROLE_NAVIGATION[role as UserRole] || ROLE_NAVIGATION.intern;
 };
 
 // Get routes for a specific role
-export const getRoutesForRole = (role: UserRole): RouteConfig[] => {
-  return getNavRoutes(role);
+export const getRoutesForRole = (role: UserRole | string, accessLevel?: string): RouteConfig[] => {
+  return getNavRoutes(role, accessLevel);
 };
 
 // Get route by path

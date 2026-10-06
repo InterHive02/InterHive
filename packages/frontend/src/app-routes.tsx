@@ -118,7 +118,7 @@ export const AppRoutes: React.FC = () => {
       {/* Clerk SSO Callback Route */}
       <Route path="/sso-callback" element={<SsoCallbackPage />} />
 
-      {/* Protected Routes */}
+      {/* Protected Basic Routes */}
       <Route
         element={
           <ProtectedRoute>
@@ -127,15 +127,25 @@ export const AppRoutes: React.FC = () => {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        
-        {/* Intern Routes */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
+        <Route path="/training" element={<TrainingPage />} />
+        <Route path="/training/:id" element={<TrainingDetailsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+
+      {/* Protected Premium Intern Routes */}
+      <Route
+        element={
+          <ProtectedRoute requiresPremium>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/assessments" element={<AssessmentsPage />} />
         <Route path="/assessments/:id/take" element={<TakeAssessmentPage />} />
         <Route path="/assessments/:id/results" element={<AssessmentResultsPage />} />
-        <Route path="/training" element={<TrainingPage />} />
-        <Route path="/training/:id" element={<TrainingDetailsPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/internship" element={<ProjectsPage />} />
         <Route path="/projects/create" element={<Navigate to="/projects" replace />} />
@@ -145,8 +155,6 @@ export const AppRoutes: React.FC = () => {
         <Route path="/opportunities/:id" element={<MatchDetailsPage />} />
         <Route path="/certificate" element={<CertificatePage />} />
         <Route path="/communication" element={<CommunicationPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
       {/* Admin Routes */}

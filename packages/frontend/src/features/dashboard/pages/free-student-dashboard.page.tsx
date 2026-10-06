@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../api/hooks/use-auth';
 import { InternshipApplicationModal } from '../../landing/components/internship-application-modal';
+import { ProgramDetailsModal } from '../../landing/components/program-details-modal';
+import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
 import {
   Sparkles,
   GraduationCap,
@@ -31,6 +33,9 @@ export const FreeStudentDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [selectedProgramTypeForModal, setSelectedProgramTypeForModal] = useState<string | undefined>(undefined);
+  const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // Check local storage for application submission state
   const hasAppliedLocal = typeof window !== 'undefined' ? localStorage.getItem('hasAppliedPpo') === 'true' : false;
@@ -213,6 +218,82 @@ export const FreeStudentDashboardPage: React.FC = () => {
             <span>{hasApplied ? 'View / Update Details' : 'Start Application'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
+        </div>
+      </div>
+
+      {/* 2.5. Industry-Readiness Programs (1, 2, 3 & 4 Year) */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <span>InterHive Industry-Readiness Programs</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Select your academic program level to build company readiness, industrial training, and placement opportunities.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(Object.values(PROGRAM_CONFIGS) as any[]).map((prog) => (
+            <div
+              key={prog.id}
+              className="rounded-2xl bg-white dark:bg-[#121526] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                    {prog.badge}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-semibold">{prog.duration}</span>
+                </div>
+                <h3 className="font-extrabold text-slate-900 dark:text-white text-lg mb-1">{prog.title}</h3>
+                <p className="text-[11.5px] font-bold text-purple-600 dark:text-purple-400 mb-2">
+                  Target: {prog.targetAcademicYear}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                  {prog.shortDescription}
+                </p>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 mb-4">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Roadmap Milestone</span>
+                  <span className="text-[11.5px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    {prog.summaryTarget}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveDetailsProgramType(prog.id as ProgramTypeKey);
+                    setIsDetailsModalOpen(true);
+                  }}
+                  className="w-full py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>View Roadmap</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedProgramTypeForModal(prog.id);
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>Enroll in Program</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-[12px] text-slate-500 dark:text-slate-400 font-medium text-center">
+          {PROGRAM_DISCLAIMER}
         </div>
       </div>
 
@@ -474,6 +555,18 @@ export const FreeStudentDashboardPage: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           handleApplicationSuccess();
+        }}
+        preselectedProgramType={selectedProgramTypeForModal}
+      />
+
+      {/* Program Details Modal */}
+      <ProgramDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        programType={activeDetailsProgramType}
+        onEnroll={(progType) => {
+          setSelectedProgramTypeForModal(progType);
+          setIsModalOpen(true);
         }}
       />
     </div>

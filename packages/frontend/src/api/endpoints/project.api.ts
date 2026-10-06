@@ -1,10 +1,15 @@
 import { apiClient } from '../client';
 
 export interface Project {
+  id?: string;
+  _id?: string;
   companyId: string;
   title: string;
   description?: string;
   category: string[];
+  status?: 'planning' | 'in_progress' | 'completed' | 'on_hold';
+  progress?: number;
+  timeline?: any[];
   requiredSkills: {
     id: string;
     name: string;
@@ -22,8 +27,8 @@ export interface Project {
   };
   workType: 'remote' | 'hybrid' | 'onsite';
   tasks: ProjectTask[];
-  assignedTo?: string[];
-  mentors?: string[];
+  assignedTo?: any[];
+  mentors?: any[];
 }
 
 export interface ProjectTask {

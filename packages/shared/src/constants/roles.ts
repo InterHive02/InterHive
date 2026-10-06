@@ -2,6 +2,7 @@ export const ROLES = {
   ADMIN: 'admin',
   HR: 'hr',
   MANAGER: 'manager',
+  STUDENT: 'student',
   INTERN: 'intern',
   COMPANY: 'company',
   MENTOR: 'mentor',
@@ -12,6 +13,13 @@ export type Role = typeof ROLES[keyof typeof ROLES];
 
 export const ROLE_PERMISSIONS: Record<Role, string[]> = {
   admin: ['*'],
+  student: [
+    'view_profile',
+    'update_profile',
+    'view_programs',
+    'view_courses',
+    'apply_internship',
+  ],
   hr: [
     'view_interns',
     'manage_interns',

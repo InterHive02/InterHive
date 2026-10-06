@@ -27,6 +27,7 @@ const ALLOWED_CHAT_ROLES: Record<string, string[]> = {
   [UserRole.MANAGER]: [UserRole.ADMIN, UserRole.HR, UserRole.INTERN],
   [UserRole.HR]: [UserRole.ADMIN, UserRole.MANAGER, UserRole.INTERN],
   [UserRole.INTERN]: [UserRole.HR, UserRole.MANAGER],
+  [UserRole.STUDENT]: [],
 };
 
 @Injectable()
@@ -54,32 +55,52 @@ export class CommunicationService {
 
   /**
    * Centralized Relationship & Access Control Engine:
-   * 1. Deactivates/purges any unauthorized 1-on-1 chats that violate the access matrix.
-   * 2. Auto-provisions missing authorized 1-on-1 chats with populated metadata (Student domain, role title, application status).
+   * 1. Deactivates/purges any unauthorized 1-on-1 chats that violate the access matrix (including Free Registered Users).
+   * 2. Auto-provisions missing authorized 1-on-1 chats with populated metadata for Premium Interns, HR, Managers, Admin, and Companies.
    */
   async ensureRoleBasedChatsForUser(userId: string): Promise<void> {
     const userObjId = this.toObjectId(userId);
     if (!userObjId) return;
 
-    const userDoc = await this.userModel.findById(userObjId).select('role email firstName lastName position department').lean();
+    const userDoc = await this.userModel
+      .findById(userObjId)
+      .select('role accessLevel internStatus email firstName lastName position department assignedHr assignedManager domain')
+      .lean();
     if (!userDoc) return;
 
-    const userRole = (userDoc.role as string) || UserRole.INTERN;
+    const userRole = (userDoc.role as string) || UserRole.STUDENT;
+    const isFreeUser = userRole === UserRole.STUDENT || userDoc.accessLevel === 'BASIC';
+
+    // Free registered users must NEVER have active chat records
+    if (isFreeUser) {
+      await this.chatModel.updateMany(
+        { participants: userObjId, isActive: true },
+        { isActive: false },
+      );
+      return;
+    }
+
     const allowedRoles = ALLOWED_CHAT_ROLES[userRole] || [];
 
     // Step 1: Purge/deactivate unauthorized 1-on-1 chats for this user
     const userChats = await this.chatModel
       .find({ participants: userObjId, isGroupChat: false, isActive: true })
-      .populate('participants', 'role email')
+      .populate('participants', 'role accessLevel email')
       .lean();
 
     for (const chat of userChats) {
       if (chat.participants && chat.participants.length === 2) {
         const otherP = chat.participants.find((p: any) => p._id?.toString() !== userId);
         if (otherP) {
-          const otherRole = ((otherP as any).role as string) || UserRole.INTERN;
-          if (!allowedRoles.includes(otherRole)) {
-            // Deactivate unauthorized chat
+          const otherRole = ((otherP as any).role as string) || UserRole.STUDENT;
+          const otherAccessLevel = (otherP as any).accessLevel || 'BASIC';
+          
+          // Block if other participant is a free student or violates allowed target roles
+          if (
+            otherRole === UserRole.STUDENT ||
+            otherAccessLevel === 'BASIC' ||
+            !allowedRoles.includes(otherRole)
+          ) {
             await this.chatModel.findByIdAndUpdate(chat._id, { isActive: false });
           }
         }
@@ -89,12 +110,21 @@ export class CommunicationService {
     if (allowedRoles.length === 0) return;
 
     // Step 2: Auto-create missing authorized chats with target users
+    // For targets that are INTERN, ensure we only select PREMIUM interns
+    const queryConditions: any[] = [];
+    for (const role of allowedRoles) {
+      if (role === UserRole.INTERN) {
+        queryConditions.push({ role: UserRole.INTERN, accessLevel: 'PREMIUM', isActive: true });
+      } else {
+        queryConditions.push({ role, isActive: true });
+      }
+    }
+
     const targets = await this.userModel
-      .find({ role: { $in: allowedRoles }, isActive: true })
-      .select('_id role firstName lastName email position department skills')
+      .find({ $or: queryConditions })
+      .select('_id role accessLevel firstName lastName email position department skills domain')
       .lean();
 
-    // Fetch internship application collection for metadata if target or current user is student
     const appsCollection = this.userModel.db.collection('internshipapplications');
 
     for (const target of targets) {
@@ -102,9 +132,8 @@ export class CommunicationService {
       if (targetId === userId) continue;
 
       const targetRole = target.role as string;
-
-      // Double check permission matrix from both sides
       const targetAllowed = ALLOWED_CHAT_ROLES[targetRole] || [];
+
       if (!allowedRoles.includes(targetRole) || !targetAllowed.includes(userRole)) {
         continue;
       }
@@ -115,22 +144,22 @@ export class CommunicationService {
         participants: { $all: [userObjId, this.toObjectId(targetId)], $size: 2 },
       });
 
-      // Metadata calculation if student is involved
+      // Metadata calculation if Premium Intern is involved
       let studentMeta: any = undefined;
       const studentUser = userRole === UserRole.INTERN ? userDoc : targetRole === UserRole.INTERN ? target : null;
 
       if (studentUser) {
         const studentEmail = (studentUser as any).email;
         const app = await appsCollection.findOne({ email: studentEmail });
-        const domain = app?.areasOfInterest?.[0] || app?.degree || (studentUser as any).position || 'Full Stack Developer';
-        const appStatus = app?.status || 'Active Intern';
+        const domain = (studentUser as any).domain || app?.areasOfInterest?.[0] || app?.degree || (studentUser as any).position || 'Full Stack Developer';
+        const appStatus = app?.status || 'Selected Intern';
         
         studentMeta = {
           fullName: `${(studentUser as any).firstName || ''} ${(studentUser as any).lastName || ''}`.trim(),
           domain: domain,
           applicationStatus: appStatus,
-          degree: app?.degree || 'Computer Science',
-          institution: app?.institution || 'InterHive Tech',
+          degree: app?.degree || 'B.Tech CS',
+          institution: app?.institution || 'InterHive Partner Institute',
         };
       }
 
@@ -167,7 +196,7 @@ export class CommunicationService {
     managerId: string,
     data: { name: string; domain?: string; studentIds: string[] },
   ) {
-    const managerDoc = await this.userModel.findById(managerId).select('role').lean();
+    const managerDoc = await this.userModel.findById(managerId).select('role accessLevel').lean();
     if (!managerDoc || (managerDoc.role !== UserRole.MANAGER && managerDoc.role !== UserRole.ADMIN)) {
       throw new ForbiddenException('Only Managers and Admins can create domain-based intern groups.');
     }
@@ -178,6 +207,23 @@ export class CommunicationService {
     }
 
     const uniqueStudentIds = [...new Set(studentIds || [])];
+
+    // Verify all selected student IDs are active Premium Interns
+    if (uniqueStudentIds.length > 0) {
+      const selectedUsers = await this.userModel
+        .find({ _id: { $in: uniqueStudentIds.map(id => this.toObjectId(id)) } })
+        .select('_id role accessLevel email')
+        .lean();
+
+      for (const u of selectedUsers) {
+        if (u.role === UserRole.STUDENT || u.accessLevel === 'BASIC') {
+          throw new BadRequestException(
+            `Free Registered User (${u.email}) cannot be added to internship groups. Only Premium Interns are allowed.`,
+          );
+        }
+      }
+    }
+
     const allParticipants = [managerId, ...uniqueStudentIds].map(id => this.toObjectId(id)!);
 
     const chat = new this.chatModel({
@@ -205,22 +251,30 @@ export class CommunicationService {
   }
 
   /**
-   * Fetch eligible students/interns for Manager group creation
+   * Fetch eligible Premium Interns for Manager group creation
    */
   async getStudentsForManager(domain?: string) {
     const students = await this.userModel
-      .find({ role: UserRole.INTERN, isActive: true })
-      .select('_id firstName lastName email profilePhoto position skills department')
+      .find({
+        $or: [
+          { role: UserRole.INTERN, accessLevel: 'PREMIUM', isActive: true },
+          { role: UserRole.INTERN, isActive: true }, // fallback for active intern role
+        ],
+      })
+      .select('_id firstName lastName email profilePhoto position skills department domain accessLevel')
       .lean();
+
+    // Exclude any student with BASIC access level
+    const premiumStudents = students.filter(s => s.role !== UserRole.STUDENT && s.accessLevel !== 'BASIC');
 
     const appsCollection = this.userModel.db.collection('internshipapplications');
 
     const formattedStudents = await Promise.all(
-      students.map(async (st) => {
+      premiumStudents.map(async (st) => {
         const app = await appsCollection.findOne({ email: st.email });
-        const studentDomain = app?.areasOfInterest?.[0] || st.position || 'Full Stack Developer';
+        const studentDomain = st.domain || app?.areasOfInterest?.[0] || st.position || 'Full Stack Developer';
         const degree = app?.degree || 'B.Tech CS';
-        const status = app?.status || 'Selected';
+        const status = app?.status || 'Active Intern';
 
         return {
           id: st._id.toString(),

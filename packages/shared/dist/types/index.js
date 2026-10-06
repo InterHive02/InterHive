@@ -19,6 +19,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/types/index.ts
 var types_exports = {};
 __export(types_exports, {
+  AcademicYear: () => AcademicYear,
   ApplicationStatus: () => ApplicationStatus,
   AssessmentStatus: () => AssessmentStatus,
   AssessmentType: () => AssessmentType,
@@ -26,13 +27,16 @@ __export(types_exports, {
   EmploymentType: () => EmploymentType,
   Gender: () => Gender,
   InternStatus: () => InternStatus,
+  InternWorkflowStatus: () => InternWorkflowStatus,
   NotificationCategory: () => NotificationCategory,
   NotificationPriority: () => NotificationPriority,
+  ProgramType: () => ProgramType,
   ProjectPhase: () => ProjectPhase,
   ProjectStatus: () => ProjectStatus,
   RequirementStatus: () => RequirementStatus,
   SkillLevel: () => SkillLevel,
   TaskStatus: () => TaskStatus,
+  UserAccessLevel: () => UserAccessLevel,
   UserRole: () => UserRole,
   UserStatus: () => UserStatus
 });
@@ -43,10 +47,40 @@ var UserRole = /* @__PURE__ */ ((UserRole2) => {
   UserRole2["ADMIN"] = "admin";
   UserRole2["HR"] = "hr";
   UserRole2["MANAGER"] = "manager";
+  UserRole2["STUDENT"] = "student";
   UserRole2["INTERN"] = "intern";
   UserRole2["COMPANY"] = "company";
   return UserRole2;
 })(UserRole || {});
+var UserAccessLevel = /* @__PURE__ */ ((UserAccessLevel2) => {
+  UserAccessLevel2["BASIC"] = "BASIC";
+  UserAccessLevel2["PREMIUM"] = "PREMIUM";
+  return UserAccessLevel2;
+})(UserAccessLevel || {});
+var InternWorkflowStatus = /* @__PURE__ */ ((InternWorkflowStatus2) => {
+  InternWorkflowStatus2["FREE"] = "FREE";
+  InternWorkflowStatus2["APPLIED"] = "APPLIED";
+  InternWorkflowStatus2["INTERVIEW"] = "INTERVIEW";
+  InternWorkflowStatus2["SELECTED"] = "SELECTED";
+  InternWorkflowStatus2["ACTIVE"] = "ACTIVE";
+  InternWorkflowStatus2["COMPLETED"] = "COMPLETED";
+  InternWorkflowStatus2["REVOKED"] = "REVOKED";
+  return InternWorkflowStatus2;
+})(InternWorkflowStatus || {});
+var ProgramType = /* @__PURE__ */ ((ProgramType2) => {
+  ProgramType2["ONE_YEAR"] = "ONE_YEAR";
+  ProgramType2["TWO_YEAR"] = "TWO_YEAR";
+  ProgramType2["THREE_YEAR"] = "THREE_YEAR";
+  ProgramType2["FOUR_YEAR"] = "FOUR_YEAR";
+  return ProgramType2;
+})(ProgramType || {});
+var AcademicYear = /* @__PURE__ */ ((AcademicYear2) => {
+  AcademicYear2["FIRST_YEAR"] = "1st";
+  AcademicYear2["SECOND_YEAR"] = "2nd";
+  AcademicYear2["THIRD_YEAR"] = "3rd";
+  AcademicYear2["FINAL_YEAR"] = "Final";
+  return AcademicYear2;
+})(AcademicYear || {});
 var UserStatus = /* @__PURE__ */ ((UserStatus2) => {
   UserStatus2["ACTIVE"] = "active";
   UserStatus2["INACTIVE"] = "inactive";
@@ -182,6 +216,7 @@ var ProjectPhase = /* @__PURE__ */ ((ProjectPhase2) => {
 })(ProjectPhase || {});
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  AcademicYear,
   ApplicationStatus,
   AssessmentStatus,
   AssessmentType,
@@ -189,13 +224,16 @@ var ProjectPhase = /* @__PURE__ */ ((ProjectPhase2) => {
   EmploymentType,
   Gender,
   InternStatus,
+  InternWorkflowStatus,
   NotificationCategory,
   NotificationPriority,
+  ProgramType,
   ProjectPhase,
   ProjectStatus,
   RequirementStatus,
   SkillLevel,
   TaskStatus,
+  UserAccessLevel,
   UserRole,
   UserStatus
 });

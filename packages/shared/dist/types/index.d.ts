@@ -71,8 +71,34 @@ declare enum UserRole {
     ADMIN = "admin",
     HR = "hr",
     MANAGER = "manager",
+    STUDENT = "student",
     INTERN = "intern",
     COMPANY = "company"
+}
+declare enum UserAccessLevel {
+    BASIC = "BASIC",
+    PREMIUM = "PREMIUM"
+}
+declare enum InternWorkflowStatus {
+    FREE = "FREE",
+    APPLIED = "APPLIED",
+    INTERVIEW = "INTERVIEW",
+    SELECTED = "SELECTED",
+    ACTIVE = "ACTIVE",
+    COMPLETED = "COMPLETED",
+    REVOKED = "REVOKED"
+}
+declare enum ProgramType {
+    ONE_YEAR = "ONE_YEAR",
+    TWO_YEAR = "TWO_YEAR",
+    THREE_YEAR = "THREE_YEAR",
+    FOUR_YEAR = "FOUR_YEAR"
+}
+declare enum AcademicYear {
+    FIRST_YEAR = "1st",
+    SECOND_YEAR = "2nd",
+    THIRD_YEAR = "3rd",
+    FINAL_YEAR = "Final"
 }
 declare enum UserStatus {
     ACTIVE = "active",
@@ -722,4 +748,4 @@ interface AssessmentResult {
     updatedAt: Date;
 }
 
-export { Address, AnalyticsEvent, ApiResponse, ApplicationStatus, Assessment, AssessmentAnswer, AssessmentFeedback, AssessmentOption, AssessmentQuestion, AssessmentResult, AssessmentStatus, AssessmentSubmission, AssessmentType, BaseAssessmentResult, BaseEntity, Certification, Company, CompanyCollaboration, CompanyRating, CompanyRequirement, CompanyStatus, CompanySubscription, ContactInfo, Education, Email, EmploymentType, Experience, FileUpload, Gender, HiringProcess, InternApplication, InternProfile, InternProjectEvaluation, InternStatus, Location, NotificationCategory, NotificationPriority, NotificationType, OfferDetails, PaginatedResponse, PaginationParams, PhoneNumber, Project, ProjectContribution, ProjectDeliverable, ProjectEvaluation, ProjectParticipation, ProjectPhase, ProjectResource, ProjectStatus, ProjectSubtask, ProjectTask, ReadinessScore, ReadinessScoreHistory, RequirementStatus, Skill, SkillLevel, TaskComment, TaskStatus, TestResult, Timestamp, TrainingEnrollment, TrainingModuleProgress, URLString, UUID, UserRole, UserStatus };
+export { AcademicYear, Address, AnalyticsEvent, ApiResponse, ApplicationStatus, Assessment, AssessmentAnswer, AssessmentFeedback, AssessmentOption, AssessmentQuestion, AssessmentResult, AssessmentStatus, AssessmentSubmission, AssessmentType, BaseAssessmentResult, BaseEntity, Certification, Company, CompanyCollaboration, CompanyRating, CompanyRequirement, CompanyStatus, CompanySubscription, ContactInfo, Education, Email, EmploymentType, Experience, FileUpload, Gender, HiringProcess, InternApplication, InternProfile, InternProjectEvaluation, InternStatus, InternWorkflowStatus, Location, NotificationCategory, NotificationPriority, NotificationType, OfferDetails, PaginatedResponse, PaginationParams, PhoneNumber, ProgramType, Project, ProjectContribution, ProjectDeliverable, ProjectEvaluation, ProjectParticipation, ProjectPhase, ProjectResource, ProjectStatus, ProjectSubtask, ProjectTask, ReadinessScore, ReadinessScoreHistory, RequirementStatus, Skill, SkillLevel, TaskComment, TaskStatus, TestResult, Timestamp, TrainingEnrollment, TrainingModuleProgress, URLString, UUID, UserAccessLevel, UserRole, UserStatus };

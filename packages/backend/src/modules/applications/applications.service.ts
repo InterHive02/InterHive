@@ -18,9 +18,11 @@ import {
   AddNoteDto,
   UpdateStatusDto,
 } from './dto/create-application.dto';
+import { Inject, forwardRef } from '@nestjs/common';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../../common/mail/mail.service';
 import { UserRole } from '@interhive/shared';
+import { CommunicationService } from '../communication/communication.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -33,10 +35,33 @@ export class ApplicationsService {
     @InjectConnection()
     private readonly connection: Connection,
     private mailService: MailService,
+    @Inject(forwardRef(() => CommunicationService))
+    private communicationService: CommunicationService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
     const cleanEmail = dto.email.toLowerCase().trim();
+
+    // Eligibility check for selected program
+    if (dto.programType && dto.academicYear) {
+      const yearStr = dto.academicYear.toLowerCase();
+      const prog = dto.programType;
+
+      let isEligible = true;
+      if (prog === 'ONE_YEAR' && !yearStr.includes('final') && !yearStr.includes('4th') && !yearStr.includes('4')) {
+        isEligible = false;
+      } else if (prog === 'TWO_YEAR' && !yearStr.includes('3rd') && !yearStr.includes('3') && !yearStr.includes('final') && !yearStr.includes('4th')) {
+        isEligible = false;
+      } else if (prog === 'THREE_YEAR' && yearStr.includes('1st')) {
+        isEligible = false;
+      }
+
+      if (!isEligible) {
+        throw new BadRequestException(
+          'Based on your current academic year, this program is not available for you. Please select the program designed for your academic stage.',
+        );
+      }
+    }
 
     // Check if an application already exists with this email
     const existing = await this.applicationModel.findOne({ email: cleanEmail });
@@ -76,6 +101,8 @@ export class ApplicationsService {
     page?: number;
     limit?: number;
     status?: string;
+    programType?: string;
+    academicYear?: string;
     search?: string;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
@@ -85,6 +112,12 @@ export class ApplicationsService {
     const query: any = {};
     if (params.status && params.status !== 'all') {
       query.status = params.status;
+    }
+    if (params.programType && params.programType !== 'all') {
+      query.programType = params.programType;
+    }
+    if (params.academicYear && params.academicYear !== 'all') {
+      query.academicYear = params.academicYear;
     }
 
     if (params.search) {
@@ -277,6 +310,8 @@ export class ApplicationsService {
         lastName,
         phone: application.phone,
         role: UserRole.INTERN,
+        accessLevel: 'PREMIUM',
+        internStatus: 'ACTIVE',
         skills: application.skills || [],
         position: `${application.degree || 'Engineering'} Intern`,
         education: [
@@ -297,8 +332,17 @@ export class ApplicationsService {
       user.mustChangePassword = true;
       user.applicationId = application._id as any;
       user.role = UserRole.INTERN;
+      user.accessLevel = 'PREMIUM';
+      user.internStatus = 'ACTIVE';
       user.password = tempPassword;
       await user.save();
+    }
+
+    // Provision role-based chats (HR & Manager ↔ Intern)
+    try {
+      await this.communicationService.ensureRoleBasedChatsForUser(user._id.toString());
+    } catch (chatErr: any) {
+      this.logger.error(`Failed to auto-provision chats for new intern ${user.email}: ${chatErr.message}`);
     }
 
     // Update application record

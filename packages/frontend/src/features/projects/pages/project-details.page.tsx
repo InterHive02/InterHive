@@ -71,12 +71,12 @@ export const ProjectDetailsPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
           <p className="font-semibold text-gray-900 dark:text-white capitalize mt-1">
-            {project.status.replace('_', ' ')}
+            {(project.status || 'planning').replace('_', ' ')}
           </p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">Progress</p>
-          <p className="font-semibold text-gray-900 dark:text-white mt-1">{project.progress}%</p>
+          <p className="font-semibold text-gray-900 dark:text-white mt-1">{project.progress || 0}%</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">Team Size</p>
@@ -117,20 +117,20 @@ export const ProjectDetailsPage: React.FC = () => {
           <ProjectCollaborators
             collaborators={[
               ...(project.assignedTo?.map((user: any) => ({
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
+                id: user.id || user._id || '',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
                 profilePhoto: user.profilePhoto,
-                role: 'intern',
+                role: 'intern' as const,
               })) || []),
               ...(project.mentors?.map((user: any) => ({
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
+                id: user.id || user._id || '',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
                 profilePhoto: user.profilePhoto,
-                role: 'mentor',
+                role: 'mentor' as const,
               })) || []),
             ]}
           />

@@ -50,6 +50,22 @@ export class InternshipApplication {
   @Prop({ required: true, trim: true })
   semester: string;
 
+  @Prop({
+    type: String,
+    enum: ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR'],
+    default: 'ONE_YEAR',
+    index: true,
+  })
+  programType: string;
+
+  @Prop({
+    type: String,
+    enum: ['1st', '2nd', '3rd', 'Final', '1st Year', '2nd Year', '3rd Year', 'Final Year'],
+    default: 'Final',
+    index: true,
+  })
+  academicYear: string;
+
   @Prop({ trim: true, default: '' })
   graduationYear?: string;
 

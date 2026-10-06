@@ -414,7 +414,9 @@ export class AuthService {
         password: Math.random().toString(36) + Date.now().toString(),
         firstName,
         lastName,
-        role: UserRole.INTERN,
+        role: UserRole.STUDENT,
+        accessLevel: 'BASIC',
+        internStatus: 'FREE',
         isActive: true,
         isVerified: true,
       });
@@ -466,7 +468,9 @@ export class AuthService {
             firstName,
             lastName,
             profilePhoto: googleData.picture,
-            role: UserRole.INTERN,
+            role: UserRole.STUDENT,
+            accessLevel: 'BASIC',
+            internStatus: 'FREE',
             isActive: true,
             isVerified: true,
           });

@@ -3,8 +3,8 @@ import { Bell, Check, Trash2, Calendar, Award, MessageSquare } from 'lucide-reac
 import { useNotification } from '../../../api/hooks/use-notification';
 
 export const NotificationsPage: React.FC = () => {
-  const { useNotifications, markAsRead, markAllAsRead, clearAll } = useNotification();
-  const { data: notificationsData, isLoading } = useNotifications();
+  const { useNotifications, markAsRead, markAllAsRead } = useNotification();
+  const { data: notificationsData, isLoading } = useNotifications({ page: 1, limit: 20 });
 
   const notifications = Array.isArray(notificationsData)
     ? notificationsData

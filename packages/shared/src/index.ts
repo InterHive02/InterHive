@@ -10,6 +10,7 @@ export * from './constants/roles';
 export * from './constants/skills';
 export * from './constants/status';
 export * from './constants/permissions';
+export * from './constants/programs';
 
 // Utils
 export * from './utils/validators';

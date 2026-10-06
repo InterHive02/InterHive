@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { UserRole, UserStatus, Gender, EmploymentType } from '@interhive/shared';
+import { UserRole, UserStatus, Gender, EmploymentType, UserAccessLevel, InternWorkflowStatus } from '@interhive/shared';
 
 export type UserDocument = User & Document;
 
@@ -47,9 +47,40 @@ export class User {
   @Prop({
     type: String,
     enum: Object.values(UserRole),
-    default: UserRole.INTERN,
+    default: UserRole.STUDENT,
   })
   role: UserRole;
+
+  @Prop({
+    type: String,
+    enum: ['BASIC', 'PREMIUM'],
+    default: 'BASIC',
+  })
+  accessLevel: string;
+
+  @Prop({
+    type: String,
+    enum: ['FREE', 'APPLIED', 'INTERVIEW', 'SELECTED', 'ACTIVE', 'COMPLETED', 'REVOKED'],
+    default: 'FREE',
+  })
+  internStatus: string;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+  })
+  assignedHr: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+  })
+  assignedManager: Types.ObjectId;
+
+  @Prop({
+    trim: true,
+  })
+  domain: string;
 
   @Prop({
     type: Types.ObjectId,

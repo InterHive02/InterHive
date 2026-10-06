@@ -2,8 +2,8 @@ import { apiClient } from '../client';
 
 export interface InternProfile {
   personalInfo: {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
     dateOfBirth?: string;
     gender?: string;
     nationality?: string;

@@ -3,6 +3,7 @@ import { AppModule } from '../app.module';
 import { Logger } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { UserRole } from '@interhive/shared';
+import { CommunicationService } from '../modules/communication/communication.service';
 
 async function bootstrap() {
   const logger = new Logger('Seeder');
@@ -23,6 +24,7 @@ async function bootstrap() {
         email: 'admin@interhive.in',
         password: 'Password123!',
         role: UserRole.ADMIN,
+        accessLevel: 'PREMIUM',
         position: 'System Administrator',
         phone: '+91 9876543210',
       },
@@ -32,6 +34,7 @@ async function bootstrap() {
         email: 'hr@interhive.in',
         password: 'Password123!',
         role: UserRole.HR,
+        accessLevel: 'PREMIUM',
         position: 'HR Manager',
         phone: '+91 9876543211',
       },
@@ -41,6 +44,7 @@ async function bootstrap() {
         email: 'manager@interhive.in',
         password: 'Password123!',
         role: UserRole.MANAGER,
+        accessLevel: 'PREMIUM',
         position: 'Engineering Manager',
         phone: '+91 9876543212',
       },
@@ -50,8 +54,22 @@ async function bootstrap() {
         email: 'intern@interhive.in',
         password: 'Password123!',
         role: UserRole.INTERN,
+        accessLevel: 'PREMIUM',
+        internStatus: 'ACTIVE',
+        domain: 'Full Stack Web Development',
         position: 'Software Engineering Intern',
         phone: '+91 9876543213',
+      },
+      {
+        firstName: 'Sam',
+        lastName: 'Student',
+        email: 'student@interhive.in',
+        password: 'Password123!',
+        role: UserRole.STUDENT,
+        accessLevel: 'BASIC',
+        internStatus: 'FREE',
+        position: 'Free Registered Student',
+        phone: '+91 9876543215',
       },
       {
         firstName: 'Clara',
@@ -59,6 +77,7 @@ async function bootstrap() {
         email: 'company@interhive.in',
         password: 'Password123!',
         role: UserRole.COMPANY,
+        accessLevel: 'PREMIUM',
         position: 'Tech Talent Acquisition Head',
         phone: '+91 9876543214',
       },
@@ -81,12 +100,14 @@ async function bootstrap() {
         });
         await user.save();
         logger.log(`✅ Created user [${account.role}]: ${account.email} / ${account.password}`);
-      } else {
         user.email = account.email;
         user.password = account.password;
         user.firstName = account.firstName;
         user.lastName = account.lastName;
         user.role = account.role as UserRole;
+        (user as any).accessLevel = account.accessLevel;
+        (user as any).internStatus = account.internStatus || 'FREE';
+        if ((account as any).domain) (user as any).domain = (account as any).domain;
         user.isActive = true;
         user.isVerified = true;
         await user.save();
@@ -237,6 +258,18 @@ async function bootstrap() {
           }
         }
       }
+    }
+
+    // Sync role-based chat matrix for all seeded accounts
+    try {
+      const commService = app.get(CommunicationService);
+      const allUsers = await userModel.find().select('_id email').lean();
+      for (const u of allUsers) {
+        await commService.ensureRoleBasedChatsForUser(u._id.toString());
+      }
+      logger.log('✅ Synced centralized role-based chat permissions for all accounts');
+    } catch (commErr: any) {
+      logger.warn(`Chat sync notice: ${commErr.message}`);
     }
 
     logger.log('🎉 Database seeding for dummy accounts completed successfully!');

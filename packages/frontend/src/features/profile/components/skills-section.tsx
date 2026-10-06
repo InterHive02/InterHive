@@ -2,6 +2,7 @@ import React from 'react';
 
 interface SkillsSectionProps {
   skills: {
+    id?: string;
     name: string;
     category: string;
     level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -74,7 +75,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
 
             {onRemove && (
               <button
-                onClick={() => onRemove(skill.id)}
+                onClick={() => onRemove(skill.id || skill.name)}
                 className="text-red-500 hover:text-red-600 text-sm"
               >
                 Remove

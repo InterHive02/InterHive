@@ -28,6 +28,8 @@ export interface InternshipApplicationData {
   portfolioUrl?: string;
   reasonForApplying: string;
   additionalInfo?: string;
+  programType?: string;
+  academicYear?: string;
   consentTimestamp?: string;
   consentVersion?: string;
   status:
@@ -65,7 +67,7 @@ export const applicationsApi = {
       data,
     ),
 
-  getApplications: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
+  getApplications: (params?: { page?: number; limit?: number; status?: string; search?: string; programType?: string; academicYear?: string }) =>
     apiClient.get<InternshipApplicationData[]>('/applications', { params }),
 
   getStats: () =>

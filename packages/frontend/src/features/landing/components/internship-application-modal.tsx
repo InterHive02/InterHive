@@ -8,12 +8,34 @@ import {
 } from 'lucide-react';
 import { applicationsApi } from '../../../api/endpoints/applications.api';
 import { toast } from 'react-hot-toast';
+import {
+  ProgramType,
+  AcademicYear,
+  PROGRAM_CONFIGS,
+  PROGRAM_ELIGIBILITY_MATRIX,
+} from '@interhive/shared';
 
 interface InternshipApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
   preselectedCategory?: string;
+  preselectedProgramType?: string;
 }
+
+const mapSemesterToAcademicYear = (semester: string): AcademicYear => {
+  if (semester.includes('1st') || semester.includes('2nd')) return AcademicYear.FIRST_YEAR;
+  if (semester.includes('3rd') || semester.includes('4th')) return AcademicYear.SECOND_YEAR;
+  if (semester.includes('5th') || semester.includes('6th')) return AcademicYear.THIRD_YEAR;
+  return AcademicYear.FINAL_YEAR;
+};
+
+const PROGRAM_OPTIONS = [
+  { value: 'NONE', label: 'Standard Internship (No specific multi-year program)' },
+  { value: ProgramType.ONE_YEAR, label: '1-Year Program (Final Year Students)' },
+  { value: ProgramType.TWO_YEAR, label: '2-Year Program (3rd & Final Year Students)' },
+  { value: ProgramType.THREE_YEAR, label: '3-Year Program (2nd Year Onwards)' },
+  { value: ProgramType.FOUR_YEAR, label: '4-Year Program (1st Year Onwards)' },
+];
 
 interface CountryDialCode {
   country: string;
@@ -154,6 +176,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
   isOpen,
   onClose,
   preselectedCategory,
+  preselectedProgramType,
 }) => {
   const currentYear = new Date().getFullYear();
   const currentMonthYear = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
@@ -200,13 +223,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     pinCode: '',
     countryCode: '+91',
 
-    // Step 2: Academic
+    // Step 2: Academic & Program
     institution: '',
     degree: 'B.Tech / B.E.',
     branch: 'Computer Science & Engineering',
     semester: '6th Semester',
     graduationYear: String(currentYear + 1),
     cgpa: '',
+    programType: preselectedProgramType || 'NONE',
 
     // Step 3: Domain & Skills
     skills: '',
@@ -477,6 +501,18 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
       return false;
     }
 
+    if (formData.programType && formData.programType !== 'NONE') {
+      const currentAcademicYear = mapSemesterToAcademicYear(formData.semester);
+      const eligibleYears = PROGRAM_ELIGIBILITY_MATRIX[formData.programType as ProgramType];
+      if (eligibleYears && !eligibleYears.includes(currentAcademicYear)) {
+        const progConfig = PROGRAM_CONFIGS[formData.programType as ProgramType];
+        setErrorMessage(
+          `Based on your current academic standing (${currentAcademicYear} Year), the ${progConfig?.title || 'selected program'} is not available. Target academic year: ${progConfig?.targetAcademicYear}.`
+        );
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -556,6 +592,8 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
         semester: formData.semester,
         graduationYear: formData.graduationYear,
         cgpa: formData.cgpa.trim(),
+        programType: formData.programType !== 'NONE' ? formData.programType : undefined,
+        academicYear: mapSemesterToAcademicYear(formData.semester),
         rollNumber: '',
         skills: parsedSkills.length > 0 ? parsedSkills : ['JavaScript', 'React'],
         areasOfInterest: resolvedInterests,
@@ -1122,6 +1160,51 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                         className={inputCls}
                       />
                       <p className={hintCls}>Optional. Enter CGPA (e.g. 8.5) or percentage (e.g. 85%).</p>
+                    </div>
+
+                    {/* Program Selection */}
+                    <div className="min-[600px]:col-span-2">
+                      <label className={labelCls}>
+                        Select Program Level <span className="text-slate-400 font-normal text-[12.5px] ml-1">(Choose a structured multi-year roadmap)</span>
+                      </label>
+                      <select
+                        value={formData.programType}
+                        onChange={e => setFormData({ ...formData, programType: e.target.value })}
+                        className={selectCls}
+                      >
+                        {PROGRAM_OPTIONS.map(p => (
+                          <option key={p.value} value={p.value} className="bg-surface dark:bg-surface-dark text-slate-900 dark:text-slate-100">
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                      {formData.programType !== 'NONE' && (
+                        <div className="mt-2.5 p-3.5 rounded-[12px] bg-primary/5 border border-primary/20 text-[13px]">
+                          <div className="font-semibold text-primary dark:text-primary-light">
+                            {PROGRAM_CONFIGS[formData.programType as ProgramType]?.title} ({PROGRAM_CONFIGS[formData.programType as ProgramType]?.duration})
+                          </div>
+                          <p className="text-slate-600 dark:text-slate-300 mt-1 text-[12.5px]">
+                            <strong>Target Academic Year:</strong> {PROGRAM_CONFIGS[formData.programType as ProgramType]?.targetAcademicYear}
+                          </p>
+                          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-[12px]">
+                            {PROGRAM_CONFIGS[formData.programType as ProgramType]?.shortDescription}
+                          </p>
+                          {/* Real-time eligibility badge */}
+                          {(() => {
+                            const acadYear = mapSemesterToAcademicYear(formData.semester);
+                            const eligible = PROGRAM_ELIGIBILITY_MATRIX[formData.programType as ProgramType]?.includes(acadYear);
+                            return (
+                              <div className={`mt-2 font-semibold text-[12px] flex items-center gap-1.5 p-2 rounded-[8px] ${
+                                eligible 
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                              }`}>
+                                <span>{eligible ? `✓ Eligible for your academic status (${acadYear} Year)` : `⚠️ Ineligible: ${PROGRAM_CONFIGS[formData.programType as ProgramType]?.title} targets ${PROGRAM_CONFIGS[formData.programType as ProgramType]?.targetAcademicYear}. You selected ${acadYear} Year.`}</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}

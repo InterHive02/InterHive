@@ -2,6 +2,7 @@ declare const ROLES: {
     readonly ADMIN: "admin";
     readonly HR: "hr";
     readonly MANAGER: "manager";
+    readonly STUDENT: "student";
     readonly INTERN: "intern";
     readonly COMPANY: "company";
     readonly MENTOR: "mentor";
@@ -198,4 +199,35 @@ declare const MANAGER_PERMISSIONS: ("view_interns" | "view_trainings" | "view_re
 declare const INTERN_PERMISSIONS: ("view_interns" | "view_assessments" | "view_trainings" | "view_projects" | "enroll_training" | "view_opportunities" | "view_users" | "take_assessment" | "manage_training_progress" | "submit_project_work" | "apply_opportunity")[];
 declare const COMPANY_PERMISSIONS: ("view_companies" | "view_reports" | "view_analytics" | "view_opportunities" | "view_applications" | "view_users" | "update_company" | "create_opportunity" | "review_application" | "schedule_interview" | "make_offer")[];
 
-export { ADMIN_PERMISSIONS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROJECT_STATUS, Permission, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType };
+declare const PROGRAM_TYPES: {
+    readonly ONE_YEAR: "ONE_YEAR";
+    readonly TWO_YEAR: "TWO_YEAR";
+    readonly THREE_YEAR: "THREE_YEAR";
+    readonly FOUR_YEAR: "FOUR_YEAR";
+};
+type ProgramTypeKey = typeof PROGRAM_TYPES[keyof typeof PROGRAM_TYPES];
+interface ProgramYearDetails {
+    yearLabel: string;
+    stageName: string;
+    targetFocus: string;
+    targetCount: string;
+    activities: string[];
+}
+interface ProgramConfig {
+    id: ProgramTypeKey;
+    title: string;
+    duration: string;
+    targetAcademicYear: string;
+    allowedAcademicYears: string[];
+    shortDescription: string;
+    mainObjective: string;
+    summaryFocus: string;
+    summaryTarget: string;
+    badge: string;
+    roadmap: ProgramYearDetails[];
+}
+declare const PROGRAM_CONFIGS: Record<ProgramTypeKey, ProgramConfig>;
+declare const PROGRAM_ELIGIBILITY_MATRIX: Record<string, ProgramTypeKey>;
+declare const PROGRAM_DISCLAIMER = "Note: The specified number of internships and training opportunities are program targets and roadmap milestones designed to build maximum industry readiness, and do not constitute an unconditional guarantee of placement.";
+
+export { ADMIN_PERMISSIONS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType };
