@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Linkedin, Instagram, ArrowRight } from 'lucide-react';
 
 interface PublicFooterProps {
   onOpenInternshipModal: () => void;
@@ -31,6 +31,27 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
             <p className="text-xs text-slate-400 font-medium leading-relaxed">
               From Intern to Industry. Connecting talent with real-world opportunities worldwide.
             </p>
+            {/* Social Links */}
+            <div className="flex items-center gap-3 pt-1">
+              <a
+                href="https://www.linkedin.com/in/interhive-undefined-1a19a6441/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="InterHive on LinkedIn"
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-[#0077b5] text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-xs"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/interhive?stkn=MW5jamdxc2RrYzE3Zw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="InterHive on Instagram"
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-[#E4405F] text-slate-300 hover:text-white flex items-center justify-center transition-all shadow-xs"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* For Students Column */}
@@ -88,10 +109,16 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           <div>
             <h5 className="text-sm font-black text-white mb-4">Contact & Support</h5>
             <p className="text-xs text-slate-400 font-medium mb-3">Have questions? Reach out to our team:</p>
-            <a href="mailto:interhive.info@gmail.com" className="text-xs font-extrabold text-blue-400 hover:text-blue-300 flex items-center gap-2 mb-3">
-              <Mail className="w-4 h-4" />
-              <span>interhive.info@gmail.com</span>
-            </a>
+            <div className="space-y-2.5 mb-3">
+              <a href="mailto:interhive.info@gmail.com" className="text-xs font-extrabold text-blue-400 hover:text-blue-300 flex items-center gap-2">
+                <Mail className="w-4 h-4 shrink-0" />
+                <span>interhive.info@gmail.com</span>
+              </a>
+              <a href="tel:+918278314925" className="text-xs font-extrabold text-blue-400 hover:text-blue-300 flex items-center gap-2">
+                <Phone className="w-4 h-4 shrink-0" />
+                <span>+91 82783 14925</span>
+              </a>
+            </div>
             <Link
               to="/contact"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors"

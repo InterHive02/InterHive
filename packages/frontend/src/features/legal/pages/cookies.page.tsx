@@ -143,7 +143,7 @@ export const CookiePolicyPage: React.FC = () => {
             <span>Contact Regarding Storage Practices</span>
           </h2>
           <p>
-            If you have questions regarding our technical storage or data safeguards, contact our security and privacy team at <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a>.
+            If you have questions regarding our technical storage or data safeguards, contact our security and privacy team at <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a> or by phone at <a href="tel:+918278314925" className="text-blue-600 font-bold">+91 82783 14925</a>.
           </p>
         </section>
 

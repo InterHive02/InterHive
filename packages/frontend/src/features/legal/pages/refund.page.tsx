@@ -141,6 +141,7 @@ export const RefundPolicyPage: React.FC = () => {
             <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 max-w-md space-y-1.5 text-xs">
               <p className="font-bold text-white">InterHive Commercial Operations</p>
               <p className="text-slate-300">Email: <a href="mailto:interhive.info@gmail.com" className="text-blue-400 underline">interhive.info@gmail.com</a></p>
+              <p className="text-slate-300">Phone: <a href="tel:+918278314925" className="text-blue-400 underline">+91 82783 14925</a></p>
               <p className="text-slate-400">Response SLA: Within 24-48 business hours</p>
               <p className="text-slate-400">Location: India</p>
             </div>

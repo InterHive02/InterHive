@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import {
   Mail,
+  Phone,
+  Linkedin,
+  Instagram,
   Clock,
   Sparkles,
   ArrowRight,
@@ -135,6 +138,56 @@ export const ContactPage: React.FC = () => {
                     <Mail className="w-4 h-4 shrink-0" />
                     <span>interhive.info@gmail.com</span>
                   </a>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
+                  <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    Phone / WhatsApp Support
+                  </span>
+                  <a
+                    href="tel:+918278314925"
+                    className="text-sm sm:text-base font-extrabold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2"
+                  >
+                    <Phone className="w-4 h-4 shrink-0" />
+                    <span>+91 82783 14925</span>
+                  </a>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60">
+                  <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Connect With Us
+                  </span>
+                  <div className="space-y-2">
+                    <a
+                      href="https://www.linkedin.com/in/interhive-undefined-1a19a6441/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-blue-300 text-slate-700 hover:text-blue-600 font-bold text-xs flex items-center justify-between transition-all group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-[#0077b5]/10 text-[#0077b5] flex items-center justify-center">
+                          <Linkedin className="w-4 h-4" />
+                        </div>
+                        <span>LinkedIn Official</span>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600" />
+                    </a>
+
+                    <a
+                      href="https://www.instagram.com/interhive?stkn=MW5jamdxc2RrYzE3Zw=="
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-pink-300 text-slate-700 hover:text-pink-600 font-bold text-xs flex items-center justify-between transition-all group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-[#E4405F]/10 text-[#E4405F] flex items-center justify-center">
+                          <Instagram className="w-4 h-4" />
+                        </div>
+                        <span>Instagram @interhive</span>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-pink-600" />
+                    </a>
+                  </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-start gap-3">

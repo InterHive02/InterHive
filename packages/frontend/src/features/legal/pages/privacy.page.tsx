@@ -194,13 +194,14 @@ export const PrivacyPage: React.FC = () => {
             In compliance with the DPDP Act, 2023 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, our designated Grievance Officer details are:
           </p>
           
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 text-xs">
-            <p><strong>Name:</strong> Ankit Yadav</p>
-            <p><strong>Designation:</strong> Data Protection & Grievance Officer, InterHive</p>
-            <p><strong>Email:</strong> <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a></p>
-            <p><strong>Jurisdiction:</strong> India</p>
-            <p><strong>Response Timeline:</strong> Within 30 days of ticket receipt.</p>
-          </div>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 text-xs">
+              <p><strong>Name:</strong> Ankit Yadav</p>
+              <p><strong>Designation:</strong> Data Protection & Grievance Officer, InterHive</p>
+              <p><strong>Email:</strong> <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a></p>
+              <p><strong>Phone:</strong> <a href="tel:+918278314925" className="text-blue-600 font-bold">+91 82783 14925</a></p>
+              <p><strong>Jurisdiction:</strong> India</p>
+              <p><strong>Response Timeline:</strong> Within 30 days of ticket receipt.</p>
+            </div>
         </section>
 
       </main>

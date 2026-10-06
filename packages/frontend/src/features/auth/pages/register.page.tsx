@@ -146,6 +146,13 @@ export const RegisterPage: React.FC = () => {
                 className="text-blue-600 hover:underline font-bold"
               >
                 interhive.info@gmail.com
+              </a>{' '}
+              or{' '}
+              <a
+                href="tel:+918278314925"
+                className="text-blue-600 hover:underline font-bold"
+              >
+                +91 82783 14925
               </a>
             </p>
           </div>

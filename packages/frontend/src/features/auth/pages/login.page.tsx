@@ -46,6 +46,10 @@ export const LoginPage: React.FC = () => {
             Need help? Contact support at{' '}
             <a href="mailto:interhive.info@gmail.com" className="font-bold text-blue-600 hover:underline">
               interhive.info@gmail.com
+            </a>{' '}
+            or{' '}
+            <a href="tel:+918278314925" className="font-bold text-blue-600 hover:underline">
+              +91 82783 14925
             </a>
           </p>
         </div>

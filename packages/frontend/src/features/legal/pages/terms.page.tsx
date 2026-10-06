@@ -133,7 +133,7 @@ export const TermsPage: React.FC = () => {
             These Terms shall be governed by and construed in accordance with the laws of the Republic of India. In the event of any dispute or claim arising under or related to these Terms, the parties shall first attempt to resolve the matter through mutual good-faith consultation. If unresolved, the competent courts in India shall have exclusive jurisdiction.
           </p>
           <p>
-            Contact for legal notifications: <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a>.
+            Contact for legal notifications: <a href="mailto:interhive.info@gmail.com" className="text-blue-600 font-bold">interhive.info@gmail.com</a> | Phone: <a href="tel:+918278314925" className="text-blue-600 font-bold">+91 82783 14925</a>.
           </p>
         </section>
 
