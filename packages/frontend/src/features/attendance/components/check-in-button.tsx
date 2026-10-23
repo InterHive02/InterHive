@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAttendance } from '../hooks/use-attendance';
+import { attendanceOfflineService } from '../services/attendance-offline.service';
 
 interface CheckInButtonProps {
   onSuccess?: () => void;
@@ -71,17 +72,34 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({
   };
 
   const handleCheckIn = async () => {
+    const payload = {
+      location: location || undefined,
+      notes: notes || undefined,
+      deviceInfo: navigator.userAgent,
+    };
+
+    if (!navigator.onLine) {
+      attendanceOfflineService.enqueue('checkIn', payload);
+      setIsCheckedIn(true);
+      toast.success('⚡ Offline check-in recorded! Will auto-sync when back online.');
+      onSuccess?.();
+      return;
+    }
+
     try {
-      await checkIn({
-        location: location || undefined,
-        notes: notes || undefined,
-        deviceInfo: navigator.userAgent,
-      });
+      await checkIn(payload);
       setIsCheckedIn(true);
       await refetch();
       onSuccess?.();
-    } catch (error) {
-      onError?.(error);
+    } catch (error: any) {
+      if (!navigator.onLine || error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') {
+        attendanceOfflineService.enqueue('checkIn', payload);
+        setIsCheckedIn(true);
+        toast.success('⚡ Network offline: Check-in saved locally & queued for auto-sync!');
+        onSuccess?.();
+      } else {
+        onError?.(error);
+      }
     }
   };
 

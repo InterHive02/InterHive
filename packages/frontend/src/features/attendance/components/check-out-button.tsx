@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useAttendance } from '../hooks/use-attendance';
+import { attendanceOfflineService } from '../services/attendance-offline.service';
 
 interface CheckOutButtonProps {
   onSuccess?: () => void;
@@ -30,7 +32,7 @@ export const CheckOutButton: React.FC<CheckOutButtonProps> = ({
 
   const getLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Geolocation is not supported by your browser');
       return;
     }
 
@@ -61,7 +63,7 @@ export const CheckOutButton: React.FC<CheckOutButtonProps> = ({
       (error) => {
         console.error('Geolocation error:', error);
         setIsGettingLocation(false);
-        alert('Failed to get location. Please enable location services.');
+        toast.error('Failed to get location. Proceeding without GPS.');
       },
       {
         enableHighAccuracy: true,
@@ -72,17 +74,34 @@ export const CheckOutButton: React.FC<CheckOutButtonProps> = ({
   };
 
   const handleCheckOut = async () => {
+    const payload = {
+      location: location || undefined,
+      notes: notes || undefined,
+      deviceInfo: navigator.userAgent,
+    };
+
+    if (!navigator.onLine) {
+      attendanceOfflineService.enqueue('checkOut', payload);
+      setIsCheckedOut(true);
+      toast.success('⚡ Offline check-out recorded! Will auto-sync when back online.');
+      onSuccess?.();
+      return;
+    }
+
     try {
-      await checkOut({
-        location: location || undefined,
-        notes: notes || undefined,
-        deviceInfo: navigator.userAgent,
-      });
+      await checkOut(payload);
       setIsCheckedOut(true);
       await refetch();
       onSuccess?.();
-    } catch (error) {
-      onError?.(error);
+    } catch (error: any) {
+      if (!navigator.onLine || error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') {
+        attendanceOfflineService.enqueue('checkOut', payload);
+        setIsCheckedOut(true);
+        toast.success('⚡ Network offline: Check-out saved locally & queued for auto-sync!');
+        onSuccess?.();
+      } else {
+        onError?.(error);
+      }
     }
   };
 

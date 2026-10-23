@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckInButton } from '../components/check-in-button';
 import { CheckOutButton } from '../components/check-out-button';
 import { AttendanceCalendar } from '../components/attendance-calendar';
 import { AttendanceStats } from '../components/attendance-stats';
 import { useAttendance } from '../hooks/use-attendance';
+import { attendanceOfflineService } from '../services/attendance-offline.service';
 import { toast } from 'react-hot-toast';
 
 export const AttendancePage: React.FC = () => {
@@ -11,6 +12,10 @@ export const AttendancePage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const { data: today, refetch: refetchToday } = useToday();
+
+  useEffect(() => {
+    return attendanceOfflineService.initAutoSync(() => refetchToday());
+  }, []);
   const { data: history } = useHistory(
     selectedDate || undefined,
     undefined,

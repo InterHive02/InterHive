@@ -21,8 +21,9 @@ import {
 import { Inject, forwardRef } from '@nestjs/common';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../../common/mail/mail.service';
-import { UserRole } from '@interhive/shared';
+import { UserRole, NotificationCategory, NotificationPriority } from '@interhive/shared';
 import { CommunicationService } from '../communication/communication.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -37,6 +38,8 @@ export class ApplicationsService {
     private mailService: MailService,
     @Inject(forwardRef(() => CommunicationService))
     private communicationService: CommunicationService,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
@@ -203,6 +206,23 @@ export class ApplicationsService {
         });
     }
 
+    // Dispatch in-app notification if user account exists
+    this.userModel
+      .findOne({ email: application.email.toLowerCase().trim() })
+      .then((user) => {
+        if (user) {
+          this.notificationsService.create({
+            userId: user._id.toString(),
+            title: `Application Status: ${updateStatusDto.status.replace(/_/g, ' ').toUpperCase()}`,
+            message: `Your InterHive application status has been updated to "${updateStatusDto.status.replace(/_/g, ' ')}". Check your dashboard for more details.`,
+            type: NotificationCategory.SYSTEM,
+            priority: NotificationPriority.HIGH,
+            data: { metadata: { applicationId: id, status: updateStatusDto.status } },
+          }).catch(err => this.logger.warn(`Failed to dispatch in-app notification: ${err.message}`));
+        }
+      })
+      .catch(() => {});
+
     return {
       success: true,
       message: `Application status updated to ${updateStatusDto.status}`,
@@ -249,6 +269,23 @@ export class ApplicationsService {
           `Failed to send interview invitation email to ${application.email}: ${mailErr.message}`,
         );
       });
+
+    // Dispatch real-time in-app notification to candidate if registered
+    this.userModel
+      .findOne({ email: application.email.toLowerCase().trim() })
+      .then((user) => {
+        if (user) {
+          this.notificationsService.create({
+            userId: user._id.toString(),
+            title: `Interview Scheduled: ${dto.date} at ${dto.time}`,
+            message: `An interview has been scheduled for your application on ${dto.date} at ${dto.time} (${dto.mode || 'online'}). Mode details: ${dto.linkOrLocation || 'Check your registered email'}.`,
+            type: NotificationCategory.INTERVIEW,
+            priority: NotificationPriority.URGENT,
+            data: { metadata: { applicationId: id, interview: application.interview } },
+          }).catch(err => this.logger.warn(`Failed to dispatch interview in-app notification: ${err.message}`));
+        }
+      })
+      .catch(() => {});
 
     return {
       success: true,

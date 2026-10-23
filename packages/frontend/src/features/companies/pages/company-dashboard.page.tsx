@@ -20,23 +20,23 @@ export const CompanyDashboardPage: React.FC = () => {
   const { data: matches, isLoading: matchesLoading } = useMyMatches();
 
   const handleEditProfile = () => {
-    navigate('/company/profile/edit');
+    navigate('/profile/edit');
   };
 
-  const handleEditRequirement = (id: string) => {
-    navigate(`/company/requirements/${id}/edit`);
+  const handleEditRequirement = (_id: string) => {
+    navigate('/company/requirements');
   };
 
-  const handleViewRequirement = (id: string) => {
-    navigate(`/company/requirements/${id}`);
+  const handleViewRequirement = (_id: string) => {
+    navigate('/company/requirements');
   };
 
   const handleCreateRequirement = () => {
-    navigate('/company/requirements/create');
+    navigate('/company/requirements');
   };
 
-  const handleContactIntern = (id: string) => {
-    navigate(`/company/interns/${id}/contact`);
+  const handleContactIntern = (_id: string) => {
+    navigate('/company/matches');
   };
 
   const isLoading = profileLoading || requirementsLoading || matchesLoading;
@@ -55,7 +55,7 @@ export const CompanyDashboardPage: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Company Profile Not Found</h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Please complete your company profile</p>
         <button
-          onClick={() => navigate('/company/profile/create')}
+          onClick={() => navigate('/profile/edit')}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <Building2 className="w-4 h-4" />

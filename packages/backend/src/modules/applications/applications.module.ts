@@ -9,6 +9,7 @@ import { ApplicationsService } from './applications.service';
 import { ApplicationsController } from './applications.controller';
 import { MailModule } from '../../common/mail/mail.module';
 import { CommunicationModule } from '../communication/communication.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CommunicationModule } from '../communication/communication.module';
     ]),
     MailModule,
     forwardRef(() => CommunicationModule),
+    forwardRef(() => NotificationsModule),
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],

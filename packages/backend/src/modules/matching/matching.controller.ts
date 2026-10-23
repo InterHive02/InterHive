@@ -18,9 +18,11 @@ import { Roles } from '../../core/decorators/roles.decorator';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { UserRole } from '@interhive/shared';
 import { User } from '../users/schemas/user.schema';
+import { PremiumGuard } from '../../core/guards/premium.guard';
 
 @ApiTags('Matching')
 @Controller('matching')
+@UseGuards(PremiumGuard)
 @ApiBearerAuth()
 export class MatchingController {
   constructor(private readonly matchingService: MatchingService) {}

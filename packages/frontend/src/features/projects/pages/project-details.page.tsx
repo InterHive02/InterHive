@@ -6,14 +6,18 @@ import { ProjectTimeline } from '../components/project-timeline';
 import { ProjectCollaborators } from '../components/project-collaborators';
 import { UploadWorkModal } from '../components/upload-work-modal';
 import { useProject } from '../hooks/use-project';
+import { useAuth } from '../../../api/hooks/use-auth';
 
 export const ProjectDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { useProject: useProjectDetails, updateTaskStatus, uploadFiles } = useProject();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const { data: project, isLoading } = useProjectDetails(id || '');
+
+  const isElevatedRole = user?.role && ['admin', 'manager', 'hr'].includes(user.role);
 
   const handleTaskStatusChange = (taskId: string, status: string) => {
     updateTaskStatus({ taskId, status });
@@ -57,12 +61,14 @@ export const ProjectDetailsPage: React.FC = () => {
             <Upload className="w-4 h-4" />
             Upload Work
           </button>
-          <button
-            onClick={() => navigate(`/projects/${id}/edit`)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
-          >
-            Edit Project
-          </button>
+          {isElevatedRole && (
+            <button
+              onClick={() => navigate('/manager/projects')}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+            >
+              Manage Project
+            </button>
+          )}
         </div>
       </div>
 
@@ -105,7 +111,7 @@ export const ProjectDetailsPage: React.FC = () => {
               })) || [],
             })) || []}
             onTaskStatusChange={handleTaskStatusChange}
-            onAddTask={() => navigate(`/projects/${id}/tasks/create`)}
+            onAddTask={isElevatedRole ? () => navigate('/manager/projects') : undefined}
           />
 
           <ProjectTimeline
