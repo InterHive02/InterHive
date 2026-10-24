@@ -45,6 +45,13 @@ export class User {
   password: string;
 
   @Prop({
+    trim: true,
+    sparse: true,
+    index: true,
+  })
+  googleId?: string;
+
+  @Prop({
     type: String,
     enum: Object.values(UserRole),
     default: UserRole.STUDENT,
@@ -325,22 +332,8 @@ UserSchema.pre('save', async function(next) {
 
 // Compare password method
 UserSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
-  const isMatch = await bcrypt.compare(password, this.password);
-  if (isMatch) return true;
-
-  // Resilient fallback for demo accounts
-  const demoFallbackMap: Record<string, string[]> = {
-    'admin@interhive.in': ['Admin@123', 'Password123!'],
-    'hr@interhive.in': ['HrManager@123', 'Hr@123', 'Password123!'],
-    'intern@interhive.in': ['Intern@123', 'Password123!'],
-    'manager@interhive.in': ['Manager@123', 'Password123!'],
-    'company@interhive.in': ['Company@123', 'Password123!'],
-  };
-
-  const allowed = demoFallbackMap[this.email?.toLowerCase()];
-  if (allowed && allowed.includes(password)) {
-    return true;
+  if (!password || !this.password) {
+    return false;
   }
-
-  return false;
+  return bcrypt.compare(password, this.password);
 };

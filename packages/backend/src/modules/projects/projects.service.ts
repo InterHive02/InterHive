@@ -309,13 +309,43 @@ export class ProjectsService {
     };
   }
 
-  async updateTask(taskId: string, updateTaskDto: any) {
+  private async verifyProjectAccess(project: any, user: any): Promise<void> {
+    if (!user) {
+      throw new ForbiddenException('User context is required for authorization');
+    }
+    const role = user.role;
+    if (role === 'admin' || role === 'hr' || role === 'manager') {
+      return;
+    }
+    const userIdStr = (user.id || user._id || '').toString();
+    const isAssigned = (project.assignedTo || []).some((id: any) => id.toString() === userIdStr);
+    const isMentor = (project.mentors || []).some((id: any) => id.toString() === userIdStr);
+
+    if (!isAssigned && !isMentor) {
+      throw new ForbiddenException('You do not have permission to access or modify this project');
+    }
+  }
+
+  async updateTask(taskId: string, updateTaskDto: any, user?: any) {
     const task = await this.taskModel.findById(taskId);
     if (!task) {
       throw new NotFoundException('Task not found');
     }
 
-    Object.assign(task, updateTaskDto);
+    if (user) {
+      const project = await this.projectModel.findById(task.projectId);
+      if (project) {
+        await this.verifyProjectAccess(project, user);
+      }
+    }
+
+    // Whitelist allowed task fields to prevent mass assignment
+    const allowedTaskFields = ['title', 'description', 'priority', 'dueDate', 'assignedTo'];
+    for (const key of allowedTaskFields) {
+      if (updateTaskDto[key] !== undefined) {
+        (task as any)[key] = updateTaskDto[key];
+      }
+    }
     await task.save();
 
     return {
@@ -325,10 +355,17 @@ export class ProjectsService {
     };
   }
 
-  async updateTaskStatus(taskId: string, status: string) {
+  async updateTaskStatus(taskId: string, status: string, user?: any) {
     const task = await this.taskModel.findById(taskId);
     if (!task) {
       throw new NotFoundException('Task not found');
+    }
+
+    if (user) {
+      const project = await this.projectModel.findById(task.projectId);
+      if (project) {
+        await this.verifyProjectAccess(project, user);
+      }
     }
 
     task.status = status as TaskStatus;
@@ -368,10 +405,15 @@ export class ProjectsService {
     projectId: string,
     files: Express.Multer.File[],
     taskId?: string,
+    user?: any,
   ) {
     const project = await this.projectModel.findById(projectId);
     if (!project) {
       throw new NotFoundException('Project not found');
+    }
+
+    if (user) {
+      await this.verifyProjectAccess(project, user);
     }
 
     const uploads = await Promise.all(

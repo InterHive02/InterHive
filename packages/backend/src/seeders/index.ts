@@ -7,6 +7,12 @@ import { CommunicationService } from '../modules/communication/communication.ser
 
 async function bootstrap() {
   const logger = new Logger('Seeder');
+
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SEED_IN_PRODUCTION !== 'true') {
+    logger.error('CRITICAL: Seeding dummy accounts is strictly blocked in production environments.');
+    process.exit(1);
+  }
+
   logger.log('Starting database dummy accounts seeding...');
 
   const app = await NestFactory.createApplicationContext(AppModule);

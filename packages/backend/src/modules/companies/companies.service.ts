@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -14,7 +15,7 @@ import { CompanyLead, CompanyLeadDocument } from './schemas/company-lead.schema'
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { MailService } from '../../common/mail/mail.service';
-import { CompanyStatus, RequirementStatus } from '@interhive/shared';
+import { CompanyStatus, RequirementStatus, UserRole } from '@interhive/shared';
 
 @Injectable()
 export class CompaniesService {
@@ -134,13 +135,52 @@ export class CompaniesService {
     };
   }
 
-  async update(id: string, updateCompanyDto: any) {
+  private async verifyCompanyOwnership(companyId: any, user?: any): Promise<void> {
+    if (!user) {
+      throw new ForbiddenException('User context is required for authorization');
+    }
+    if (user.role === UserRole.ADMIN) {
+      return;
+    }
+
+    const company = await this.companyModel.findById(companyId);
+    if (!company) {
+      throw new NotFoundException('Associated company not found');
+    }
+
+    const userIdStr = (user.id || user._id || '').toString();
+    const companyIdStr = (company._id || company.id).toString();
+
+    const isContactOwner =
+      company.contact?.primaryContact?.email?.toLowerCase() === user.email?.toLowerCase() ||
+      company.contact?.hrContact?.email?.toLowerCase() === user.email?.toLowerCase();
+
+    const isDirectOwner =
+      companyIdStr === userIdStr ||
+      (company as any).userId === userIdStr;
+
+    if (!isContactOwner && !isDirectOwner) {
+      throw new ForbiddenException('You do not have permission to modify this company resource');
+    }
+  }
+
+  async update(id: string, updateCompanyDto: any, user?: any) {
     const company = await this.companyModel.findById(id);
     if (!company) {
       throw new NotFoundException('Company not found');
     }
 
-    Object.assign(company, updateCompanyDto);
+    if (user) {
+      await this.verifyCompanyOwnership(company._id, user);
+    }
+
+    const { companyInfo, contact } = updateCompanyDto;
+    if (companyInfo) {
+      company.companyInfo = { ...company.companyInfo, ...companyInfo };
+    }
+    if (contact) {
+      company.contact = { ...company.contact, ...contact };
+    }
     await company.save();
 
     return {
@@ -216,13 +256,39 @@ export class CompaniesService {
     };
   }
 
-  async updateRequirement(requirementId: string, updateRequirementDto: any) {
+  async updateRequirement(requirementId: string, updateRequirementDto: any, user?: any) {
     const requirement = await this.requirementModel.findById(requirementId);
     if (!requirement) {
       throw new NotFoundException('Requirement not found');
     }
 
-    Object.assign(requirement, updateRequirementDto);
+    if (user) {
+      await this.verifyCompanyOwnership(requirement.companyId, user);
+    }
+
+    // Strict field whitelisting to prevent mass assignment of sensitive internal fields
+    const allowedFields = [
+      'title',
+      'department',
+      'openings',
+      'skills',
+      'stipend',
+      'duration',
+      'workType',
+      'description',
+      'responsibilities',
+      'qualifications',
+      'status',
+      'expiresAt',
+      'location',
+    ];
+
+    for (const key of allowedFields) {
+      if (updateRequirementDto[key] !== undefined) {
+        (requirement as any)[key] = updateRequirementDto[key];
+      }
+    }
+
     await requirement.save();
 
     return {
@@ -232,10 +298,14 @@ export class CompaniesService {
     };
   }
 
-  async deleteRequirement(requirementId: string) {
+  async deleteRequirement(requirementId: string, user?: any) {
     const requirement = await this.requirementModel.findById(requirementId);
     if (!requirement) {
       throw new NotFoundException('Requirement not found');
+    }
+
+    if (user) {
+      await this.verifyCompanyOwnership(requirement.companyId, user);
     }
 
     await requirement.deleteOne();

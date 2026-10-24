@@ -7,12 +7,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Request } from 'express';
 
 import { User, UserDocument } from '../../users/schemas/user.schema';
+import { RedisService } from '../../../common/redis/redis.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -21,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
       ignoreExpiration: false,
       secretOrKey: configService.get('jwt.secret'),
+      passReqToCallback: true,
     });
   }
 
@@ -31,7 +34,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return null;
   }
 
-  async validate(payload: any) {
+  async validate(req: Request, payload: any) {
+    // Check if token has been revoked / blacklisted on logout
+    const token =
+      ExtractJwt.fromAuthHeaderAsBearerToken()(req) ||
+      JwtStrategy.extractJwtFromCookie(req);
+
+    if (token) {
+      try {
+        const isRevoked = await this.redisService.get(`blacklist:${token}`);
+        if (isRevoked) {
+          throw new UnauthorizedException('Authentication token has been revoked');
+        }
+      } catch (err) {
+        if (err instanceof UnauthorizedException) throw err;
+      }
+    }
+
     const userId = payload.id || payload._id || payload.sub;
     if (!userId) {
       throw new UnauthorizedException('Invalid token payload');

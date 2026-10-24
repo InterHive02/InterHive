@@ -18,6 +18,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { Public } from '../../core/decorators/public.decorator';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../users/schemas/user.schema';
@@ -82,8 +83,14 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(@CurrentUser() user: User, @Res() response: Response) {
-    await this.authService.logout(user.id);
+  async logout(
+    @CurrentUser() user: User,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const authHeader = request.headers.authorization;
+    const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    await this.authService.logout(user.id, bearerToken);
     
     // Clear refresh token cookie
     response.clearCookie('refresh_token', {
@@ -197,9 +204,9 @@ export class AuthController {
   @Public()
   @Post('google')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login / Register with Google account' })
+  @ApiOperation({ summary: 'Login / Register with verified Google account ID token' })
   async googleAuth(
-    @Body() body: { email: string; name?: string; googleId?: string; picture?: string },
+    @Body() body: GoogleAuthDto,
     @Res() response: Response,
   ) {
     const result = await this.authService.googleAuth(body);

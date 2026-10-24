@@ -1,5 +1,6 @@
 import React from 'react';
 import { Download, ExternalLink, FileText, Video, Book, Code, Briefcase, Link2 } from 'lucide-react';
+import { isSafeUrl } from '../../../shared/utils/sanitize';
 
 interface TrainingResourcesProps {
   resources: {
@@ -88,7 +89,7 @@ export const TrainingResources: React.FC<TrainingResourcesProps> = ({ resources 
 
             <div className="flex items-center gap-2">
               <a
-                href={resource.url}
+                href={isSafeUrl(resource.url) ? resource.url : '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"

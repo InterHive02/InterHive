@@ -23,8 +23,10 @@ export const signInWithFirebaseGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
+    const idToken = await user.getIdToken();
     return {
       success: true,
+      idToken,
       user: {
         uid: user.uid,
         email: user.email,

@@ -74,7 +74,7 @@ export const authApi = {
   verifyOtp: (email: string, code: string) =>
     apiClient.post<AuthResponse>('/auth/verify-otp', { email, code }),
 
-  googleLogin: (data: { email: string; name?: string; googleId?: string; picture?: string }) =>
+  googleLogin: (data: { idToken: string }) =>
     apiClient.post<AuthResponse>('/auth/google', data),
 
   changeFirstPassword: (newPassword: string) =>

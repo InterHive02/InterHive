@@ -135,8 +135,9 @@ export class CompaniesController {
   async updateRequirement(
     @Param('requirementId') requirementId: string,
     @Body() updateRequirementDto: any,
+    @CurrentUser() user: User,
   ) {
-    return this.companiesService.updateRequirement(requirementId, updateRequirementDto);
+    return this.companiesService.updateRequirement(requirementId, updateRequirementDto, user);
   }
 
   @Delete('requirements/:requirementId')
@@ -145,8 +146,11 @@ export class CompaniesController {
   @ApiOperation({ summary: 'Delete company requirement' })
   @ApiResponse({ status: 204, description: 'Requirement deleted successfully' })
   @ApiResponse({ status: 404, description: 'Requirement not found' })
-  async deleteRequirement(@Param('requirementId') requirementId: string) {
-    await this.companiesService.deleteRequirement(requirementId);
+  async deleteRequirement(
+    @Param('requirementId') requirementId: string,
+    @CurrentUser() user: User,
+  ) {
+    await this.companiesService.deleteRequirement(requirementId, user);
   }
 
   // Matching

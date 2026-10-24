@@ -16,11 +16,15 @@ import * as bcrypt from 'bcryptjs';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
+import * as crypto from 'crypto';
+import axios from 'axios';
+
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { MailService } from '../../common/mail/mail.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { UserRole } from '@interhive/shared';
@@ -28,7 +32,7 @@ import { UserRole } from '@interhive/shared';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger('AuthService');
-  private otpMemoryMap = new Map<string, { code: string; expiresAt: number }>();
+  private otpMemoryMap = new Map<string, { code: string; expiresAt: number; attempts: number }>();
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -148,7 +152,7 @@ export class AuthService {
         success: true,
         data: {
           accessToken,
-          expiresIn: this.configService.get('jwt.expiresIn', '7d'),
+          expiresIn: this.configService.get('jwt.expiresIn', '1h'),
         },
       };
     } catch (error) {
@@ -156,12 +160,18 @@ export class AuthService {
     }
   }
 
-  async logout(userId: string) {
+  async logout(userId: string, token?: string | null) {
     // Remove refresh token
-    await this.redisService.del(`refresh:${userId}`);
-    
-    // Blacklist access token (optional)
-    // await this.redisService.set(`blacklist:${token}`, 'true', 7 * 24 * 60 * 60);
+    try {
+      await this.redisService.del(`refresh:${userId}`);
+    } catch {}
+
+    // Blacklist access token for the remainder of its lifespan
+    if (token) {
+      try {
+        await this.redisService.set(`blacklist:${token}`, 'true', 3600);
+      } catch {}
+    }
 
     return { success: true, message: 'Logged out successfully' };
   }
@@ -337,9 +347,8 @@ export class AuthService {
   }
 
   private async generateEmployeeId(): Promise<string> {
-    // Use timestamp + random to avoid race conditions
     const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const random = crypto.randomBytes(3).toString('hex').toUpperCase();
     return `EMP${timestamp}${random}`;
   }
 
@@ -349,29 +358,43 @@ export class AuthService {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store in memory map as fallback
+    // Check email-level cooldown to prevent spam / flooding
+    const existingMemory = this.otpMemoryMap.get(cleanEmail);
+    if (existingMemory && existingMemory.expiresAt > Date.now()) {
+      const timeSinceSent = 10 * 60 * 1000 - (existingMemory.expiresAt - Date.now());
+      if (timeSinceSent < 60000) {
+        const remainingWait = Math.ceil((60000 - timeSinceSent) / 1000);
+        throw new BadRequestException(`Please wait ${remainingWait} seconds before requesting another code`);
+      }
+    }
+
+    // Cryptographically secure 6-digit OTP
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
+
+    // Store in memory map as fallback with attempt tracking
     this.otpMemoryMap.set(cleanEmail, {
       code: otpCode,
       expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+      attempts: 0,
     });
 
     // Store in Redis if available
     try {
       await this.redisService.set(`otp:${cleanEmail}`, otpCode, 600); // 10 minutes
+      await this.redisService.set(`otp_attempts:${cleanEmail}`, '0', 600);
     } catch (e) {
-      console.warn('Redis unavailable, using in-memory OTP store.');
+      this.logger.warn('Redis unavailable, using in-memory OTP store.');
     }
 
-    console.log(`\n=================================================`);
-    console.log(`🔑 INTERHIVE GMAIL OTP FOR [${email}]: ${otpCode}`);
-    console.log(`=================================================\n`);
+    // Do NOT log plaintext OTP in application logs
+    const maskedEmail = cleanEmail.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+    this.logger.log(`OTP generated and sent to ${maskedEmail}`);
 
     try {
       await this.mailService.sendOtpEmail(email, otpCode);
     } catch (err) {
-      console.error(`Mail dispatch exception for ${email}:`, err);
+      this.logger.error(`Mail dispatch exception for ${maskedEmail}:`, err);
     }
 
     return {
@@ -381,37 +404,82 @@ export class AuthService {
   }
 
   async verifyLoginOtp(email: string, code: string) {
-    const cleanEmail = email.toLowerCase().trim();
-    let storedOtp = await this.redisService.get(`otp:${cleanEmail}`);
-
-    // Fallback to memory map if Redis didn't return a code
-    if (!storedOtp) {
-      const memoryData = this.otpMemoryMap.get(cleanEmail);
-      if (memoryData && memoryData.expiresAt > Date.now()) {
-        storedOtp = memoryData.code;
-      }
+    if (!email || !code) {
+      throw new BadRequestException('Email and verification code are required');
     }
 
-    if (!storedOtp || storedOtp !== code.trim()) {
+    const cleanEmail = email.toLowerCase().trim();
+    const inputCode = code.trim();
+
+    let storedOtp = await this.redisService.get(`otp:${cleanEmail}`);
+    let memoryData = this.otpMemoryMap.get(cleanEmail);
+
+    if (!storedOtp && memoryData && memoryData.expiresAt > Date.now()) {
+      storedOtp = memoryData.code;
+    }
+
+    if (!storedOtp) {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    // Clean up
+    // Check brute force attempts
+    let attempts = 0;
+    try {
+      const redisAttempts = await this.redisService.get(`otp_attempts:${cleanEmail}`);
+      attempts = redisAttempts ? parseInt(redisAttempts, 10) : (memoryData?.attempts || 0);
+    } catch {
+      attempts = memoryData?.attempts || 0;
+    }
+
+    if (attempts >= 5) {
+      this.otpMemoryMap.delete(cleanEmail);
+      try {
+        await this.redisService.del(`otp:${cleanEmail}`);
+        await this.redisService.del(`otp_attempts:${cleanEmail}`);
+      } catch {}
+      throw new BadRequestException('Too many failed verification attempts. Please request a new OTP.');
+    }
+
+    // Constant-time comparison to prevent timing attacks
+    const isValid =
+      inputCode.length === storedOtp.length &&
+      crypto.timingSafeEqual(Buffer.from(inputCode), Buffer.from(storedOtp));
+
+    if (!isValid) {
+      const newAttempts = attempts + 1;
+      if (memoryData) memoryData.attempts = newAttempts;
+      try {
+        await this.redisService.set(`otp_attempts:${cleanEmail}`, newAttempts.toString(), 600);
+      } catch {}
+
+      if (newAttempts >= 5) {
+        this.otpMemoryMap.delete(cleanEmail);
+        try {
+          await this.redisService.del(`otp:${cleanEmail}`);
+          await this.redisService.del(`otp_attempts:${cleanEmail}`);
+        } catch {}
+        throw new BadRequestException('Too many failed verification attempts. Please request a new OTP.');
+      }
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    // Clean up used OTP
     this.otpMemoryMap.delete(cleanEmail);
     try {
       await this.redisService.del(`otp:${cleanEmail}`);
+      await this.redisService.del(`otp_attempts:${cleanEmail}`);
     } catch (e) { /* ignore */ }
 
     let user = await this.userModel.findOne({ email: cleanEmail });
     if (!user) {
-      // Auto-register user with OTP
+      // Auto-register user with cryptographically secure random password
       const nameParts = cleanEmail.split('@')[0].split('.');
       const firstName = nameParts[0] || 'User';
       const lastName = nameParts[1] || 'Intern';
       user = new this.userModel({
         email: cleanEmail,
         employeeId: await this.generateEmployeeId(),
-        password: Math.random().toString(36) + Date.now().toString(),
+        password: crypto.randomBytes(32).toString('hex'),
         firstName,
         lastName,
         role: UserRole.STUDENT,
@@ -432,7 +500,9 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.generateRefreshToken(userIdStr);
 
-    await this.redisService.set(`refresh:${userIdStr}`, refreshToken, 30 * 24 * 60 * 60);
+    try {
+      await this.redisService.set(`refresh:${userIdStr}`, refreshToken, 30 * 24 * 60 * 60);
+    } catch {}
 
     const userData = user.toObject();
     delete userData.password;
@@ -441,52 +511,105 @@ export class AuthService {
       user: userData,
       accessToken,
       refreshToken,
-      expiresIn: this.configService.get('jwt.expiresIn', '7d'),
+      expiresIn: this.configService.get('jwt.expiresIn', '1h'),
     };
   }
 
-  async googleAuth(googleData: { email: string; name?: string; googleId?: string; picture?: string }) {
-    if (!googleData?.email) {
-      throw new BadRequestException('Email is required for Google login');
+  async googleAuth(dto: GoogleAuthDto) {
+    if (!dto?.idToken || typeof dto.idToken !== 'string') {
+      throw new BadRequestException('A valid Google ID token is required');
     }
-    const cleanEmail = googleData.email.toLowerCase().trim();
+
+    const configuredClientId = this.configService.get<string>('GOOGLE_CLIENT_ID') || process.env.GOOGLE_CLIENT_ID;
+    const configuredFirebaseId = this.configService.get<string>('FIREBASE_PROJECT_ID') || process.env.FIREBASE_PROJECT_ID;
+
+    // Fail safe: If neither client ID nor Firebase project ID is configured, reject
+    if (!configuredClientId && !configuredFirebaseId) {
+      this.logger.error('Google Sign-In rejected: No OAuth client ID or Firebase project ID configured.');
+      throw new BadRequestException('Google authentication is not configured on this server');
+    }
+
+    // Cryptographic verification via Google's tokeninfo service
+    let tokenInfo: any;
+    try {
+      const resp = await axios.get(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(dto.idToken.trim())}`,
+        { timeout: 8000 },
+      );
+      tokenInfo = resp.data;
+    } catch (err: any) {
+      this.logger.warn(`Google token verification failed: ${err.response?.data?.error_description || err.message}`);
+      throw new UnauthorizedException('Invalid, expired, or untrusted Google ID token');
+    }
+
+    if (!tokenInfo || !tokenInfo.email || !tokenInfo.sub) {
+      throw new UnauthorizedException('Incomplete Google identity token payload');
+    }
+
+    // Verify token issuer
+    const validIssuers = ['https://accounts.google.com', 'accounts.google.com'];
+    if (!validIssuers.includes(tokenInfo.iss)) {
+      throw new UnauthorizedException('Untrusted token issuer');
+    }
+
+    // Verify token expiration
+    const exp = Number(tokenInfo.exp);
+    if (!exp || exp <= Math.floor(Date.now() / 1000)) {
+      throw new UnauthorizedException('Google ID token has expired');
+    }
+
+    // Strictly verify audience matches configured Google OAuth Client ID or Firebase Project ID
+    const validAudiences = [configuredClientId, configuredFirebaseId].filter(Boolean);
+    if (!validAudiences.includes(tokenInfo.aud)) {
+      throw new UnauthorizedException('Google token audience does not match configured application');
+    }
+
+    // Strictly enforce verified email from Google
+    const isEmailVerified = tokenInfo.email_verified === true || tokenInfo.email_verified === 'true';
+    if (!isEmailVerified) {
+      throw new UnauthorizedException('Google account email has not been verified by Google');
+    }
+
+    const cleanEmail = tokenInfo.email.toLowerCase().trim();
+    const googleSubjectId = tokenInfo.sub;
 
     try {
       let user = await this.userModel.findOne({ email: cleanEmail });
 
       if (!user) {
-        const nameParts = (googleData.name || cleanEmail.split('@')[0]).split(' ');
+        // Safe user creation with verified Google identity
+        const nameParts = (tokenInfo.name || cleanEmail.split('@')[0]).split(' ');
         const firstName = nameParts[0] || 'Google';
         const lastName = nameParts.slice(1).join(' ') || 'User';
+        const empId = await this.generateEmployeeId();
 
-        try {
-          const empId = await this.generateEmployeeId();
-          user = new this.userModel({
-            email: cleanEmail,
-            employeeId: empId,
-            password: Math.random().toString(36) + Date.now().toString(),
-            firstName,
-            lastName,
-            profilePhoto: googleData.picture,
-            role: UserRole.STUDENT,
-            accessLevel: 'BASIC',
-            internStatus: 'FREE',
-            isActive: true,
-            isVerified: true,
-          });
-          await user.save();
-        } catch (saveError: any) {
-          if (saveError?.code === 11000) {
-            user = await this.userModel.findOne({ email: cleanEmail });
-            if (!user) throw saveError;
-          } else {
-            console.error('Error saving new Google user:', saveError);
-            throw saveError;
-          }
-        }
+        user = new this.userModel({
+          email: cleanEmail,
+          googleId: googleSubjectId,
+          employeeId: empId,
+          password: crypto.randomBytes(32).toString('hex'),
+          firstName,
+          lastName,
+          profilePhoto: tokenInfo.picture,
+          role: UserRole.STUDENT,
+          accessLevel: 'BASIC',
+          internStatus: 'FREE',
+          isActive: true,
+          isVerified: true,
+        });
+        await user.save();
       } else {
-        if (googleData.picture && !user.profilePhoto) {
-          user.profilePhoto = googleData.picture;
+        // Prevent account takeover: verify existing account's linked Google identity
+        if (user.googleId && user.googleId !== googleSubjectId) {
+          throw new UnauthorizedException('This email is already associated with a different Google account');
+        }
+
+        if (!user.googleId) {
+          user.googleId = googleSubjectId;
+        }
+
+        if (tokenInfo.picture && !user.profilePhoto) {
+          user.profilePhoto = tokenInfo.picture;
         }
         user.isVerified = true;
         user.lastLogin = new Date();
@@ -511,11 +634,14 @@ export class AuthService {
         user: userData,
         accessToken,
         refreshToken,
-        expiresIn: '7d',
+        expiresIn: this.configService.get('jwt.expiresIn', '1h'),
       };
     } catch (error: any) {
-      console.error('Google Auth exception:', error);
-      throw new BadRequestException(error?.message || 'Google authentication failed');
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.error('Google Auth exception:', error);
+      throw new BadRequestException('Google authentication processing failed');
     }
   }
 }

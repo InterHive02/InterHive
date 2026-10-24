@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
+import { ValidationPipe, Logger, VersioningType, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
@@ -16,6 +16,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
+
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const isProduction = nodeEnv === 'production';
+
+  // Configure secure proxy trust for accurate IP resolution behind load balancers/proxies
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', configService.get('TRUST_PROXY', isProduction ? 1 : 'loopback'));
 
   // Increase body size limit to allow base64-encoded profile photos
   app.use(require('express').json({ limit: '10mb' }));
@@ -35,47 +42,52 @@ async function bootstrap() {
   app.use((compression as any)());
   app.use((cookieParser as any)());
   
-  // CORS configuration
-  const customOrigins = configService
+  // Strict CORS configuration
+
+  const configuredCustomOrigins = configService
     .get('CORS_ORIGIN', '')
     .split(',')
     .map((o: string) => o.trim())
     .filter(Boolean);
+
+  const allowedOriginsSet = new Set<string>([
+    'https://interhive.in',
+    'https://www.interhive.in',
+    ...configuredCustomOrigins,
+  ]);
+
+  if (!isProduction) {
+    allowedOriginsSet.add('http://localhost:3000');
+    allowedOriginsSet.add('http://localhost:5173');
+    allowedOriginsSet.add('http://127.0.0.1:3000');
+    allowedOriginsSet.add('http://127.0.0.1:5173');
+  }
 
   app.enableCors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
 
-      const standardOrigins = [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'https://interhive.in',
-        'https://www.interhive.in',
-        'http://interhive.in',
-        'http://www.interhive.in',
-        ...customOrigins,
-      ];
-
-      const isAllowed =
-        standardOrigins.includes(origin) ||
-        origin.includes('localhost') ||
-        origin.includes('127.0.0.1') ||
-        origin.endsWith('.vercel.app') ||
-        origin.endsWith('interhive.in') ||
-        origin.includes('onrender.com');
-
-      if (isAllowed) {
+      if (allowedOriginsSet.has(origin)) {
         return callback(null, true);
       }
 
-      // Safe fallback - avoid crashing request handler with Error
-      logger.warn(`Untracked CORS origin request: ${origin}`);
-      return callback(null, true);
+      // Check for approved preview domains in development or staging
+      if (
+        !isProduction &&
+        /^https:\/\/interhive(-[a-zA-Z0-9_-]+)?\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      logger.warn(`Rejected unauthorized CORS request from origin: ${origin}`);
+      return callback(new ForbiddenException(`CORS origin not allowed: ${origin}`), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 3600,
   });
 
   // API versioning

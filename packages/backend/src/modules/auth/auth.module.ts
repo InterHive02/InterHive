@@ -21,7 +21,7 @@ import { RedisModule } from '../../common/redis/redis.module';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get('jwt.expiresIn', '7d'),
+          expiresIn: configService.get('jwt.expiresIn', '1h'),
           issuer: configService.get('jwt.issuer', 'interhive'),
           audience: configService.get('jwt.audience', 'interhive-users'),
         },

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, CheckCircle2, Shield } from 'lucide-react';
+import { X, CheckCircle2, Shield, AlertCircle } from 'lucide-react';
 import { authApi } from '../../../api/endpoints/auth.api';
+import { signInWithFirebaseGoogle } from '../../../core/config/firebase.config';
 import { toast } from 'react-hot-toast';
 
 interface GoogleAuthModalProps {
@@ -16,48 +17,46 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   title = 'Sign in with Google',
 }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleAuth = async () => {
     setError(null);
-
-    const cleanEmail = email.trim();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError('Please enter a valid Google/Gmail email address.');
-      return;
-    }
-
     setIsLoading(true);
+
     try {
-      const displayName = name.trim() || cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`;
+      const result = await signInWithFirebaseGoogle();
+      if (!result?.idToken) {
+        throw new Error('No Google authentication token was received.');
+      }
 
       const response = await authApi.googleLogin({
-        email: cleanEmail,
-        name: displayName,
-        picture: avatarUrl,
+        idToken: result.idToken,
       });
 
-      const payload = (response as any)?.data ?? response;
+      const payload = (response as any)?.data?.data ?? (response as any)?.data ?? response;
       const { user, accessToken, refreshToken } = payload;
 
       if (accessToken) localStorage.setItem('accessToken', accessToken);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       if (user) localStorage.setItem('user', JSON.stringify(user));
 
-      toast.success(`Welcome to InterHive, ${displayName}! Logged in successfully.`, { duration: 4000 });
+      toast.success(`Welcome to InterHive, ${user?.firstName || 'User'}! Logged in successfully.`, { duration: 4000 });
       onClose();
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Google authentication failed. Please try again.';
-      setError(msg);
-      toast.error(msg);
+      if (err?.code === 'auth/popup-closed-by-user') {
+        setError('Google Sign-In was canceled.');
+      } else {
+        const msg =
+          err.response?.data?.message ||
+          err.message ||
+          'Google authentication failed. Please sign in using your email and password or OTP.';
+        setError(msg);
+        toast.error(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -97,59 +96,38 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
           </div>
           <h3 className="text-xl font-black tracking-tight">{title}</h3>
           <p className="text-xs text-blue-100 mt-1 font-medium">
-            Enter your Google Email address to proceed
+            Authenticate securely with your verified Google account
           </p>
         </div>
 
         {/* Content Body */}
         <div className="p-6 space-y-5">
           {error && (
-            <div className="p-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl font-medium">
-              {error}
+            <div className="p-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl font-medium flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Google / Gmail Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@gmail.com"
-                required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Full Name (Optional)
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all"
-              />
-            </div>
+          <div className="space-y-4 text-center">
+            <p className="text-xs text-slate-600">
+              Click the button below to launch the official Google OAuth prompt. We never store or ask for your password.
+            </p>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleGoogleAuth}
               disabled={isLoading}
               className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 text-sm flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>{isLoading ? 'Authenticating...' : 'Continue & Login'}</span>
+              <span>{isLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
             </button>
-          </form>
+          </div>
 
           <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
             <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Direct Google SSL Authentication</span>
+            <span>Cryptographic OAuth 2.0 Token Verification</span>
           </div>
         </div>
       </div>

@@ -128,11 +128,9 @@ export const RegisterForm: React.FC = () => {
     setIsGoogleLoading(true);
     try {
       const result = await signInWithFirebaseGoogle();
-      if (result?.user?.email) {
+      if (result?.idToken) {
         const response = await authApi.googleLogin({
-          email: result.user.email,
-          name: result.user.displayName || result.user.email.split('@')[0],
-          picture: result.user.photoURL || undefined,
+          idToken: result.idToken,
         });
 
         const payload = (response as any)?.data?.data ?? (response as any)?.data ?? response;

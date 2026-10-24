@@ -12,6 +12,7 @@ import {
   HttpCode,
   UploadedFiles,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -96,20 +97,22 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Update task' })
   @ApiResponse({ status: 200, description: 'Task updated successfully' })
   async updateTask(
+    @CurrentUser() user: User,
     @Param('taskId') taskId: string,
     @Body() updateTaskDto: any,
   ) {
-    return this.projectsService.updateTask(taskId, updateTaskDto);
+    return this.projectsService.updateTask(taskId, updateTaskDto, user);
   }
 
   @Post('tasks/:taskId/status')
   @ApiOperation({ summary: 'Update task status' })
   @ApiResponse({ status: 200, description: 'Task status updated successfully' })
   async updateTaskStatus(
+    @CurrentUser() user: User,
     @Param('taskId') taskId: string,
     @Body('status') status: string,
   ) {
-    return this.projectsService.updateTaskStatus(taskId, status);
+    return this.projectsService.updateTaskStatus(taskId, status, user);
   }
 
   @Delete('tasks/:taskId')
@@ -133,7 +136,21 @@ export class ProjectsController {
   }
 
   @Post(':projectId/uploads')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
+      fileFilter: (_req, file, callback) => {
+        const dangerousExts = /\.(exe|sh|bat|cmd|php|phtml|cgi|pl|py|js|ts|html|htm|svg|vbs|jar|apk)$/i;
+        if (dangerousExts.test(file.originalname)) {
+          return callback(
+            new BadRequestException(`File type not allowed for upload: ${file.originalname}`),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @ApiOperation({ summary: 'Upload project files' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
@@ -143,7 +160,10 @@ export class ProjectsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body('taskId') taskId?: string,
   ) {
-    return this.projectsService.uploadFiles(user.id, projectId, files, taskId);
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one file must be provided');
+    }
+    return this.projectsService.uploadFiles(user.id, projectId, files, taskId, user);
   }
 
   @Get(':projectId/uploads')

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Play, CheckCircle, Lock, ChevronDown, ChevronUp, Video, FileText, Book, Code, Briefcase } from 'lucide-react';
+import { sanitizeHtml, isSafeUrl } from '../../../shared/utils/sanitize';
 
 interface TrainingModuleProps {
   module: {
@@ -149,7 +150,7 @@ export const TrainingModule: React.FC<TrainingModuleProps> = ({
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             {module.content?.content && (
               <div className="prose prose-sm dark:prose-invert max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: module.content.content }} />
+                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(module.content.content) }} />
               </div>
             )}
 
@@ -159,18 +160,21 @@ export const TrainingModule: React.FC<TrainingModuleProps> = ({
                   Resources
                 </h5>
                 <div className="space-y-1">
-                  {module.content.resources.map((resource, idx) => (
-                    <a
-                      key={idx}
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark"
-                    >
-                      {getTypeIcon()}
-                      {resource.title}
-                    </a>
-                  ))}
+                  {module.content.resources.map((resource, idx) => {
+                    const safeHref = isSafeUrl(resource.url) ? resource.url : '#';
+                    return (
+                      <a
+                        key={idx}
+                        href={safeHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark"
+                      >
+                        {getTypeIcon()}
+                        {resource.title}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             )}

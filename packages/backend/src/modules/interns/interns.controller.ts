@@ -12,6 +12,7 @@ import {
   HttpCode,
   UploadedFile,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -194,7 +195,20 @@ export class InternsController {
   }
 
   @Post('upload-resume')
-  @UseInterceptors(FileInterceptor('resume'))
+  @UseInterceptors(
+    FileInterceptor('resume', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
+      fileFilter: (_req, file, callback) => {
+        if (!file.originalname.match(/\.(pdf)$/i) || file.mimetype !== 'application/pdf') {
+          return callback(
+            new BadRequestException('Only PDF resume files (.pdf) under 5MB are permitted'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @ApiOperation({ summary: 'Upload resume' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, description: 'Resume uploaded successfully' })
@@ -202,6 +216,9 @@ export class InternsController {
     @CurrentUser() user: User,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) {
+      throw new BadRequestException('A valid PDF resume file is required');
+    }
     return this.internsService.uploadResume(user.id, file);
   }
 

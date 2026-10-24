@@ -38,11 +38,20 @@ export class AdminSeeder {
     for (const adminData of admins) {
       const existing = await this.userModel.findOne({ email: adminData.email });
       if (!existing) {
+        const isProduction = process.env.NODE_ENV === 'production';
+        let seedPassword = process.env.ADMIN_INITIAL_PASSWORD;
+        if (isProduction && (!seedPassword || seedPassword.length < 12)) {
+          throw new Error('In production, ADMIN_INITIAL_PASSWORD must be configured with at least 12 characters');
+        }
+        if (!seedPassword) {
+          seedPassword = 'Admin@123456';
+        }
+
         const employeeId = await this.generateEmployeeId();
         const user = new this.userModel({
           ...adminData,
           employeeId,
-          password: 'Admin@123456', // Will be hashed by pre-save hook
+          password: seedPassword,
         });
         await user.save();
         this.logger.log(`Admin created: ${adminData.email}`);

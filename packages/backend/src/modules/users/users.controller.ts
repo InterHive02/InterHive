@@ -12,6 +12,7 @@ import {
   HttpCode,
   UploadedFile,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -98,7 +99,19 @@ export class UsersController {
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   async updateProfile(@CurrentUser() user: any, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(user.id || user._id, updateUserDto);
+    // Prevent self-privilege-escalation: users cannot alter their role, accessLevel, verification, or status
+    const {
+      role,
+      accessLevel,
+      internStatus,
+      employeeId,
+      isActive,
+      isVerified,
+      department,
+      manager,
+      ...allowedProfileData
+    } = updateUserDto as any;
+    return this.usersService.update(user.id || user._id, allowedProfileData);
   }
 
   @Get(':id')
@@ -154,7 +167,21 @@ export class UsersController {
   }
 
   @Post('upload-avatar')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB max
+      fileFilter: (_req, file, callback) => {
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!file.originalname.match(/\.(jpg|jpeg|png|webp)$/i) || !allowedMimes.includes(file.mimetype)) {
+          return callback(
+            new BadRequestException('Only JPG, PNG, and WebP images under 2MB are permitted'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @ApiOperation({ summary: 'Upload user avatar' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, description: 'Avatar uploaded successfully' })
@@ -162,6 +189,9 @@ export class UsersController {
     @CurrentUser() user: User,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!file) {
+      throw new BadRequestException('An avatar image file is required');
+    }
     return this.usersService.updateAvatar(user.id, file);
   }
 
