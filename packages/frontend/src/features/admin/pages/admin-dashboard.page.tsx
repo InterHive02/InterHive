@@ -271,7 +271,7 @@ export const AdminDashboardPage: React.FC = () => {
               settings={{
                 general: {
                   appName: 'InterHive',
-                  appVersion: '1.0.0',
+                  appVersion: '1.1.0',
                   environment: 'development',
                   timezone: 'UTC',
                   language: 'en',

@@ -417,10 +417,16 @@ export const LandingPage: React.FC = () => {
             {/* HERO LEFT CONTENT */}
             <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
               
-              {/* PPO Track Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
-                <GraduationCap className="w-4 h-4 text-purple-600" />
-                <span>6-Month PPO Track: 2 Months Training + 4 Months Company Internship</span>
+              {/* Version & PPO Track Badges */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                  <span>InterHive v1.1</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
+                  <GraduationCap className="w-4 h-4 text-purple-600" />
+                  <span>6-Month PPO Track: 2 Months Training + 4 Months Company Internship</span>
+                </div>
               </div>
 
               {/* Headlines */}

@@ -21,6 +21,7 @@ export const LoginForm: React.FC = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
     setError,
   } = useForm<LoginFormData>({
@@ -31,6 +32,11 @@ export const LoginForm: React.FC = () => {
   });
 
   const emailValue = watch('email') || '';
+
+  const fillDemoAccount = (email: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', 'InterHive@2026!', { shouldValidate: true });
+  };
 
   // Password Login Submit
   const onSubmit = async (data: LoginFormData) => {
@@ -153,6 +159,57 @@ export const LoginForm: React.FC = () => {
           )}
         </button>
       </form>
+
+      {/* Quick Demo Credentials for v1.1 */}
+      <div className="pt-2">
+        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center mb-2">
+          Demo Accounts (v1.1) • Click to Fill
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('admin@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('hr@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors"
+          >
+            HR
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('manager@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors"
+          >
+            Manager
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('intern@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors"
+          >
+            Intern (PPO)
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('student@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors"
+          >
+            Free Intern
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoAccount('company@interhive.in')}
+            className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors"
+          >
+            Company
+          </button>
+        </div>
+      </div>
 
       {/* Controlled-Access Platform Footer Notice */}
       <div className="pt-4 border-t border-slate-100 text-center space-y-1">
