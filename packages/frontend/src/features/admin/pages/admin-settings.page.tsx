@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield, Server, Database, Key } from 'lucide-react';
 import { LandingStatsEditor } from '../../../shared/components/common/landing-stats-editor';
+import { LandingContentManager } from '../components/landing-content-manager';
 
 export const AdminSettingsPage: React.FC = () => {
   return (
@@ -12,6 +13,9 @@ export const AdminSettingsPage: React.FC = () => {
 
       {/* Landing Page Metrics Manager */}
       <LandingStatsEditor />
+
+      {/* Landing Content Manager (Partner Companies & Student Reviews) */}
+      <LandingContentManager />
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 p-6 space-y-4">
         <div className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-750 rounded-lg">

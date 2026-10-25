@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { companyApi } from '../../../api/endpoints/company.api';
 import { statsApi, LandingStatItem } from '../../../api/endpoints/stats.api';
+import { contentApi, PartnerItem, TestimonialItem } from '../../../api/endpoints/content.api';
 import { Logo } from '../../../shared/components/common/logo';
 import { getLandingStats, LandingStats } from '../../../shared/utils/landing-stats';
 import { InternshipApplicationModal } from '../components/internship-application-modal';
@@ -86,72 +87,70 @@ export const LandingPage: React.FC = () => {
   // Video modal state
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  // Showcase students for interactive live hero preview (replaces hardcoded demo user)
-  const showcaseStudents = [
+  // Dynamic Content from Database (Managed via Admin Dashboard)
+  const [publicPartners, setPublicPartners] = useState<PartnerItem[]>([]);
+  const [publicTestimonials, setPublicTestimonials] = useState<TestimonialItem[]>([]);
+
+  // Interactive Curriculum Track Showcases for Hero Preview (truthful, educational platform demonstration)
+  const trackShowcases = [
     {
-      name: 'Aarav Sharma',
-      college: 'PICT Pune',
-      branch: '3rd Year CSE',
-      track: 'PPO Track — Full Stack Engineering',
-      targetCompany: 'TATA Digital',
-      avatarInitial: 'A',
-      avatarColor: 'bg-blue-600',
+      id: 'fullstack',
+      trackName: 'PPO Track — Full Stack Engineering',
+      curriculum: 'Node.js, React, Microservices & System Design',
+      badgeColor: 'bg-blue-600',
+      badgeInitial: 'FS',
       progress: 60,
       activeStep: 4,
-      currentStage: 'Company Matching',
-      currentStageDesc: 'Matched with TATA Digital based on practical Node.js and React assessments.',
+      currentStage: 'Corporate Matching Sprint',
+      currentStageDesc: 'Completing full-stack production pull-request audits before hiring rounds.',
       modules: '12/12',
       projects: '5/5',
       tests: '8/8',
-      stipend: '₹45,000 / mo',
-      ppoTarget: '₹12.5 LPA PPO'
+      stipend: '₹35,000 - ₹45,000 / mo',
+      ppoTarget: '₹10 - ₹14 LPA Target'
     },
     {
-      name: 'Priya Venkatesh',
-      college: 'VIT Vellore',
-      branch: 'Final Year IT',
-      track: 'PPO Track — Cloud & DevOps',
-      targetCompany: 'Infosys Springboard',
-      avatarInitial: 'P',
-      avatarColor: 'bg-purple-600',
+      id: 'cloud',
+      trackName: 'PPO Track — Cloud & DevOps Engineering',
+      curriculum: 'Docker, Kubernetes, AWS & CI/CD Pipelines',
+      badgeColor: 'bg-purple-600',
+      badgeInitial: 'CD',
       progress: 85,
       activeStep: 6,
-      currentStage: 'Performance Evaluation',
-      currentStageDesc: 'Completing 4th month company sprint with 94% peer and mentor review rating.',
-      modules: '12/12',
-      projects: '6/6',
+      currentStage: 'Production Internship Sprint',
+      currentStageDesc: 'Deploying automated infrastructure with mentor and code reviews.',
+      modules: '10/10',
+      projects: '4/4',
       tests: '10/10',
-      stipend: '₹40,000 / mo',
-      ppoTarget: '₹9.8 LPA PPO'
+      stipend: '₹30,000 - ₹40,000 / mo',
+      ppoTarget: '₹9 - ₹12 LPA Target'
     },
     {
-      name: 'Rohan Mukherjee',
-      college: 'Jadavpur University',
-      branch: '3rd Year AI & DS',
-      track: 'PPO Track — AI & Data Science',
-      targetCompany: 'Deloitte Digital',
-      avatarInitial: 'R',
-      avatarColor: 'bg-emerald-600',
+      id: 'aids',
+      trackName: 'PPO Track — Applied AI & Data Science',
+      curriculum: 'Python, PyTorch, LLMs, Vector DBs & ML APIs',
+      badgeColor: 'bg-emerald-600',
+      badgeInitial: 'AI',
       progress: 100,
       activeStep: 7,
-      currentStage: 'PPO Secured 🎉',
-      currentStageDesc: 'Pre-Placement Offer secured at ₹14 LPA before commencement of 8th semester.',
-      modules: '12/12',
-      projects: '5/5',
-      tests: '8/8',
-      stipend: '₹50,000 / mo',
-      ppoTarget: '₹14.0 LPA PPO'
+      currentStage: 'PPO Transition & Placement',
+      currentStageDesc: 'Graduation capstone submitted; preparing for full-time offer onboarding.',
+      modules: '14/14',
+      projects: '6/6',
+      tests: '12/12',
+      stipend: '₹40,000 - ₹50,000 / mo',
+      ppoTarget: '₹12 - ₹16 LPA Target'
     }
   ];
 
-  const [activeStudentIndex, setActiveStudentIndex] = useState(0);
+  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
 
   useEffect(() => {
-    const studentTimer = setInterval(() => {
-      setActiveStudentIndex((prev) => (prev + 1) % showcaseStudents.length);
+    const trackTimer = setInterval(() => {
+      setActiveTrackIndex((prev) => (prev + 1) % trackShowcases.length);
     }, 6000);
-    return () => clearInterval(studentTimer);
-  }, [showcaseStudents.length]);
+    return () => clearInterval(trackTimer);
+  }, [trackShowcases.length]);
 
   const faqItems = [
     {
@@ -291,10 +290,24 @@ export const LandingPage: React.FC = () => {
   // Company Partner Modal State
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
-  // Fetch live company requirements
+  // Fetch live company requirements & published landing content
   useEffect(() => {
-    const fetchOpportunities = async () => {
+    const fetchLandingData = async () => {
       try {
+        // Fetch published partners & testimonials
+        const [partnersRes, testimonialsRes] = await Promise.allSettled([
+          contentApi.getPublicPartners(),
+          contentApi.getPublicTestimonials()
+        ]);
+
+        if (partnersRes.status === 'fulfilled' && partnersRes.value?.data?.data) {
+          setPublicPartners(partnersRes.value.data.data);
+        }
+        if (testimonialsRes.status === 'fulfilled' && testimonialsRes.value?.data?.data) {
+          setPublicTestimonials(testimonialsRes.value.data.data);
+        }
+
+        // Fetch live published requirements from registered partner companies
         const res = await companyApi.getAll({ page: 1, limit: 6 });
         if (res.data?.data && res.data.data.length > 0) {
           const reqs: any[] = [];
@@ -317,69 +330,14 @@ export const LandingPage: React.FC = () => {
           }
         }
       } catch (err) {
-        // Fallback
+        // Fallback gracefully
       }
     };
 
-    fetchOpportunities();
+    fetchLandingData();
   }, []);
 
-  const defaultOpportunities = [
-    {
-      id: '1',
-      title: 'Full Stack Software Engineer Intern',
-      company: 'TATA Digital',
-      logo: '',
-      location: 'Bangalore / Hybrid',
-      stipend: '₹35,000 - ₹45,000 / month',
-      category: 'Software Engineering',
-      requiredSkills: ['React.js', 'TypeScript', 'Node.js', 'System Design'],
-      featured: true,
-      partnerTier: 'MOU Enterprise Partner',
-      ppoExpectation: '₹12.5 LPA PPO Track'
-    },
-    {
-      id: '2',
-      title: 'Frontend Cloud Developer Intern',
-      company: 'Infosys Springboard',
-      logo: '',
-      location: 'Pune / Remote',
-      stipend: '₹30,000 - ₹40,000 / month',
-      category: 'Frontend',
-      requiredSkills: ['React', 'Next.js', 'Tailwind CSS', 'Redux'],
-      featured: true,
-      partnerTier: 'Enterprise Hiring Track',
-      ppoExpectation: '₹9.8 LPA PPO Track'
-    },
-    {
-      id: '3',
-      title: 'AI & Data Science Intern',
-      company: 'Deloitte Digital',
-      logo: '',
-      location: 'Hyderabad / Hybrid',
-      stipend: '₹40,000 - ₹50,000 / month',
-      category: 'AI & Data Science',
-      requiredSkills: ['Python', 'PyTorch', 'SQL', 'Machine Learning'],
-      featured: true,
-      partnerTier: 'Campus Recruitment Partner',
-      ppoExpectation: '₹14.0 LPA PPO Track'
-    },
-    {
-      id: '4',
-      title: 'Cloud DevOps & UI Product Intern',
-      company: 'Capgemini Engineering',
-      logo: '',
-      location: 'Mumbai / Remote',
-      stipend: '₹32,000 - ₹42,000 / month',
-      category: 'UI/UX Design',
-      requiredSkills: ['Figma', 'React', 'Design Systems', 'User Research'],
-      featured: false,
-      partnerTier: 'Industry Training Partner',
-      ppoExpectation: '₹10.2 LPA PPO Track'
-    },
-  ];
-
-  const displayList = liveRequirements.length > 0 ? liveRequirements : defaultOpportunities;
+  const displayList = liveRequirements;
   const categories = ['All', 'Software Engineering', 'Frontend', 'AI & Data Science', 'UI/UX Design'];
 
   const filteredOpportunities = displayList.filter(opp => {
@@ -571,44 +529,44 @@ export const LandingPage: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5 leading-none">
-                            Welcome, {showcaseStudents[activeStudentIndex].name} 👋
+                            Interactive Learning Track Preview 🚀
                           </h4>
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-black">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                            Verified Student
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[9px] font-black">
+                            <Sparkles className="w-2.5 h-2.5 text-blue-600" />
+                            Live Simulation
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                          {showcaseStudents[activeStudentIndex].college} • {showcaseStudents[activeStudentIndex].branch}
+                          {trackShowcases[activeTrackIndex].curriculum}
                         </p>
                       </div>
                     </div>
                     
                     <div className="flex items-center justify-between sm:justify-end gap-2">
-                      {/* Interactive Student Switcher Tabs */}
+                      {/* Interactive Track Switcher Tabs */}
                       <div className="flex items-center gap-1 bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60">
-                        {showcaseStudents.map((st, sIdx) => (
+                        {trackShowcases.map((tr, tIdx) => (
                           <button
-                            key={st.name}
+                            key={tr.id}
                             type="button"
-                            onClick={() => setActiveStudentIndex(sIdx)}
+                            onClick={() => setActiveTrackIndex(tIdx)}
                             className={`px-2 py-0.5 rounded-md text-[9px] font-black transition-all cursor-pointer ${
-                              sIdx === activeStudentIndex
+                              tIdx === activeTrackIndex
                                 ? 'bg-white text-blue-700 shadow-2xs border border-slate-200/60'
                                 : 'text-slate-500 hover:text-slate-800'
                             }`}
                           >
-                            {st.name.split(' ')[0]}
+                            {tr.badgeInitial}
                           </button>
                         ))}
                       </div>
 
                       <div className="flex items-center gap-2 pl-2 border-l border-slate-100">
-                        <div className={`w-7 h-7 rounded-full ${showcaseStudents[activeStudentIndex].avatarColor} text-white text-xs font-black flex items-center justify-center shadow-xs transition-colors`}>
-                          {showcaseStudents[activeStudentIndex].avatarInitial}
+                        <div className={`w-7 h-7 rounded-full ${trackShowcases[activeTrackIndex].badgeColor} text-white text-xs font-black flex items-center justify-center shadow-xs transition-colors`}>
+                          {trackShowcases[activeTrackIndex].badgeInitial}
                         </div>
                         <span className="text-xs font-bold text-slate-700 hidden sm:inline">
-                          {showcaseStudents[activeStudentIndex].name}
+                          {trackShowcases[activeTrackIndex].id === 'fullstack' ? 'Full Stack' : trackShowcases[activeTrackIndex].id === 'cloud' ? 'DevOps' : 'AI & Data'}
                         </span>
                       </div>
                     </div>
@@ -656,23 +614,23 @@ export const LandingPage: React.FC = () => {
                       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/40 border border-slate-200/70 shadow-2xs">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                            {showcaseStudents[activeStudentIndex].track}
+                            {trackShowcases[activeTrackIndex].trackName}
                           </span>
                           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                            {showcaseStudents[activeStudentIndex].currentStage}
+                            {trackShowcases[activeTrackIndex].currentStage}
                           </span>
                         </div>
 
                         {/* Progress Bar Dynamic */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-[10px] font-extrabold text-slate-500">
-                            <span>Journey Progress</span>
-                            <span className="text-blue-600">{showcaseStudents[activeStudentIndex].progress}%</span>
+                            <span>Track Completion</span>
+                            <span className="text-blue-600">{trackShowcases[activeTrackIndex].progress}%</span>
                           </div>
                           <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                             <div 
                               className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500" 
-                              style={{ width: `${showcaseStudents[activeStudentIndex].progress}%` }} 
+                              style={{ width: `${trackShowcases[activeTrackIndex].progress}%` }} 
                             />
                           </div>
                         </div>
@@ -706,57 +664,57 @@ export const LandingPage: React.FC = () => {
                               </div>
                               <span className="text-[8px] font-black text-slate-600 mt-1">Training</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${showcaseStudents[activeStudentIndex].activeStep >= 4 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 4 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 4: Company Matching */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                showcaseStudents[activeStudentIndex].activeStep === 4 
+                                trackShowcases[activeTrackIndex].activeStep === 4 
                                   ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                  : showcaseStudents[activeStudentIndex].activeStep > 4 
+                                  : trackShowcases[activeTrackIndex].activeStep > 4 
                                   ? 'bg-emerald-500 text-white' 
                                   : 'bg-slate-200 text-slate-600'
                               }`}>
-                                {showcaseStudents[activeStudentIndex].activeStep > 4 ? <Check className="w-3 h-3 stroke-[3]" /> : '4'}
+                                {trackShowcases[activeTrackIndex].activeStep > 4 ? <Check className="w-3 h-3 stroke-[3]" /> : '4'}
                               </div>
                               <span className="text-[8px] font-black text-slate-600 mt-1">Matching</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${showcaseStudents[activeStudentIndex].activeStep >= 5 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 5 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 5: Company Internship */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                showcaseStudents[activeStudentIndex].activeStep === 5 
-                                  ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                  : showcaseStudents[activeStudentIndex].activeStep > 5 
-                                  ? 'bg-emerald-500 text-white' 
-                                  : 'bg-slate-200 text-slate-600 opacity-60'
-                              }`}>
-                                {showcaseStudents[activeStudentIndex].activeStep > 5 ? <Check className="w-3 h-3 stroke-[3]" /> : '5'}
+                                trackShowcases[activeTrackIndex].activeStep === 5 
+                                ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
+                                : trackShowcases[activeTrackIndex].activeStep > 5 
+                                ? 'bg-emerald-500 text-white' 
+                                : 'bg-slate-200 text-slate-600 opacity-60'
+                            }`}>
+                                {trackShowcases[activeTrackIndex].activeStep > 5 ? <Check className="w-3 h-3 stroke-[3]" /> : '5'}
                               </div>
                               <span className="text-[8px] font-bold text-slate-500 mt-1">Internship</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${showcaseStudents[activeStudentIndex].activeStep >= 6 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 6 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 6: Evaluation */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                showcaseStudents[activeStudentIndex].activeStep === 6 
+                                trackShowcases[activeTrackIndex].activeStep === 6 
                                   ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                  : showcaseStudents[activeStudentIndex].activeStep > 6 
+                                  : trackShowcases[activeTrackIndex].activeStep > 6 
                                   ? 'bg-emerald-500 text-white' 
                                   : 'bg-slate-200 text-slate-600 opacity-60'
-                              }`}>
-                                {showcaseStudents[activeStudentIndex].activeStep > 6 ? <Check className="w-3 h-3 stroke-[3]" /> : '6'}
+                            }`}>
+                                {trackShowcases[activeTrackIndex].activeStep > 6 ? <Check className="w-3 h-3 stroke-[3]" /> : '6'}
                               </div>
                               <span className="text-[8px] font-bold text-slate-500 mt-1">Evaluation</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${showcaseStudents[activeStudentIndex].activeStep >= 7 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 7 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 7: PPO */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                showcaseStudents[activeStudentIndex].activeStep === 7 
+                                trackShowcases[activeTrackIndex].activeStep === 7 
                                   ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' 
                                   : 'bg-slate-200 text-slate-600 opacity-60'
                               }`}>
@@ -778,10 +736,10 @@ export const LandingPage: React.FC = () => {
                           <div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase block">
-                                Current Stage
+                                Active Sprint
                               </span>
-                              <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                                {showcaseStudents[activeStudentIndex].targetCompany}
+                              <span className="text-[9px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                                Cohort Phase
                               </span>
                             </div>
                             <div className="flex items-start gap-2.5">
@@ -790,10 +748,10 @@ export const LandingPage: React.FC = () => {
                               </div>
                               <div>
                                 <h5 className="font-black text-slate-900 text-xs">
-                                  {showcaseStudents[activeStudentIndex].currentStage}
+                                  {trackShowcases[activeTrackIndex].currentStage}
                                 </h5>
                                 <p className="text-[10px] text-slate-500 leading-tight mt-0.5 font-medium">
-                                  {showcaseStudents[activeStudentIndex].currentStageDesc}
+                                  {trackShowcases[activeTrackIndex].currentStageDesc}
                                 </p>
                               </div>
                             </div>
@@ -801,10 +759,10 @@ export const LandingPage: React.FC = () => {
                           
                           <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-slate-100">
                             <span className="text-[10px] font-bold text-slate-600">
-                              Stipend: <strong className="text-slate-900">{showcaseStudents[activeStudentIndex].stipend}</strong>
+                              Stipend Track: <strong className="text-slate-900">{trackShowcases[activeTrackIndex].stipend}</strong>
                             </span>
                             <span className="text-[10px] font-black text-emerald-600">
-                              Target: {showcaseStudents[activeStudentIndex].ppoTarget}
+                              {trackShowcases[activeTrackIndex].ppoTarget}
                             </span>
                           </div>
                         </div>
@@ -814,16 +772,16 @@ export const LandingPage: React.FC = () => {
                           <div>
                             <div className="flex items-center justify-between">
                               <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase">
-                                Verified Metrics
+                                Standard Milestones
                               </span>
                               <span className="text-[10px] font-black text-emerald-600">
-                                {showcaseStudents[activeStudentIndex].progress === 100 ? '100% PPO' : 'On Track'}
+                                {trackShowcases[activeTrackIndex].progress === 100 ? '100% PPO' : 'On Track'}
                               </span>
                             </div>
                             <div className="w-full h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden">
                               <div 
                                 className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
-                                style={{ width: `${showcaseStudents[activeStudentIndex].progress}%` }} 
+                                style={{ width: `${trackShowcases[activeTrackIndex].progress}%` }} 
                               />
                             </div>
                           </div>
@@ -832,19 +790,19 @@ export const LandingPage: React.FC = () => {
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Modules</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {showcaseStudents[activeStudentIndex].modules}
+                                {trackShowcases[activeTrackIndex].modules}
                               </span>
                             </div>
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Projects</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {showcaseStudents[activeStudentIndex].projects}
+                                {trackShowcases[activeTrackIndex].projects}
                               </span>
                             </div>
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Tests</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {showcaseStudents[activeStudentIndex].tests}
+                                {trackShowcases[activeTrackIndex].tests}
                               </span>
                             </div>
                           </div>
@@ -1212,93 +1170,11 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ============================================================== */}
-      {/* 2. OUR PARTNER COMPANIES (MATCHING REFERENCE IMAGE 1)         */}
+      {/* 2. DYNAMIC PLATFORM STATS STRIP                                */}
       {/* ============================================================== */}
-      <section className="py-12 bg-slate-50/70 border-y border-slate-200/60">
+      <section className="py-8 bg-slate-50/70 border-y border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-2xs mb-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>MOU Signed & Enterprise Placement Network</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Our Hiring Partners & Placement Ecosystem
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5 max-w-2xl">
-                Students train on production-grade codebases and transition directly into industrial internships and Pre-Placement Offers (PPOs) across these enterprise partners.
-              </p>
-            </div>
-            <button
-              onClick={() => setIsCompanyModalOpen(true)}
-              className="text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 group shrink-0 cursor-pointer"
-            >
-              <span>View All Partners</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-
-          {/* Company Brand Badges Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
-            
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-slate-800 text-sm tracking-widest text-[#004B87]">TATA</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center gap-1.5 h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <div className="grid grid-cols-2 gap-0.5 w-3.5 h-3.5 shrink-0">
-                <span className="bg-[#F25022] rounded-2xs" />
-                <span className="bg-[#7FBA00] rounded-2xs" />
-                <span className="bg-[#00A4EF] rounded-2xs" />
-                <span className="bg-[#FFB900] rounded-2xs" />
-              </div>
-              <span className="font-bold text-slate-700 text-xs">Microsoft</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-bold text-sm tracking-tight">
-                <span className="text-[#4285F4]">G</span>
-                <span className="text-[#EA4335]">o</span>
-                <span className="text-[#FBBC05]">o</span>
-                <span className="text-[#4285F4]">g</span>
-                <span className="text-[#34A853]">l</span>
-                <span className="text-[#EA4335]">e</span>
-              </span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-slate-900 text-xs tracking-tight">amazon</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-[#007CC3] text-xs">Infosys</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-extrabold text-[#A100FF] text-xs">accenture</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-slate-900 text-xs">Deloitte<span className="text-[#86BC25]">.</span></span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-extrabold text-[#0070AD] text-[11px]">Capgemini</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-[#00529B] text-xs tracking-wider">HCL</span>
-            </div>
-
-            <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center justify-center h-14 shadow-2xs hover:shadow-md transition-shadow">
-              <span className="font-black text-slate-800 text-xs">wipro<span className="text-orange-500">.</span></span>
-            </div>
-
-          </div>
-
-          {/* 4 Stats Cards dynamically loaded from Admin / System sync */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-200/70">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {(dynamicLandingStats.length > 0 ? dynamicLandingStats : [
               { key: 'students_trained', label: 'Students Trained', value: 5000, suffix: '+', icon: 'Users' },
               { key: 'internships_provided', label: 'Internships Provided', value: 1200, suffix: '+', icon: 'Briefcase' },
@@ -1332,9 +1208,60 @@ export const LandingPage: React.FC = () => {
               );
             })}
           </div>
-
         </div>
       </section>
+
+      {/* ============================================================== */}
+      {/* 2.1 OUR PARTNER COMPANIES (ONLY VISIBLE IF ADMIN ADDS PARTNERS) */}
+      {/* ============================================================== */}
+      {publicPartners.length > 0 && (
+        <section className="py-12 bg-white border-b border-slate-200/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-2xs mb-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Enterprise Placement Network</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Our Hiring Partners & Placement Ecosystem
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5 max-w-2xl">
+                  Students train on production-grade codebases and transition directly into industrial internships across verified partners.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCompanyModalOpen(true)}
+                className="text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1 group shrink-0 cursor-pointer"
+              >
+                <span>Partner with Us</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+              {publicPartners.map((partner) => (
+                <div
+                  key={partner._id}
+                  className="bg-white rounded-xl p-4 border border-slate-200/80 flex items-center justify-center h-16 shadow-2xs hover:shadow-md transition-shadow group"
+                >
+                  {partner.logo ? (
+                    <img
+                      src={partner.logo}
+                      alt={partner.name}
+                      className="max-h-8 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                    />
+                  ) : (
+                    <span className="font-black text-slate-800 text-sm tracking-wide">
+                      {partner.name}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
 
 
@@ -1568,415 +1495,279 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredOpportunities.map(opp => (
-            <div
-              key={opp.id || opp._id}
-              className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    {(() => {
-                      const compName = opp.company || opp.companyName || 'Opportunity';
-                      const words = compName.split(' ').filter(Boolean);
-                      const initials = words.length >= 2
-                        ? `${words[0][0]}${words[1][0]}`.toUpperCase()
-                        : compName.slice(0, 2).toUpperCase();
-                      
-                      const colorPalettes: Record<string, { bg: string; text: string; border: string }> = {
-                        'TATA Digital': { bg: 'bg-[#004B87]/10', text: 'text-[#004B87]', border: 'border-[#004B87]/30' },
-                        'Infosys Springboard': { bg: 'bg-[#007CC3]/10', text: 'text-[#007CC3]', border: 'border-[#007CC3]/30' },
-                        'Deloitte Digital': { bg: 'bg-emerald-50', text: 'text-[#86BC25]', border: 'border-emerald-200' },
-                        'Capgemini Engineering': { bg: 'bg-[#0070AD]/10', text: 'text-[#0070AD]', border: 'border-[#0070AD]/30' },
-                        'NovaTech Solutions': { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
-                        'Brightwave Digital': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
-                      };
-                      const theme = colorPalettes[compName] || {
-                        bg: 'bg-indigo-100',
-                        text: 'text-indigo-700',
-                        border: 'border-indigo-200',
-                      };
+        {filteredOpportunities.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredOpportunities.map(opp => (
+              <div
+                key={opp.id || opp._id}
+                className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      {(() => {
+                        const compName = opp.company || opp.companyName || 'Opportunity';
+                        const words = compName.split(' ').filter(Boolean);
+                        const initials = words.length >= 2
+                          ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+                          : compName.slice(0, 2).toUpperCase();
+                        
+                        const hash = compName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+                        const palettes = [
+                          { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+                          { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+                          { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+                          { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+                          { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+                        ];
+                        const theme = palettes[hash % palettes.length];
 
-                      return (
-                        <div className={`w-12 h-12 rounded-2xl ${theme.bg} border ${theme.border} flex items-center justify-center overflow-hidden shrink-0 shadow-xs`}>
-                          <span className={`font-black ${theme.text} text-sm tracking-wider`}>
-                            {initials}
-                          </span>
+                        return (
+                          <div className={`w-12 h-12 rounded-2xl ${theme.bg} border ${theme.border} flex items-center justify-center overflow-hidden shrink-0 shadow-xs`}>
+                            <span className={`font-black ${theme.text} text-sm tracking-wider`}>
+                              {initials}
+                            </span>
+                          </div>
+                        );
+                      })()}
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors">
+                            {opp.title || opp.position}
+                          </h4>
                         </div>
-                      );
-                    })()}
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors">
-                          {opp.title || opp.position}
-                        </h4>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-slate-600 font-bold">
+                            {opp.company || opp.companyName || 'Corporate Partner'}
+                          </p>
+                          {opp.partnerTier && (
+                            <span className="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/80">
+                              {opp.partnerTier}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-slate-600 font-bold">
-                          {opp.company || opp.companyName || 'Corporate Partner'}
-                        </p>
-                        {opp.partnerTier && (
-                          <span className="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/80">
-                            {opp.partnerTier}
-                          </span>
-                        )}
-                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      {opp.featured && (
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+                          ★ Featured
+                        </span>
+                      )}
+                      {opp.ppoExpectation && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {opp.ppoExpectation}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    {opp.featured && (
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
-                        ★ Featured
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 mb-4 font-semibold">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{opp.location || opp.workType || 'Remote'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Wallet className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{opp.stipend?.max ? `₹${opp.stipend.max}/mo` : opp.stipend || '₹40,000 / month'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {(opp.tags || opp.requiredSkills || ['React', 'Node.js', 'Problem Solving']).map((tag: string, tIdx: number) => (
+                      <span
+                        key={tIdx}
+                        className="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold"
+                      >
+                        {typeof tag === 'string' ? tag : (tag as any).name || 'Skill'}
                       </span>
-                    )}
-                    {opp.ppoExpectation && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        {opp.ppoExpectation}
-                      </span>
-                    )}
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 mb-4 font-semibold">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{opp.location || opp.workType || 'Remote'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{opp.stipend?.max ? `₹${opp.stipend.max}/mo` : opp.stipend || '₹40,000 / month'}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {(opp.tags || opp.requiredSkills || ['React', 'Node.js', 'Problem Solving']).map((tag: string, tIdx: number) => (
-                    <span
-                      key={tIdx}
-                      className="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold"
-                    >
-                      {typeof tag === 'string' ? tag : (tag as any).name || 'Skill'}
-                    </span>
-                  ))}
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    Direct InterHive Application
+                  </span>
+                  <button
+                    onClick={() => {
+                      setSelectedProgramCategory(opp.category || opp.title || 'Software Engineering');
+                      setIsInternshipModalOpen(true);
+                    }}
+                    className="px-5 py-2 rounded-full bg-blue-50 text-blue-600 font-extrabold text-xs hover:bg-blue-600 hover:text-white hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Apply Now</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  Direct InterHive Application
-                </span>
-                <button
-                  onClick={() => {
-                    setSelectedProgramCategory(opp.category || opp.title || 'Software Engineering');
-                    setIsInternshipModalOpen(true);
-                  }}
-                  className="px-5 py-2 rounded-full bg-blue-50 text-blue-600 font-extrabold text-xs hover:bg-blue-600 hover:text-white hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Apply Now</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-10 border border-slate-200/80 shadow-2xs text-center max-w-2xl mx-auto space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-xs">
+              <Briefcase className="w-7 h-7" />
             </div>
-          ))}
-        </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">Upcoming Cohort Roles Opening Soon</h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed max-w-md mx-auto">
+                Company requirements for the next internship cohort are currently being prepared. Complete your assessment to receive early notification when applications open.
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => {
+                  setSelectedProgramTypeForModal('ppo_internship');
+                  setIsInternshipModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+              >
+                Apply for Next Cohort
+              </button>
+              <button
+                onClick={() => setIsCompanyModalOpen(true)}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer"
+              >
+                Hire Interns as a Company
+              </button>
+            </div>
+          </div>
+        )}
 
       </section>
 
       {/* ============================================================== */}
       {/* 2.5 VERIFIED STUDENT STORIES & PPO PLACEMENTS                 */}
+      {/* (ONLY RENDERED IF ADMIN ADDS REAL TESTIMONIALS IN ADMIN SETTINGS) */}
       {/* ============================================================== */}
-      <section className="py-16 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/60 border-y border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
-              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>Real Students • Real Offers</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              From College Campuses to Full-Time PPOs
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-2xl mx-auto">
-              Read how students from Tier-1, Tier-2, and Tier-3 colleges converted practical project training and company internships into confirmed job offers before graduation.
-            </p>
-          </div>
-
-          {/* Social Proof Strip / Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 max-w-4xl mx-auto">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs text-center">
-              <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <span className="block font-black text-slate-900 text-lg sm:text-xl">4.8 / 5.0</span>
-              <span className="text-[10px] text-slate-500 font-bold">1,400+ Student Reviews</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs text-center">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-1">
-                <Trophy className="w-4 h-4" />
-              </div>
-              <span className="block font-black text-blue-600 text-lg sm:text-xl">72%</span>
-              <span className="text-[10px] text-slate-500 font-bold">Direct PPO Conversion</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs text-center">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-1">
-                <IndianRupee className="w-4 h-4" />
-              </div>
-              <span className="block font-black text-emerald-600 text-lg sm:text-xl">₹9.6 LPA</span>
-              <span className="text-[10px] text-slate-500 font-bold">Average Entry Package</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs text-center">
-              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-1">
-                <GraduationCap className="w-4 h-4" />
-              </div>
-              <span className="block font-black text-purple-600 text-lg sm:text-xl">100+ Colleges</span>
-              <span className="text-[10px] text-slate-500 font-bold">Tier 1, 2 & 3 Represented</span>
-            </div>
-          </div>
-
-          {/* 4 Detailed Student Story Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {publicTestimonials.length > 0 && (
+        <section className="py-16 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/60 border-y border-slate-200/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {/* Student 1: Aarav Sharma */}
-            <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-blue-500/20 shrink-0">
-                      AS
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug">
-                          Aarav Sharma
-                        </h4>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      </div>
-                      <p className="text-xs text-slate-500 font-semibold">
-                        PICT Pune • 3rd Year CSE (2025 Batch)
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 shadow-2xs">
-                    PPO: ₹12.5 LPA
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Placed At</span>
-                    <span className="text-xs font-black text-[#004B87]">TATA Digital</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-full">
-                    Full Stack Engineer
-                  </span>
-                </div>
-
-                <div className="relative mb-4">
-                  <Quote className="w-6 h-6 text-slate-200 absolute -top-2 -left-1 pointer-events-none" />
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-6 italic">
-                    "Coming from a tier-2 college, our on-campus companies were mostly mass recruiters offering 3.5 LPA. InterHive’s 2-month industrial sprint was the first time I wrote production code and got roasted in real pull-request reviews. Within 4 months of my internship at TATA Digital, I converted directly into a full-time PPO before starting my 8th semester."
-                  </p>
-                </div>
+            {/* Section Header */}
+            <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>Verified Student Experiences</span>
               </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Offer Letter
-                </span>
-                <span className="text-slate-400">Internship Duration: 6 Months</span>
-              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                From College Campuses to Full-Time Careers
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-2xl mx-auto">
+                Read authentic feedback from students who transformed practical skills into verified internship and job opportunities.
+              </p>
             </div>
 
-            {/* Student 2: Priya Venkatesh */}
-            <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-purple-500/20 shrink-0">
-                      PV
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug">
-                          Priya Venkatesh
-                        </h4>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            {/* Dynamic Student Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {publicTestimonials.map((t) => (
+                <div
+                  key={t._id}
+                  className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        {t.avatar ? (
+                          <img
+                            src={t.avatar}
+                            alt={t.name}
+                            className="w-12 h-12 rounded-2xl object-cover shrink-0 border border-slate-200"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-blue-500/20 shrink-0">
+                            {t.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="font-extrabold text-slate-900 text-base leading-snug">
+                              {t.name}
+                            </h4>
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                          </div>
+                          <p className="text-xs text-slate-500 font-semibold">
+                            {t.college}{t.branch ? ` • ${t.branch}` : ''}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 font-semibold">
-                        VIT Vellore • Final Year IT (2025 Batch)
+
+                      {t.package && (
+                        <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 shadow-2xs">
+                          {t.package}
+                        </span>
+                      )}
+                    </div>
+
+                    {(t.company || t.role) && (
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4 flex items-center justify-between">
+                        {t.company && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Placed At</span>
+                            <span className="text-xs font-black text-slate-800">{t.company}</span>
+                          </div>
+                        )}
+                        {t.role && (
+                          <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-full">
+                            {t.role}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="relative mb-4">
+                      <Quote className="w-6 h-6 text-slate-200 absolute -top-2 -left-1 pointer-events-none" />
+                      <p className="text-xs text-slate-700 leading-relaxed font-medium pl-6 italic">
+                        "{t.review}"
                       </p>
                     </div>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 shadow-2xs">
-                    PPO: ₹9.8 LPA
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Placed At</span>
-                    <span className="text-xs font-black text-[#007CC3]">Infosys Springboard Track</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-full">
-                    Cloud & DevOps
-                  </span>
-                </div>
-
-                <div className="relative mb-4">
-                  <Quote className="w-6 h-6 text-slate-200 absolute -top-2 -left-1 pointer-events-none" />
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-6 italic">
-                    "Other bootcamps dump video recordings and leave you alone in Discord. At InterHive, we had daily 9 AM standups with our engineering mentor, sprint boards on Jira, and actual cloud deployments on AWS. When I stepped into my company internship, I was already trained on day one and needed zero handholding."
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Offer Letter
-                </span>
-                <span className="text-slate-400">Internship Duration: 6 Months</span>
-              </div>
-            </div>
-
-            {/* Student 3: Rohan Mukherjee */}
-            <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-emerald-500/20 shrink-0">
-                      RM
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug">
-                          Rohan Mukherjee
-                        </h4>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      </div>
-                      <p className="text-xs text-slate-500 font-semibold">
-                        Jadavpur University • 3rd Year AI & DS (2026 Batch)
-                      </p>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
+                    <span className="flex items-center gap-1 text-emerald-600">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Verified Review
+                    </span>
+                    <div className="flex items-center gap-1 text-amber-500">
+                      {[...Array(t.rating || 5)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      ))}
                     </div>
                   </div>
-
-                  <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 shadow-2xs">
-                    PPO: ₹14.0 LPA
-                  </span>
                 </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Placed At</span>
-                    <span className="text-xs font-black text-slate-900">Deloitte Digital</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
-                    AI & Data Science
-                  </span>
-                </div>
-
-                <div className="relative mb-4">
-                  <Quote className="w-6 h-6 text-slate-200 absolute -top-2 -left-1 pointer-events-none" />
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-6 italic">
-                    "The practical skill screening was the turning point. Rather than memorizing LeetCode dynamic programming questions, I was tested on building an end-to-end sentiment pipeline with PyTorch and FastAPI. Deloitte matched with me within 10 days of completing the 2-month training. Secured a 14 LPA offer as a pre-final year student."
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Offer Letter
-                </span>
-                <span className="text-slate-400">Internship Duration: 6 Months</span>
-              </div>
-            </div>
-
-            {/* Student 4: Ananya Gupta */}
-            <div className="bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-base shadow-md shadow-amber-500/20 shrink-0">
-                      AG
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug">
-                          Ananya Gupta
-                        </h4>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      </div>
-                      <p className="text-xs text-slate-500 font-semibold">
-                        Thapar Institute of Engg • Final Year (2025 Batch)
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 shadow-2xs">
-                    PPO: ₹10.2 LPA
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Placed At</span>
-                    <span className="text-xs font-black text-[#0070AD]">Capgemini Engineering</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full">
-                    UI & Cloud DevOps
-                  </span>
-                </div>
-
-                <div className="relative mb-4">
-                  <Quote className="w-6 h-6 text-slate-200 absolute -top-2 -left-1 pointer-events-none" />
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-6 italic">
-                    "I had zero prior internship experience and felt severe imposter syndrome. InterHive’s mentors rebuilt my resume from scratch, guided me through real project sprints, and taught me how to present code like a seasoned professional. I cleared Capgemini's technical interview with flying colors."
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Verified Offer Letter
-                </span>
-                <span className="text-slate-400">Internship Duration: 6 Months</span>
-              </div>
+              ))}
             </div>
 
           </div>
+        </section>
+      )}
 
-          {/* Equal Opportunity Trust Guarantee Banner */}
-          <div className="mt-10 p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-white to-indigo-50/90 border border-blue-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl mx-auto shadow-2xs">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <h5 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                  100% Equal Opportunity • No College Pedigree Bias
-                </h5>
-                <p className="text-[11px] text-slate-600 font-medium">
-                  Whether you are from a tier-1 IIT/NIT or a tier-3 state college, your practical skill assessment score and project quality determine your partner matching.
-                </p>
-              </div>
+      {/* Equal Opportunity Trust Guarantee Banner */}
+      <section className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-50/90 via-white to-indigo-50/90 border border-blue-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-            <button
-              onClick={() => setIsInternshipModalOpen(true)}
-              className="px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-500/25 transition-all shrink-0 cursor-pointer"
-            >
-              Start Free Assessment →
-            </button>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                100% Equal Opportunity • Merit & Practical Skills First
+              </h5>
+              <p className="text-xs text-slate-600 font-medium mt-0.5">
+                Whether you are from a tier-1 institute or a tier-3 college, your practical assessment scores and demonstrated project work determine your company matching.
+              </p>
+            </div>
           </div>
-
+          <button
+            onClick={() => {
+              setSelectedProgramTypeForModal('ppo_internship');
+              setIsInternshipModalOpen(true);
+            }}
+            className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-500/20 transition-all shrink-0 cursor-pointer"
+          >
+            Start Free Assessment →
+          </button>
         </div>
       </section>
 
