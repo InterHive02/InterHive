@@ -732,10 +732,10 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
               <span className="text-[12px] text-slate-500 dark:text-slate-400">Reviewed within 7 days</span>
             </div>
             <h2 className="text-[28px] sm:text-[30px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
-              Internship Application
+              PPO Track & Internship Application
             </h2>
             <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
-              Applications are reviewed on a rolling basis; you'll hear back within 7 days. Never pay to apply.
+              Direct pathway to 2-month industry training, partner matching, and Pre-Placement Offers. 100% Free for students.
             </p>
           </div>
 
