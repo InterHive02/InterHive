@@ -12,7 +12,6 @@ import {
   TrendingUp,
   Code,
   Sparkles,
-  ChevronRight,
   MapPin,
   IndianRupee,
   Wallet,
@@ -81,44 +80,8 @@ export const LandingPage: React.FC = () => {
     }, 400);
   };
 
-  const howItWorksSteps = [
-    {
-      step: '01',
-      label: 'Step 1',
-      title: 'Choose Your Year Program',
-      desc: 'Select the program matched to your current college year (1st Year CRT foundation, 2nd/3rd Year industrial training, or Final Year placement sprint).',
-      icon: GraduationCap,
-      color: 'bg-blue-50 text-blue-600 border-blue-200/80',
-      hoverBg: 'group-hover:bg-blue-600',
-    },
-    {
-      step: '02',
-      label: 'Step 2',
-      title: 'Get Screened & Approved',
-      desc: 'Undergo our skill evaluation and HR assessment to activate your official Premium Intern account.',
-      icon: UserCheck,
-      color: 'bg-indigo-50 text-indigo-600 border-indigo-200/80',
-      hoverBg: 'group-hover:bg-indigo-600',
-    },
-    {
-      step: '03',
-      label: 'Step 3',
-      title: 'Build with Industry Mentors',
-      desc: 'Join team cohorts with dedicated Manager & HR communication, agile task boards, and daily work verification.',
-      icon: Users,
-      color: 'bg-purple-50 text-purple-600 border-purple-200/80',
-      hoverBg: 'group-hover:bg-purple-600',
-    },
-    {
-      step: '04',
-      label: 'Step 4',
-      title: 'Partner Company Hiring',
-      desc: 'Graduate with portfolio-grade work, verified project certificates, and direct interview opportunities with hiring partners.',
-      icon: Briefcase,
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
-      hoverBg: 'group-hover:bg-emerald-600',
-    },
-  ];
+  // Video player state
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const faqItems = [
     {
@@ -419,10 +382,6 @@ export const LandingPage: React.FC = () => {
               
               {/* Version & PPO Track Badges */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                  <span>InterHive v1.1</span>
-                </div>
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
                   <GraduationCap className="w-4 h-4 text-purple-600" />
                   <span>6-Month PPO Track: 2 Months Training + 4 Months Company Internship</span>
@@ -483,13 +442,13 @@ export const LandingPage: React.FC = () => {
                 </button>
 
                 <a
-                  href="#how-it-works"
+                  href="#platform-video"
                   className="px-6 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2"
                 >
                   <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center">
                     <Play className="w-3 h-3 text-slate-700 fill-slate-700 ml-0.5" />
                   </div>
-                  <span>Watch How It Works</span>
+                  <span>Watch Platform Overview</span>
                 </a>
               </div>
 
@@ -1229,57 +1188,150 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 1. HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="pt-16 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* PLATFORM OVERVIEW VIDEO SECTION */}
+      <section id="platform-video" className="pt-16 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-2">
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Year-Wise Career Architecture</span>
+            <span>Platform Overview</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            How It Works
+            See InterHive in Action
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-xl mx-auto">
-            Structured progression from college fundamentals to industry-ready hiring.
+            Watch how our platform powers your journey from selection to a Pre-Placement Offer.
           </p>
         </div>
 
-        {/* 4 Steps Horizontal on Desktop, Stacking on Mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-          {howItWorksSteps.map((step, idx) => (
-            <div key={idx} className="relative group">
-              <div className="h-full bg-white rounded-[2rem] p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className={`w-13 h-13 rounded-2xl ${step.color} flex items-center justify-center font-bold shadow-xs group-hover:scale-110 ${step.hoverBg} group-hover:text-white transition-all`}>
-                      <step.icon className="w-6 h-6" />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200/60">
-                      {step.step}
-                    </span>
+        {/* Cinematic Video Player */}
+        <div className="relative max-w-4xl mx-auto">
+          {/* Glow effects behind the video */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-[2.5rem] blur-2xl opacity-60 pointer-events-none" />
+          
+          <div className="relative bg-slate-900 rounded-[2rem] overflow-hidden border border-slate-700/50 shadow-2xl">
+            {/* Video or Thumbnail */}
+            {isVideoPlaying ? (
+              <div className="aspect-video w-full bg-slate-900 flex items-center justify-center">
+                <video
+                  autoPlay
+                  controls
+                  className="w-full h-full object-cover"
+                  poster="/platform_overview_thumbnail.png"
+                  onEnded={() => setIsVideoPlaying(false)}
+                >
+                  {/* When you have a real video URL, add it here */}
+                  <source src="" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            ) : (
+              <div 
+                className="aspect-video w-full relative cursor-pointer group"
+                onClick={() => setIsVideoPlaying(true)}
+              >
+                {/* Thumbnail Image */}
+                <img
+                  src="/platform_overview_thumbnail.png"
+                  alt="InterHive Platform Overview"
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Dark overlay for play button visibility */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-slate-900/40 group-hover:from-slate-900/70 group-hover:via-slate-900/20 group-hover:to-slate-900/30 transition-all duration-300" />
+                
+                {/* Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative">
+                    {/* Pulse ring */}
+                    <div className="absolute inset-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 animate-ping" style={{ animationDuration: '2s' }} />
+                    {/* Glow ring */}
+                    <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-blue-500/30 to-purple-500/30 blur-xl" />
+                    {/* Button */}
+                    <button className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                      <Play className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 fill-blue-600 ml-1" />
+                    </button>
                   </div>
-                  <div className="text-[11px] font-extrabold text-blue-600 tracking-wider uppercase mb-1">
-                    {step.label}
+                </div>
+
+                {/* Bottom info bar */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 flex items-end justify-between">
+                  <div>
+                    <h4 className="text-white font-black text-sm sm:text-base mb-0.5">
+                      Discover InterHive
+                    </h4>
+                    <p className="text-white/70 text-[11px] sm:text-xs font-semibold">
+                      Your complete PPO journey walkthrough — 2 min overview
+                    </p>
                   </div>
-                  <h3 className="text-lg font-black text-slate-900 mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed font-semibold">
-                    {step.desc}
-                  </p>
+                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white text-[11px] font-bold">
+                    <Play className="w-3 h-3 fill-white" />
+                    <span>2:00</span>
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* Connecting Progression Indicator for Desktop (steps 1, 2, 3) */}
-              {idx < howItWorksSteps.length - 1 && (
-                <div className="hidden lg:flex absolute top-1/2 -right-4 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border border-slate-200/90 shadow-xs items-center justify-center pointer-events-none text-slate-400">
-                  <ChevronRight className="w-4 h-4 text-blue-500" />
-                </div>
-              )}
+          {/* Floating feature highlights around the video */}
+          <div className="hidden lg:block absolute -left-16 top-1/4 animate-float-slow">
+            <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                <GraduationCap className="w-4 h-4" />
+              </div>
+              <span>Industry Training</span>
             </div>
-          ))}
+          </div>
+
+          <div className="hidden lg:block absolute -right-16 top-1/3 animate-float-medium">
+            <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <span>Company Matching</span>
+            </div>
+          </div>
+
+          <div className="hidden lg:block absolute -right-10 bottom-8 animate-float-fast">
+            <div className="px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl shadow-xl border border-white/90 text-xs font-black text-slate-800 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <Trophy className="w-4 h-4" />
+              </div>
+              <span>PPO Opportunity</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Video Feature Pills */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">2-Month Training</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Industry-focused curriculum</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">4-Month Internship</h5>
+              <p className="text-[10px] text-slate-500 font-medium">At partner companies</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 text-xs">Pre-Placement Offer</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Performance-based PPO</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1456,7 +1508,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="pt-6 flex justify-end">
               <a 
-                href="#how-it-works" 
+                href="#platform-video" 
                 className="w-9 h-9 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors"
               >
                 <ArrowRight className="w-4 h-4" />
