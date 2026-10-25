@@ -697,6 +697,27 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
   const firstName = formData.fullName.trim().split(' ')[0] || 'Applicant';
 
+  const isPpoTrack = preselectedProgramType === 'ppo_internship' || preselectedProgramType === 'ppo' || !preselectedProgramType;
+  const isFreeTrack = preselectedProgramType === 'free_internship';
+
+  const modalTitle = isPpoTrack
+    ? 'Apply for the 6-Month PPO Track'
+    : isFreeTrack
+    ? 'Free Skill Assessment & Internship'
+    : 'PPO Track & Internship Application';
+
+  const modalBadge = isPpoTrack
+    ? `6-Month Track · ${currentMonthYear} Cohort`
+    : isFreeTrack
+    ? '100% Free Skill Screening'
+    : `Applications open · ${currentMonthYear} batch`;
+
+  const modalSubtitle = isPpoTrack
+    ? 'Two-stage structured placement track: 2 months project training + 4 months corporate internship with stipend & PPO review.'
+    : isFreeTrack
+    ? 'Take the practical assessment to showcase your real capabilities and qualify for verified corporate internships.'
+    : 'Direct pathway to 2-month industry training, partner matching, and Pre-Placement Offers. 100% Free for students.';
+
   // ──────────────────── shared class helpers ────────────────────
 
   const inputCls = 'w-full min-h-[44px] px-[12px] rounded-[10px] border-[1.5px] border-slate-200 dark:border-[#2D3347] bg-slate-50 dark:bg-[#12151E] text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors duration-150 focus:border-primary focus:ring-[3px] focus:ring-primary/25 focus:outline-none';
@@ -727,15 +748,15 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
           <div className="pr-10">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary dark:text-primary-light">
-                Applications open · {currentMonthYear} batch
+                {modalBadge}
               </span>
               <span className="text-[12px] text-slate-500 dark:text-slate-400">Reviewed within 7 days</span>
             </div>
-            <h2 className="text-[28px] sm:text-[30px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
-              PPO Track & Internship Application
+            <h2 className="text-[26px] sm:text-[30px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
+              {modalTitle}
             </h2>
-            <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
-              Direct pathway to 2-month industry training, partner matching, and Pre-Placement Offers. 100% Free for students.
+            <p className="text-[13.5px] sm:text-[14px] text-slate-500 dark:text-slate-400 mt-1">
+              {modalSubtitle}
             </p>
           </div>
 
@@ -850,6 +871,40 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                 {/* ================= STEP 1: PERSONAL ================= */}
                 {currentStep === 1 && (
                   <>
+                    {/* Clear Pathway Explanation — Eliminates Student Training vs Job Confusion */}
+                    <div className="min-[600px]:col-span-2 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-purple-50/70 border border-blue-200/80 shadow-xs mb-2">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+                          {isPpoTrack ? 'PPO' : 'FREE'}
+                        </div>
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex flex-wrap items-center justify-between gap-1">
+                            <h4 className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm">
+                              {isPpoTrack ? 'How the 6-Month PPO Track Works' : 'How the Placement Process Works'}
+                            </h4>
+                            <span className="text-[10px] font-black text-blue-700 dark:text-blue-300 bg-blue-100/80 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
+                              Zero Upfront Cost • No Prior Job Experience Needed
+                            </span>
+                          </div>
+                          <p className="text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                            {isPpoTrack
+                              ? "You are joining a combined training + placement track. You'll complete 2 months of hands-on project sprints and assessments, then get matched into a 4-month corporate internship with monthly stipend and direct PPO evaluation."
+                              : "Complete the practical skill assessment to showcase your capabilities. High-performing students are matched directly into corporate internship openings."}
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+                            <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-blue-100 dark:border-slate-700">
+                              <span className="font-black text-blue-700 dark:text-blue-400 block mb-0.5">Stage 1: Months 1–2 (Industrial Training)</span>
+                              <span className="text-slate-500 dark:text-slate-400">Live mentor code reviews, production stack sprints & practical readiness test.</span>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-blue-100 dark:border-slate-700">
+                              <span className="font-black text-emerald-700 dark:text-emerald-400 block mb-0.5">Stage 2: Months 3–6 (Company Internship & PPO)</span>
+                              <span className="text-slate-500 dark:text-slate-400">Direct matching with partner companies, monthly stipend, and conversion into full-time PPO.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Full Name */}
                     <div className="min-[600px]:col-span-2">
                       <label className={labelCls}>

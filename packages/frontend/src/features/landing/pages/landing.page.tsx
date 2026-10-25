@@ -87,6 +87,21 @@ export const LandingPage: React.FC = () => {
   // Video modal state
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
+  // Persistent Sticky CTA bar state (slides in after hero scroll)
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 480) {
+        setShowStickyCta(true);
+      } else {
+        setShowStickyCta(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Dynamic Content from Database (Managed via Admin Dashboard)
   const [publicPartners, setPublicPartners] = useState<PartnerItem[]>([]);
   const [publicTestimonials, setPublicTestimonials] = useState<TestimonialItem[]>([]);
@@ -470,7 +485,10 @@ export const LandingPage: React.FC = () => {
               {/* CTAs */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                 <button
-                  onClick={() => setIsInternshipModalOpen(true)}
+                  onClick={() => {
+                    setSelectedProgramTypeForModal('ppo_internship');
+                    setIsInternshipModalOpen(true);
+                  }}
                   className="px-7 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <span>Join the PPO Track</span>
@@ -1916,24 +1934,24 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. NEWSLETTER / EARLY-ACCESS SIGNUP */}
+      {/* 5. NEWSLETTER / COHORT PLACEMENT ALERTS */}
       <section className="py-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 rounded-3xl p-6 sm:p-8 border border-blue-100/90 text-center shadow-xs">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-200/60 text-blue-700 text-[11px] font-bold shadow-2xs mb-3">
-            <Sparkles className="w-3 h-3 text-blue-600" />
-            <span>Early Access Updates</span>
+            <Bell className="w-3.5 h-3.5 text-blue-600" />
+            <span>Placement & Batch Alerts</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-2">
-            Be the first to know
+            Never Miss a New Cohort or Corporate Opening
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold mb-6 max-w-md mx-auto">
-            Get notified as we add new opportunities and companies.
+            Get instant email alerts when new internship roles, assessment windows, and hiring drives open for your college batch.
           </p>
 
           {newsletterSubscribed ? (
             <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>You're on the list! We'll notify you as new opportunities launch.</span>
+              <span>You're subscribed! We'll alert you the moment new cohort roles open.</span>
             </div>
           ) : (
             <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-2.5 max-w-md mx-auto">
@@ -1942,7 +1960,7 @@ export const LandingPage: React.FC = () => {
                 required
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
-                placeholder="Enter your email address"
+                placeholder="Enter your college email address"
                 className="w-full sm:w-72 px-4 py-3 rounded-full bg-white border border-slate-200/90 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-2xs"
               />
               <button
@@ -1950,7 +1968,7 @@ export const LandingPage: React.FC = () => {
                 disabled={newsletterLoading}
                 className="w-full sm:w-auto px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all shrink-0 cursor-pointer disabled:opacity-60"
               >
-                <span>Notify Me</span>
+                <span>Get Role Alerts</span>
               </button>
             </form>
           )}
@@ -2003,8 +2021,52 @@ export const LandingPage: React.FC = () => {
       <VideoModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
-        onEnroll={() => setIsInternshipModalOpen(true)}
+        onEnroll={() => {
+          setSelectedProgramTypeForModal('ppo_internship');
+          setIsInternshipModalOpen(true);
+        }}
       />
+
+      {/* Sticky Persistent CTA Bar (Slides in smoothly after scrolling past hero) */}
+      {showStickyCta && (
+        <aside aria-label="Quick application" className="fixed bottom-4 left-0 right-0 z-40 px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="max-w-3xl mx-auto bg-slate-900/95 backdrop-blur-xl text-white rounded-2xl p-3 sm:p-3.5 shadow-2xl border border-slate-700/60 flex items-center justify-between gap-3 pointer-events-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/30">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-xs sm:text-sm text-white">6-Month PPO Track</span>
+                  <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+                    100% Free
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300">
+                  2 Months Training + 4 Months Company Internship • Direct PPO Evaluation
+                </p>
+              </div>
+              <div className="sm:hidden">
+                <span className="font-extrabold text-xs text-white block">6-Month PPO Track</span>
+                <span className="text-[10px] text-slate-300 block">Training + Internship + PPO</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSelectedProgramTypeForModal('ppo_internship');
+                  setIsInternshipModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-md shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+              >
+                <span>Apply Free</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </aside>
+      )}
 
     </div>
   );
