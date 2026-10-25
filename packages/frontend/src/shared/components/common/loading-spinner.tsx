@@ -16,29 +16,13 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className = '',
 }) => {
   const sizeMap = {
-    sm: {
-      container: 'w-8 h-8',
-      ring: 'border-2',
-      text: 'text-[9px] font-black',
-    },
-    md: {
-      container: 'w-12 h-12',
-      ring: 'border-2',
-      text: 'text-xs font-black',
-    },
-    lg: {
-      container: 'w-16 h-16',
-      ring: 'border-2',
-      text: 'text-sm font-black',
-    },
-    xl: {
-      container: 'w-20 h-20',
-      ring: 'border-3',
-      text: 'text-base font-black',
-    },
+    sm: { container: 32, border: 2, fontSize: 9 },
+    md: { container: 48, border: 2, fontSize: 11 },
+    lg: { container: 64, border: 2, fontSize: 13 },
+    xl: { container: 80, border: 3, fontSize: 15 },
   };
 
-  const { container, ring, text } = sizeMap[size] || sizeMap.md;
+  const { container, border, fontSize } = sizeMap[size] || sizeMap.md;
 
   const spinner = (
     <div
@@ -46,17 +30,37 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         fullScreen ? 'min-h-screen' : ''
       } ${className}`}
     >
-      <div className={`relative flex items-center justify-center ${container}`}>
-        {/* Exact rotating circle with dual arcs */}
+      <div
+        style={{ width: container, height: container, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        {/* The original dual-arc spinning ring — top and bottom arcs colored, sides transparent */}
         <div
-          className={`absolute inset-0 rounded-full border-t-2 border-b-2 border-primary animate-spin ${ring}`}
+          className="animate-spin"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            borderWidth: border,
+            borderStyle: 'solid',
+            borderTopColor: '#6366f1',
+            borderBottomColor: '#6366f1',
+            borderLeftColor: 'transparent',
+            borderRightColor: 'transparent',
+          }}
         />
 
-        {/* 'IH' centered inside the circle */}
+        {/* "IH" stays still in the center while the ring rotates around it */}
         {showText && (
           <span
-            className={`text-primary dark:text-primary-light font-black tracking-wider select-none uppercase ${text}`}
-            style={{ letterSpacing: '0.06em' }}
+            style={{
+              position: 'absolute',
+              color: '#6366f1',
+              fontWeight: 900,
+              fontSize,
+              letterSpacing: '0.06em',
+              userSelect: 'none',
+              lineHeight: 1,
+            }}
           >
             IH
           </span>
