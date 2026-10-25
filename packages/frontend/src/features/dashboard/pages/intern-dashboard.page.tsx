@@ -18,6 +18,7 @@ import {
   Sparkles,
   ShieldCheck,
   Calendar,
+  Circle,
   AlertCircle
 } from 'lucide-react';
 import { ReadinessScoreCard } from '../components/readiness-score-card';
@@ -34,6 +35,7 @@ import { useMatching } from '../../../api/hooks/use-matching';
 import { useTraining } from '../../../api/hooks/use-training';
 import { useAssessment } from '../../assessments/hooks/use-assessment';
 import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
+import { toast } from 'react-hot-toast';
 
 export const InternDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -60,11 +62,52 @@ export const InternDashboardPage: React.FC = () => {
 
   const isLoading = profileLoading || readinessLoading || projectsLoading || activitiesLoading;
 
-  // Real user data derivations
+  // Real user data & user-scoped storage sync
   const userProjects: any[] = Array.isArray(projects) ? projects : [];
   const userMatches: any[] = (matchesData as any)?.data || (Array.isArray(matchesData) ? matchesData : []);
   const userEnrollments: any[] = Array.isArray(enrollmentsData) ? enrollmentsData : [];
   const userResults: any[] = Array.isArray(resultsData) ? resultsData : [];
+
+  // Scoped storage reads
+  const localResults = useMemo(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const key = user?.id ? `interhive_my_results_${user.id}` : 'interhive_my_results';
+      return JSON.parse(localStorage.getItem(key) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }, [user?.id]);
+
+  const localTraining = useMemo(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const key = user?.id ? `interhive_training_${user.id}` : 'interhive_training';
+      return JSON.parse(localStorage.getItem(key) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }, [user?.id]);
+
+  const localProjects = useMemo(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const key = user?.id ? `interhive_user_projects_${user.id}` : 'interhive_user_projects';
+      return JSON.parse(localStorage.getItem(key) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }, [user?.id]);
+
+  const effectiveResults = userResults.length > 0 ? userResults : localResults;
+  const assessmentsCompleted = effectiveResults.length;
+  const latestAssessmentScore = effectiveResults[0]?.score ?? (assessmentsCompleted > 0 ? 75 : 0);
+
+  const completedTrainingCount = useMemo(() => {
+    const apiCompleted = userEnrollments.filter((e: any) => e.status === 'completed' || e.progress === 100).length;
+    const localCompleted = Object.values(localTraining).filter((m: any) => (m as any).progress === 100).length;
+    return Math.max(apiCompleted, localCompleted);
+  }, [userEnrollments, localTraining]);
 
   const activeProject = userProjects.find((p: any) => p.status === 'in_progress' || p.status === 'active') || userProjects[0] || null;
   const hasAssignedProject = !!activeProject;
@@ -72,7 +115,7 @@ export const InternDashboardPage: React.FC = () => {
   const firstName = profile?.personalInfo?.firstName || user?.firstName || 'Intern';
   const lastName = profile?.personalInfo?.lastName || user?.lastName || '';
 
-  // Dynamic Month calculation based on join date
+  // Dynamic Month calculation based on actual join date
   const joinDate = user?.createdAt ? new Date(user.createdAt).getTime() : Date.now();
   const monthsSinceJoin = Math.max(1, Math.min(6, Math.floor((Date.now() - joinDate) / (30 * 24 * 60 * 60 * 1000)) + 1));
   const currentMonthDisplay = `Month ${monthsSinceJoin} of 6`;
@@ -80,7 +123,7 @@ export const InternDashboardPage: React.FC = () => {
   // Dynamic pathway progress calculation based on real accomplishments
   const completedProjectsCount = userProjects.filter((p: any) => p.status === 'completed').length;
   const inProgressProjectsCount = userProjects.filter((p: any) => p.status === 'in_progress' || p.status === 'active').length;
-  const activeTasksCount = inProgressProjectsCount;
+  const activeTasksCount = inProgressProjectsCount > 0 ? inProgressProjectsCount : Object.keys(localProjects).length > 0 ? 1 : 0;
   
   const upcomingDeadlinesCount = useMemo(() => {
     const now = Date.now();
@@ -92,17 +135,14 @@ export const InternDashboardPage: React.FC = () => {
     }).length;
   }, [userProjects]);
 
-  const trainingModulesCompleted = userEnrollments.filter((e: any) => e.status === 'completed' || e.progress === 100).length;
-  const assessmentsCompleted = userResults.length;
-
   const pathwayProgress = useMemo(() => {
-    let progress = 15; // baseline for onboarding & joining PPO cohort
+    let progress = 15; // baseline admission into PPO cohort
     if (assessmentsCompleted > 0) progress += Math.min(25, assessmentsCompleted * 15);
-    if (trainingModulesCompleted > 0) progress += Math.min(25, trainingModulesCompleted * 10);
-    if (hasAssignedProject) progress += 20;
+    if (completedTrainingCount > 0) progress += Math.min(25, completedTrainingCount * 10);
+    if (hasAssignedProject || Object.keys(localProjects).length > 0) progress += 20;
     if (completedProjectsCount > 0) progress += Math.min(15, completedProjectsCount * 10);
     return Math.min(100, progress);
-  }, [assessmentsCompleted, trainingModulesCompleted, hasAssignedProject, completedProjectsCount]);
+  }, [assessmentsCompleted, completedTrainingCount, hasAssignedProject, localProjects, completedProjectsCount]);
 
   // Current stage in 6-stage journey
   const currentStageIndex = useMemo(() => {
@@ -110,9 +150,9 @@ export const InternDashboardPage: React.FC = () => {
     if (completedProjectsCount >= 1) return 5; // Evaluation
     if (hasAssignedProject) return 4; // Company Internship
     if (userMatches.length > 0) return 3; // Company Matching
-    if (assessmentsCompleted > 0 || userEnrollments.length > 0) return 2; // Training
+    if (assessmentsCompleted > 0 || completedTrainingCount > 0) return 2; // Training
     return 1; // Selected
-  }, [completedProjectsCount, userMatches, hasAssignedProject, assessmentsCompleted, userEnrollments]);
+  }, [completedProjectsCount, userMatches, hasAssignedProject, assessmentsCompleted, completedTrainingCount]);
 
   // Next future performance review date (14 days from today)
   const nextReviewDate = useMemo(() => {
@@ -125,16 +165,16 @@ export const InternDashboardPage: React.FC = () => {
 
   // Readiness data
   const readinessData = {
-    overall: readiness?.overall ?? (assessmentsCompleted > 0 ? 75 : 0),
+    overall: readiness?.overall && readiness.overall > 0 ? readiness.overall : latestAssessmentScore,
     breakdown: readiness?.breakdown || {
-      technicalSkills: assessmentsCompleted > 0 ? 70 : 0,
+      technicalSkills: latestAssessmentScore > 0 ? latestAssessmentScore : 0,
       projects: hasAssignedProject ? 65 : 0,
-      communication: 60,
-      problemSolving: assessmentsCompleted > 0 ? 68 : 0,
-      industryWorkflow: hasAssignedProject ? 70 : 0,
-      teamCollaboration: 60,
-      leadership: 50,
-      adaptability: 60,
+      communication: assessmentsCompleted > 0 ? 70 : 0,
+      problemSolving: latestAssessmentScore > 0 ? latestAssessmentScore : 0,
+      industryWorkflow: completedTrainingCount > 0 ? 65 : 0,
+      teamCollaboration: 50,
+      leadership: 40,
+      adaptability: 50,
     },
   };
 
@@ -149,46 +189,54 @@ export const InternDashboardPage: React.FC = () => {
   const totalSkills = skillData.length;
   const skillsCompleted = skillData.filter(s => s.score >= 70).length;
 
-  // Real curriculum modules
+  // Real curriculum modules synced with user learning state
   const defaultTrainingModules = [
     {
-      id: 'm1',
+      id: 'prog-python',
       title: 'Python for Industry',
-      subtitle: 'Modern Idiomatic Python, OOP & Testing',
+      subtitle: 'Modern Idiomatic Python, OOP, Testing & Packaging',
       lessons: 12,
       projects: 4,
-      status: trainingModulesCompleted >= 1 ? 'completed' : 'in_progress',
-      score: trainingModulesCompleted >= 1 ? 100 : 35,
+      status: (localTraining['prog-python']?.progress === 100 || completedTrainingCount >= 1)
+        ? 'completed'
+        : (localTraining['prog-python']?.progress > 0)
+        ? 'in_progress'
+        : 'not_started',
+      score: localTraining['prog-python']?.progress ?? (completedTrainingCount >= 1 ? 100 : 0),
       color: 'bg-emerald-50 text-emerald-600',
     },
     {
-      id: 'm2',
+      id: 'prog-web',
       title: 'Enterprise Web Development',
-      subtitle: 'React, TypeScript, REST & NestJS',
+      subtitle: 'TypeScript, React, Node.js & REST Microservices',
       lessons: 16,
       projects: 5,
-      status: trainingModulesCompleted >= 2 ? 'completed' : 'in_progress',
-      score: trainingModulesCompleted >= 2 ? 100 : 20,
+      status: (localTraining['prog-web']?.progress === 100 || completedTrainingCount >= 2)
+        ? 'completed'
+        : (localTraining['prog-web']?.progress > 0)
+        ? 'in_progress'
+        : 'not_started',
+      score: localTraining['prog-web']?.progress ?? (completedTrainingCount >= 2 ? 100 : 0),
       color: 'bg-blue-50 text-blue-600',
     },
     {
-      id: 'm3',
+      id: 'prog-dsa',
       title: 'Data Structures & Problem Solving',
       subtitle: 'DSA Patterns, PostgreSQL & System Design Basics',
       lessons: 14,
       projects: 5,
-      status: 'not_started',
-      score: 0,
+      status: localTraining['prog-dsa']?.progress === 100 ? 'completed' : (localTraining['prog-dsa']?.progress > 0) ? 'in_progress' : 'not_started',
+      score: localTraining['prog-dsa']?.progress ?? 0,
       color: 'bg-purple-50 text-purple-600',
     },
     {
-      id: 'm4',
+      id: 'prog-workflow',
       title: 'Professional Engineering Skills',
       subtitle: 'Git Workflow, Code Reviews & Agile Standups',
       lessons: 8,
       projects: 2,
-      status: 'not_started',
-      score: 0,
+      status: localTraining['prog-workflow']?.progress === 100 ? 'completed' : (localTraining['prog-workflow']?.progress > 0) ? 'in_progress' : 'not_started',
+      score: localTraining['prog-workflow']?.progress ?? 0,
       color: 'bg-amber-50 text-amber-600',
     },
   ];
@@ -197,36 +245,52 @@ export const InternDashboardPage: React.FC = () => {
     !searchQuery || m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Real assessment rounds
+  // Real assessment rounds synced with test results
   const assessmentRounds = [
     {
       id: 'asmt-aptitude',
       title: 'Aptitude Diagnostic',
       type: 'Quantitative, Logical, Verbal Reasoning',
-      duration: '60 mins',
-      questions: '40 Questions',
-      status: userResults.some((r: any) => r.assessmentId === 'asmt-aptitude') ? 'completed' : 'available',
+      duration: '30 mins',
+      questions: '5 Questions',
+      status: effectiveResults.some((r: any) => r.assessmentId === 'asmt-aptitude') ? 'completed' : 'available',
+      score: effectiveResults.find((r: any) => r.assessmentId === 'asmt-aptitude')?.score,
       color: 'bg-blue-500',
     },
     {
       id: 'asmt-technical',
       title: 'Technical Diagnostic',
       type: 'Hands-on Coding & System Design Basics',
-      duration: '90 mins',
+      duration: '45 mins',
       questions: '5 Problems',
-      status: userResults.some((r: any) => r.assessmentId === 'asmt-technical') ? 'completed' : 'available',
+      status: effectiveResults.some((r: any) => r.assessmentId === 'asmt-technical') ? 'completed' : 'available',
+      score: effectiveResults.find((r: any) => r.assessmentId === 'asmt-technical')?.score,
       color: 'bg-purple-500',
     },
     {
       id: 'asmt-hr',
       title: 'Communication & Culture Fit',
       type: 'Behavioral, Teamwork & STAR Evaluation',
-      duration: '30 mins',
-      questions: '15 Scenarios',
-      status: userResults.some((r: any) => r.assessmentId === 'asmt-hr') ? 'completed' : 'available',
+      duration: '20 mins',
+      questions: '3 Scenarios',
+      status: effectiveResults.some((r: any) => r.assessmentId === 'asmt-hr') ? 'completed' : 'available',
+      score: effectiveResults.find((r: any) => r.assessmentId === 'asmt-hr')?.score,
       color: 'bg-emerald-500',
     },
   ];
+
+  // Workspace checklist tasks state
+  const [workspaceTasks, setWorkspaceTasks] = useState([
+    { id: 'w-1', title: 'Onboarding & Profile Verification', done: true },
+    { id: 'w-2', title: 'Technical Diagnostic Assessment', done: assessmentsCompleted > 0 },
+    { id: 'w-3', title: 'Foundational Module 1 (Python / Web)', done: completedTrainingCount > 0 },
+    { id: 'w-4', title: 'Sprint Practice Project Deliverable', done: hasAssignedProject || Object.keys(localProjects).length > 0 },
+  ]);
+
+  const toggleWorkspaceTask = (taskId: string) => {
+    setWorkspaceTasks(prev => prev.map(t => t.id === taskId ? { ...t, done: !t.done } : t));
+    toast.success('Task status updated in workspace!');
+  };
 
   if (isLoading) {
     return <LoadingSpinner label="Loading dashboard..." />;
@@ -483,7 +547,7 @@ export const InternDashboardPage: React.FC = () => {
                       ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40'
                       : 'text-amber-600 bg-amber-50 dark:bg-amber-950/40'
                   }`}>
-                    {assessmentsCompleted > 0 ? `${assessmentsCompleted} Certified` : 'Pending'}
+                    {assessmentsCompleted > 0 ? `${assessmentsCompleted} Certified (${latestAssessmentScore}%)` : 'Pending'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
@@ -661,10 +725,10 @@ export const InternDashboardPage: React.FC = () => {
                   </div>
 
                   <Link
-                    to="/training"
+                    to={`/training/${mod.id}`}
                     className="px-4 py-2 rounded-xl bg-white dark:bg-[#151829] border border-slate-200 dark:border-slate-800 text-xs font-black text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors shadow-2xs"
                   >
-                    {mod.status === 'completed' ? 'Review' : 'Continue'}
+                    {mod.status === 'completed' ? 'Review Lessons' : mod.status === 'in_progress' ? 'Continue Lesson' : 'Start Module'}
                   </Link>
                 </div>
               </div>
@@ -729,7 +793,7 @@ export const InternDashboardPage: React.FC = () => {
                       : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
                   }`}
                 >
-                  {round.status === 'completed' ? 'Completed (View Score)' : 'Start Test →'}
+                  {round.status === 'completed' ? `Certified (${round.score}%) →` : 'Start Test →'}
                 </Link>
               </div>
             ))}
@@ -825,7 +889,7 @@ export const InternDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* 9. TAB 5: INTERNSHIP WORKSPACE (AUTHENTIC) */}
+      {/* 9. TAB 5: INTERNSHIP WORKSPACE (AUTHENTIC & INTERACTIVE) */}
       {activeTab === 'workspace' && (
         <div className="bg-white dark:bg-[#151829] rounded-[2rem] p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-6">
           <div className="flex items-center justify-between">
@@ -849,38 +913,40 @@ export const InternDashboardPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
-            {/* Task Checklist */}
-            <div className="md:col-span-7 space-y-2">
+            {/* Interactive Task Checklist */}
+            <div className="md:col-span-7 space-y-3">
               <span className="text-xs font-black text-slate-900 dark:text-white block mb-2">
-                Deliverables Checklist
+                Deliverables Checklist (Click to Toggle Status)
               </span>
               
-              <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 flex items-center gap-3">
-                <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                <span className="text-xs font-bold text-slate-800 line-through">Onboarding & Profile Verification</span>
-              </div>
-              <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 flex items-center gap-3">
-                <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                <span className="text-xs font-bold text-slate-800 line-through">Local Git & Dev Environment Configuration</span>
-              </div>
-              <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 flex items-center gap-3">
-                <Clock className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-black text-blue-900 dark:text-blue-300">
-                  {hasAssignedProject ? 'Core Feature Development & Code Submissions' : 'Complete Technical Diagnostic Assessment'}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 opacity-60">
-                <div className="w-4 h-4 rounded-full border border-slate-300" />
-                <span className="text-xs font-semibold text-slate-600">
-                  {hasAssignedProject ? 'Weekly Mentor Review & Pull Request Audit' : 'Module 1 Project Submission'}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 opacity-60">
-                <div className="w-4 h-4 rounded-full border border-slate-300" />
-                <span className="text-xs font-semibold text-slate-600">
-                  {hasAssignedProject ? 'Final Production Deployment & Demo' : 'Corporate Matching Interview Call'}
-                </span>
-              </div>
+              {workspaceTasks.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => toggleWorkspaceTask(task.id)}
+                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 ${
+                    task.done
+                      ? 'bg-emerald-50/70 border-emerald-200/70 dark:bg-emerald-950/30 dark:border-emerald-800/60'
+                      : 'bg-slate-50 border-slate-200 dark:bg-[#1A1D33] dark:border-slate-800'
+                  }`}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWorkspaceTask(task.id);
+                    }}
+                    className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer shrink-0"
+                  >
+                    {task.done ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600" />
+                    )}
+                  </button>
+                  <span className={`text-xs font-bold ${task.done ? 'line-through text-slate-500 dark:text-slate-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                    {task.title}
+                  </span>
+                </div>
+              ))}
             </div>
 
             {/* Project Details Sidebar */}
