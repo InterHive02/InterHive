@@ -1,3 +1,4 @@
+import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Users, Briefcase, TrendingUp, Award, Calendar, Plus } from 'lucide-react';
@@ -44,7 +45,7 @@ export const CompanyDashboardPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingSpinner size="md" />
       </div>
     );
   }

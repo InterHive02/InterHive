@@ -30,6 +30,7 @@ import { CompanyManagement } from '../components/company-management';
 import { ProgramManagement } from '../components/program-management';
 import { SystemSettings } from '../components/system-settings';
 import { AdminLandingStats } from '../components/admin-landing-stats';
+import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 import { useAdmin } from '../hooks/use-admin';
 import { companyApi } from '../../../api/endpoints/company.api';
 import { userApi } from '../../../api/endpoints/user.api';
@@ -439,7 +440,7 @@ export const AdminDashboardPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingSpinner size="md" />
       </div>
     );
   }

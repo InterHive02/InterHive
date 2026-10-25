@@ -1,3 +1,4 @@
+import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../../../core/providers/socket.provider';
 import { useAuth } from '../../../api/hooks/use-auth';
@@ -53,7 +54,7 @@ export const CommunicationPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingSpinner size="md" />
       </div>
     );
   }

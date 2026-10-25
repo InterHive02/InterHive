@@ -1,3 +1,4 @@
+import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -23,7 +24,7 @@ export const CompanyProfilePage: React.FC = () => {
   if (isLoading || !profile) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingSpinner size="md" />
       </div>
     );
   }
