@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, Plus, Edit2, Trash2, Ban, CheckCircle, MoreVertical, User, Mail, Phone, Calendar, Shield } from 'lucide-react';
 
 interface UserManagementProps {
+  onAdd?: () => void;
   users: {
     id: string;
     firstName: string;
@@ -25,6 +26,7 @@ interface UserManagementProps {
 
 export const UserManagement: React.FC<UserManagementProps> = ({
   users,
+  onAdd,
   onEdit,
   onDelete,
   onActivate,
@@ -91,7 +93,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
           User Management
         </h3>
-        <button className="inline-flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium">
+        <button onClick={onAdd} className="inline-flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium cursor-pointer">
           <Plus className="w-4 h-4" />
           Add User
         </button>

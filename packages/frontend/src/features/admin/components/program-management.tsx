@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Edit2, Trash2, Eye, CheckCircle, XCircle, Clock, BookOpen, Users, Calendar, Award } from 'lucide-react';
+import { Search, Filter, Plus, Edit2, Trash2, Eye, CheckCircle, XCircle, Clock, BookOpen, Users, Calendar, Award, Archive } from 'lucide-react';
 
 interface ProgramManagementProps {
+  onCreate?: () => void;
   programs: {
     id: string;
     title: string;
@@ -25,6 +26,7 @@ interface ProgramManagementProps {
 
 export const ProgramManagement: React.FC<ProgramManagementProps> = ({
   programs,
+  onCreate,
   onEdit,
   onDelete,
   onView,
@@ -113,7 +115,7 @@ export const ProgramManagement: React.FC<ProgramManagementProps> = ({
         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
           Program Management
         </h3>
-        <button className="inline-flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium">
+        <button onClick={onCreate} className="inline-flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium cursor-pointer">
           <Plus className="w-4 h-4" />
           Create Program
         </button>
