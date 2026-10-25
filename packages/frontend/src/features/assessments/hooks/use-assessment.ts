@@ -47,6 +47,19 @@ export const useAssessment = () => {
     },
   });
 
+  const useMyResults = () =>
+    useQuery({
+      queryKey: ['assessments', 'my-results'],
+      queryFn: async () => {
+        try {
+          const response = await assessmentApi.getMyResults();
+          return (response.data as any)?.data || response.data || [];
+        } catch (e) {
+          return [];
+        }
+      },
+    });
+
   const useResult = (id: string) =>
     useQuery({
       queryKey: ['assessment', 'result', id],
@@ -67,5 +80,6 @@ export const useAssessment = () => {
     submitAssessmentAsync: submitAssessmentMutation.mutateAsync,
     isSubmitting: submitAssessmentMutation.isLoading,
     useResult,
+    useMyResults,
   };
 };

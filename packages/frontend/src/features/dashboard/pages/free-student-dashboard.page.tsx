@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../api/hooks/use-auth';
 import { InternshipApplicationModal } from '../../landing/components/internship-application-modal';
+import { FreeResourcesModal, ResourceModalType } from '../components/free-resources-modal';
 import { ProgramDetailsModal } from '../../landing/components/program-details-modal';
 import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
 import {
@@ -36,6 +37,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
   const [selectedProgramTypeForModal, setSelectedProgramTypeForModal] = useState<string | undefined>(undefined);
   const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [activeResourceModal, setActiveResourceModal] = useState<ResourceModalType>(null);
 
   // Check local storage for application submission state scoped to current user
   const appStorageKey = user?.id ? `hasAppliedPpo_${user.id}` : (user?.email ? `hasAppliedPpo_${user.email}` : 'hasAppliedPpo');
@@ -76,7 +78,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
     {
       icon: Building2,
       title: '50+ Hiring Partners',
-      description: 'Direct placement referrals to TechCorp, CloudWave, Nexus FinTech, and 50+ corporate partners.',
+      description: 'Direct placement referrals to direct placement opportunities across our verified corporate hiring network.',
       badge: 'Guaranteed Matching',
     },
     {
@@ -475,20 +477,38 @@ export const FreeStudentDashboardPage: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-1">
-              <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div
+              onClick={() => setActiveResourceModal('resume')}
+              className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-2 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between">
+                <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">Open Guide →</span>
+              </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">Tech Resume Guide</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Download proven developer resume formats.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">ATS template, Action + Metric formula & sample markdown download.</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-1">
-              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div
+              onClick={() => setActiveResourceModal('masterclass')}
+              className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-2 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between">
+                <Users className="w-5 h-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-full">RSVP Free →</span>
+              </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">Weekly Masterclass</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Live Q&A with tech leads & senior managers.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Live interactive sessions with senior architects & live Q&A.</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-1">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <div
+              onClick={() => setActiveResourceModal('interview')}
+              className="p-4 rounded-2xl bg-white dark:bg-[#121526] border border-indigo-100 dark:border-slate-800 space-y-2 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">View Kit →</span>
+              </div>
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">Interview Prep Kit</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Top 50 Data Structure & React questions.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Top DSA patterns, Full-Stack concepts & STAR method.</p>
             </div>
           </div>
         </div>
@@ -570,6 +590,12 @@ export const FreeStudentDashboardPage: React.FC = () => {
           setIsModalOpen(true);
         }}
       />
+      {/* Free Resources Interactive Modal */}
+      <FreeResourcesModal
+        type={activeResourceModal}
+        onClose={() => setActiveResourceModal(null)}
+      />
+
     </div>
   );
 };

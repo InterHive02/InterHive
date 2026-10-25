@@ -26,6 +26,15 @@ export const ReadinessScoreCard: React.FC<ReadinessScoreCardProps> = ({
   activeTasksCount = 0,
   upcomingDeadlinesCount = 0,
 }) => {
+  const getScoreStatus = (val: number) => {
+    if (val >= 85) return { label: 'Industry Ready', color: 'text-emerald-600 dark:text-emerald-400' };
+    if (val >= 70) return { label: 'Good Progress', color: 'text-blue-600 dark:text-blue-400' };
+    if (val >= 50) return { label: 'Developing Competence', color: 'text-amber-600 dark:text-amber-400' };
+    return { label: 'Needs Improvement', color: 'text-rose-500' };
+  };
+
+  const scoreStatus = getScoreStatus(score);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       
@@ -42,14 +51,16 @@ export const ReadinessScoreCard: React.FC<ReadinessScoreCardProps> = ({
                 {score}
               </span>
               <span className="text-xs font-semibold text-slate-400">/ 100</span>
-              <span className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 ml-1.5">
-                <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
-                {trend}%
-              </span>
+              {trend !== 0 && (
+                <span className={`inline-flex items-center text-xs font-bold ml-1.5 ${trend > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+                  <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
+                  {trend > 0 ? `+${trend}%` : `${trend}%`}
+                </span>
+              )}
             </div>
 
-            <p className="text-xs font-bold text-red-500 mt-1">
-              Needs Improvement
+            <p className={`text-xs font-bold mt-1 ${scoreStatus.color}`}>
+              {scoreStatus.label}
             </p>
           </div>
 
@@ -94,10 +105,10 @@ export const ReadinessScoreCard: React.FC<ReadinessScoreCardProps> = ({
             </div>
 
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-              of {totalSkills}
+              {totalSkills > 0 ? `${Math.round((skillsCompleted / totalSkills) * 100)}% verified` : 'Awaiting evaluation'}
             </p>
             <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Keep learning!
+              {totalSkills > 0 && skillsCompleted >= totalSkills ? 'All requirements met!' : 'Keep learning!'}
             </p>
           </div>
 
@@ -122,10 +133,10 @@ export const ReadinessScoreCard: React.FC<ReadinessScoreCardProps> = ({
             </div>
 
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-              Tasks pending
+              {activeTasksCount === 1 ? '1 task pending' : `${activeTasksCount} tasks pending`}
             </p>
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
-              Stay consistent!
+            <p className={`text-xs font-bold ${activeTasksCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              {activeTasksCount > 0 ? 'Stay consistent!' : 'All tasks completed'}
             </p>
           </div>
 
@@ -150,10 +161,18 @@ export const ReadinessScoreCard: React.FC<ReadinessScoreCardProps> = ({
             </div>
 
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-              No upcoming deadlines
+              {upcomingDeadlinesCount === 0
+                ? 'No upcoming deadlines'
+                : `${upcomingDeadlinesCount} deadline${upcomingDeadlinesCount > 1 ? 's' : ''} approaching`}
             </p>
-            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              Great! You're all caught up.
+            <p className={`text-xs font-bold ${
+              upcomingDeadlinesCount === 0
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-amber-600 dark:text-amber-400'
+            }`}>
+              {upcomingDeadlinesCount === 0
+                ? "Great! You're all caught up."
+                : 'Review schedule & milestones'}
             </p>
           </div>
 

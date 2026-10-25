@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Award, FolderKanban, BookOpen, ClipboardCheck, ArrowRight, Inbox } from 'lucide-react';
 
 interface RecentActivityProps {
@@ -29,6 +30,7 @@ const safeText = (val: any): string => {
 };
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({ activities = [] }) => {
+  const navigate = useNavigate();
   const hasActivities = activities && activities.length > 0;
 
   return (
@@ -40,7 +42,10 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities = [] 
             Recent Activity
           </h3>
           {hasActivities && (
-            <button className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+            >
               <span>View All Activity</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
