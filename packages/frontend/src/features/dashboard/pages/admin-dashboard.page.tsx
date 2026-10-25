@@ -1,3 +1,6 @@
+export { AdminDashboardPage } from '../../admin/pages/admin-dashboard.page';
+
+// Legacy dashboard implementation preserved below
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -44,7 +47,7 @@ interface ServiceStatusItem {
   icon: 'Server' | 'Mail' | 'Clock' | 'Activity';
 }
 
-export const AdminDashboardPage: React.FC = () => {
+const LegacyAdminDashboardPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'intern' | 'company' | 'staff'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(true);

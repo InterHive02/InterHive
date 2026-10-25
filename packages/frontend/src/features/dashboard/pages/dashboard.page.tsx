@@ -4,7 +4,7 @@ import { InternDashboardPage } from './intern-dashboard.page';
 import { FreeStudentDashboardPage } from './free-student-dashboard.page';
 import { CompanyDashboardPage } from './company-dashboard.page';
 import { ManagerDashboardPage } from './manager-dashboard.page';
-import { AdminDashboardPage } from './admin-dashboard.page';
+import { AdminDashboardPage } from '../../admin/pages/admin-dashboard.page';
 import { HrDashboardPage } from './hr-dashboard.page';
 import { LoadingSpinner } from '../../../shared/components/common/loading-spinner';
 

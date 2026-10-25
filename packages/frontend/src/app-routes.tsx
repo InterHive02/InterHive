@@ -41,7 +41,7 @@ const DashboardPage = lazyLoad(() => import('./features/dashboard/pages/dashboar
 const InternDashboardPage = lazyLoad(() => import('./features/dashboard/pages/intern-dashboard.page'), 'InternDashboardPage');
 const CompanyDashboardPage = lazyLoad(() => import('./features/dashboard/pages/company-dashboard.page'), 'CompanyDashboardPage');
 const ManagerDashboardPage = lazyLoad(() => import('./features/dashboard/pages/manager-dashboard.page'), 'ManagerDashboardPage');
-const AdminDashboardPage = lazyLoad(() => import('./features/dashboard/pages/admin-dashboard.page'), 'AdminDashboardPage');
+const AdminDashboardPage = lazyLoad(() => import('./features/admin/pages/admin-dashboard.page'), 'AdminDashboardPage');
 const HrDashboardPage = lazyLoad(() => import('./features/dashboard/pages/hr-dashboard.page'), 'HrDashboardPage');
 const HrApplicationsPage = lazyLoad(() => import('./features/admin/pages/hr-applications.page'), 'HrApplicationsPage');
 const HrLeadsPage = lazyLoad(() => import('./features/admin/pages/hr-leads.page'), 'HrLeadsPage');

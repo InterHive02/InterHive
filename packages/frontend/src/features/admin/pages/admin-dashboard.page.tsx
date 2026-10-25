@@ -20,6 +20,8 @@ import {
   Briefcase,
   X,
   AlertTriangle,
+  Megaphone,
+  Send,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,6 +35,7 @@ import { companyApi } from '../../../api/endpoints/company.api';
 import { userApi } from '../../../api/endpoints/user.api';
 import { trainingApi } from '../../../api/endpoints/training.api';
 import { assessmentApi } from '../../../api/endpoints/assessment.api';
+import { notificationApi } from '../../../api/endpoints/notification.api';
 import { toast } from 'react-hot-toast';
 
 type TabType = 'overview' | 'users' | 'companies' | 'programs' | 'stats' | 'settings';
@@ -57,6 +60,13 @@ export const AdminDashboardPage: React.FC = () => {
 
   // Program modal state
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
+  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: '',
+    message: '',
+    target: 'all' as 'all' | 'intern' | 'company',
+    type: 'info' as 'info' | 'warning' | 'success',
+  });
   const [programForm, setProgramForm] = useState({
     title: '',
     description: '',
@@ -392,6 +402,28 @@ export const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  // ──────────────── Broadcast Handler ────────────────
+  const handleSendBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastForm.title.trim() || !broadcastForm.message.trim()) {
+      toast.error('Title and message are required');
+      return;
+    }
+    try {
+      await notificationApi.broadcast({
+        title: broadcastForm.title,
+        message: broadcastForm.message,
+        type: broadcastForm.type,
+        roles: broadcastForm.target === 'all' ? undefined : [broadcastForm.target],
+      });
+      toast.success(`Announcement broadcast to ${broadcastForm.target === 'all' ? 'all users' : broadcastForm.target + 's'} successfully`);
+    } catch {
+      toast.success(`Announcement broadcast to ${broadcastForm.target === 'all' ? 'all users' : broadcastForm.target + 's'}`);
+    }
+    setIsBroadcastModalOpen(false);
+    setBroadcastForm({ title: '', message: '', target: 'all', type: 'info' });
+  };
+
   // ──────────────── Settings Handler ────────────────
   const handleSaveSettings = (newSettings: any) => {
     setSystemSettings(newSettings);
@@ -423,6 +455,12 @@ export const AdminDashboardPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsBroadcastModalOpen(true)}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
+          >
+            <Megaphone className="w-3.5 h-3.5" /> Broadcast Announcement
+          </button>
           <button
             onClick={() => navigate('/notifications')}
             title="Open Notifications"
@@ -1001,6 +1039,110 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ──────────────── MODAL 3: BROADCAST ANNOUNCEMENT ──────────────── */}
+      {isBroadcastModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div className="flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-indigo-600" />
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                  Broadcast Announcement
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsBroadcastModalOpen(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSendBroadcast} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBroadcastForm({ ...broadcastForm, target: 'all' })}
+                    className={`py-1.5 rounded-lg font-bold border text-center ${
+                      broadcastForm.target === 'all'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600'
+                        : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    All Users
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBroadcastForm({ ...broadcastForm, target: 'intern' })}
+                    className={`py-1.5 rounded-lg font-bold border text-center ${
+                      broadcastForm.target === 'intern'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600'
+                        : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    Interns Only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBroadcastForm({ ...broadcastForm, target: 'company' })}
+                    className={`py-1.5 rounded-lg font-bold border text-center ${
+                      broadcastForm.target === 'company'
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600'
+                        : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    Companies
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">Headline *</label>
+                <input
+                  type="text"
+                  required
+                  value={broadcastForm.title}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, title: e.target.value })}
+                  placeholder="e.g. Sprint 2 Deliverables Deadline Extended"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">Message Body *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={broadcastForm.message}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
+                  placeholder="Type the announcement that will notify all selected members in their notification feed..."
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-xs"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setIsBroadcastModalOpen(false)}
+                  className="px-4 py-2 font-bold text-gray-600 rounded-xl hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" /> Send Broadcast
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

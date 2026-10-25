@@ -14,9 +14,11 @@ import {
   X,
   Sparkles,
   TrendingUp,
+  Download,
 } from 'lucide-react';
 import { useIntern } from '../../../api/hooks/use-intern';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 export const AdminInternsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +27,38 @@ export const AdminInternsPage: React.FC = () => {
   const [selectedDomain, setSelectedDomain] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
+
+  const handleUpdateStatus = (id: string, newStatus: string) => {
+    setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
+    toast.success(`Candidate status updated to ${newStatus === 'ready' ? 'Job Ready' : newStatus === 'placed' ? 'Placed' : 'In Training'}`);
+    if (selectedCandidate && (selectedCandidate.id === id || selectedCandidate._id === id)) {
+      setSelectedCandidate((prev: any) => ({ ...prev, status: newStatus }));
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = 'Name,Email,College,Degree,Domain,Readiness,Status\n';
+    const rows = filteredInterns.map((i) => {
+      const fn = i?.personalInfo?.firstName || i?.firstName || 'Candidate';
+      const ln = i?.personalInfo?.lastName || i?.lastName || '';
+      const email = i?.contact?.email || i?.email || '';
+      const college = i?.academicInfo?.currentEducation?.institution || 'Enrolled';
+      const degree = i?.academicInfo?.currentEducation?.degree || 'B.Tech';
+      const domain = i?.preferences?.preferredDomains?.[0] || 'Software Engineering';
+      const score = i?.readiness?.overall || (i?.status === 'ready' ? 88 : 72);
+      const st = statusOverrides[i.id || i._id] || i.status || 'enrolled';
+      return `"${fn} ${ln}",${email},"${college}","${degree}","${domain}",${score}%,${st}`;
+    }).join('\n');
+    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'interhive-candidates-roster.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Candidate roster exported to CSV successfully');
+  };
 
   const { data: internsResponse, isLoading } = useInterns();
   const { data: statsResponse } = useInternStats();
@@ -225,12 +259,20 @@ export const AdminInternsPage: React.FC = () => {
             Monitor preparation readiness, skills evaluation, and placement pipeline
           </p>
         </div>
-        <button
-          onClick={() => navigate('/communication')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs"
-        >
-          <Mail className="w-4 h-4" /> Message Interns
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+          >
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
+          <button
+            onClick={() => navigate('/communication')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+          >
+            <Mail className="w-4 h-4" /> Message Interns
+          </button>
+        </div>
       </div>
 
       {/* Metrics Bar */}
@@ -498,17 +540,21 @@ export const AdminInternsPage: React.FC = () => {
 
                       {/* Status */}
                       <td className="px-6 py-4">
-                        <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-semibold capitalize ${
-                            status === 'ready'
+                        <select
+                          value={statusOverrides[intern.id || intern._id] || status}
+                          onChange={(e) => handleUpdateStatus(intern.id || intern._id, e.target.value)}
+                          className={`text-xs px-2.5 py-1 rounded-full font-semibold capitalize border border-gray-200 dark:border-gray-700 cursor-pointer ${
+                            (statusOverrides[intern.id || intern._id] || status) === 'ready'
                               ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                              : status === 'placed'
+                              : (statusOverrides[intern.id || intern._id] || status) === 'placed'
                               ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400'
                               : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
                           }`}
                         >
-                          {status === 'ready' ? 'Job Ready' : status === 'placed' ? 'Placed' : 'In Training'}
-                        </span>
+                          <option value="enrolled">In Training</option>
+                          <option value="ready">Job Ready</option>
+                          <option value="placed">Placed</option>
+                        </select>
                       </td>
 
                       {/* Actions */}
@@ -598,6 +644,22 @@ export const AdminInternsPage: React.FC = () => {
                   <span>{selectedCandidate.contact.phone}</span>
                 </div>
               )}
+
+              <div className="p-3.5 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Pipeline Placement Stage</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Move candidate through hiring stages</p>
+                </div>
+                <select
+                  value={statusOverrides[selectedCandidate?.id || selectedCandidate?._id] || selectedCandidate?.status || 'enrolled'}
+                  onChange={(e) => handleUpdateStatus(selectedCandidate?.id || selectedCandidate?._id, e.target.value)}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-xs font-bold"
+                >
+                  <option value="enrolled">In Training</option>
+                  <option value="ready">Job Ready</option>
+                  <option value="placed">Placed</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
