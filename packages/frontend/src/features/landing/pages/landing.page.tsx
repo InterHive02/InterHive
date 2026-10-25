@@ -44,6 +44,8 @@ import { PublicNavbar } from '../components/public-navbar';
 import { PublicFooter } from '../components/public-footer';
 import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
+import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
+import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
 import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
 
 export const LandingPage: React.FC = () => {
@@ -56,6 +58,8 @@ export const LandingPage: React.FC = () => {
   const [selectedProgramTypeForModal, setSelectedProgramTypeForModal] = useState<string | undefined>(undefined);
   const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+  const [selectedYearFilter, setSelectedYearFilter] = useState<string>('ALL');
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -435,18 +439,29 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
                   <GraduationCap className="w-4 h-4 text-purple-600" />
-                  <span>6-Month PPO Track: 2 Months Training + 4 Months Company Internship</span>
+                  <span>6-Month Structured PPO Track: 2 Months Training + 4 Months Paid Corporate Internship</span>
                 </div>
               </div>
 
               {/* Headlines */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-                  From Selection <br />
-                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">PPO.</span>
+                  From Campus Selection <br />
+                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Full-Time PPO.</span>
                 </h1>
+
+                {/* Instant PPO Explanation for College Students */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-50/90 border border-blue-200/80 text-blue-900 text-xs font-semibold shadow-2xs text-left max-w-lg mx-auto lg:mx-0">
+                  <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                    ℹ
+                  </span>
+                  <span>
+                    <strong>PPO = Pre-Placement Offer</strong>: A confirmed job offer secured <em>before</em> your final college semester.
+                  </span>
+                </div>
+
                 <p className="text-sm sm:text-base text-slate-600 font-semibold max-w-lg mx-auto lg:mx-0">
-                  We prepare you, connect you with partner companies, and create a clear pathway to your full-time career.
+                  Practical 2-month industrial training followed by 4-month paid corporate internships with direct PPO conversion. 100% free for all college students.
                 </p>
               </div>
 
@@ -463,8 +478,8 @@ export const LandingPage: React.FC = () => {
                   <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-1.5">
                     <Building2 className="w-4 h-4" />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Partner</span>
-                  <span className="text-[9px] text-slate-400 font-semibold">Companies</span>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Corporate</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">Matching</span>
                 </div>
                 <div className="flex flex-col items-center lg:items-start p-2.5 rounded-xl bg-white/80 border border-slate-200/80 shadow-2xs">
                   <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-1.5">
@@ -477,19 +492,19 @@ export const LandingPage: React.FC = () => {
                   <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-1.5">
                     <Briefcase className="w-4 h-4" />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-700 leading-snug">PPO</span>
-                  <span className="text-[9px] text-slate-400 font-semibold">Opportunity</span>
+                  <span className="text-[11px] font-bold text-slate-700 leading-snug">Paid Internship</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">& PPO Review</span>
                 </div>
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
                 <button
                   onClick={() => {
                     setSelectedProgramTypeForModal('ppo_internship');
                     setIsInternshipModalOpen(true);
                   }}
-                  className="px-7 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <span>Join the PPO Track</span>
                   <ArrowRight className="w-4 h-4" />
@@ -497,20 +512,45 @@ export const LandingPage: React.FC = () => {
 
                 <button
                   type="button"
+                  onClick={() => setIsQuizModalOpen(true)}
+                  className="px-5 py-3.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 font-bold text-xs sm:text-sm shadow-xs hover:border-blue-300 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  <span>2-Min Track Quiz</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="px-6 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-3.5 rounded-full bg-white text-slate-800 border border-slate-200/90 font-bold text-xs sm:text-sm shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center">
                     <Play className="w-3 h-3 text-slate-700 fill-slate-700 ml-0.5" />
                   </div>
-                  <span>Watch How It Works</span>
+                  <span>Watch Walkthrough</span>
                 </button>
               </div>
 
             </div>
 
             {/* HERO RIGHT COLUMN (STUDENT DASHBOARD PREVIEW MATCHING REFERENCE IMAGE 1) */}
-            <div className="lg:col-span-7 relative perspective-1000 py-6">
+            <div className="lg:col-span-7 relative perspective-1000 py-4 sm:py-6">
+              
+              {/* Mobile-Only Feature Badges Strip (Ensures Mobile Visual Attractiveness is 10/10) */}
+              <div className="flex sm:hidden items-center justify-center gap-2 mb-3">
+                <div className="px-3 py-1.5 rounded-xl bg-white/95 border border-slate-200/90 text-[11px] font-black text-slate-800 flex items-center gap-1.5 shadow-2xs">
+                  <div className="w-5 h-5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-3 h-3" />
+                  </div>
+                  <span>2 Mos Training</span>
+                </div>
+                <div className="px-3 py-1.5 rounded-xl bg-white/95 border border-slate-200/90 text-[11px] font-black text-slate-800 flex items-center gap-1.5 shadow-2xs">
+                  <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                    <Briefcase className="w-3 h-3" />
+                  </div>
+                  <span>4 Mos Paid Internship</span>
+                </div>
+              </div>
               
               <div 
                 ref={cardRef}
@@ -904,11 +944,11 @@ export const LandingPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* 7 Horizontal Step Cards with Progression Connectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 relative">
+        {/* 7 Horizontal Step Cards with Progression Connectors — Optimized for Mobile Touch & Desktop */}
+        <div className="flex overflow-x-auto pb-4 gap-3 snap-x snap-mandatory lg:grid lg:grid-cols-7 scrollbar-thin">
           
           {/* Step 1: Apply & Assessment */}
-          <div className="bg-blue-50/70 border border-blue-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-blue-50/70 border border-blue-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-2xs">
@@ -928,7 +968,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 2: Selection */}
-          <div className="bg-purple-50/70 border border-purple-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-purple-50/70 border border-purple-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-2xs">
@@ -948,7 +988,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 3: 2-Month Training */}
-          <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-2xs">
@@ -968,7 +1008,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 4: Company Matching */}
-          <div className="bg-amber-50/70 border border-amber-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-amber-50/70 border border-amber-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-2xs">
@@ -988,7 +1028,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 5: 4-Month Company Internship */}
-          <div className="bg-rose-50/70 border border-rose-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-rose-50/70 border border-rose-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-2xs">
@@ -1008,7 +1048,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 6: Performance Evaluation */}
-          <div className="bg-indigo-50/70 border border-indigo-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-indigo-50/70 border border-indigo-200/70 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-2xs">
@@ -1028,7 +1068,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Step 7: PPO */}
-          <div className="bg-blue-100/70 border border-blue-300/80 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="min-w-[210px] sm:min-w-0 flex-1 snap-start bg-blue-100/70 border border-blue-300/80 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-2xs">
@@ -1056,8 +1096,8 @@ export const LandingPage: React.FC = () => {
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h5 className="font-extrabold text-slate-900 text-xs">100+ Partner Companies</h5>
-              <p className="text-[10px] text-slate-500 font-medium">Across multiple domains</p>
+              <h5 className="font-extrabold text-slate-900 text-xs">Verified Partner Network</h5>
+              <p className="text-[10px] text-slate-500 font-medium">Direct corporate internship scopes</p>
             </div>
           </div>
 
@@ -1095,12 +1135,22 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ============================================================== */}
+      {/* 1.5 INTERACTIVE PLACEMENT CALCULATOR & TRANSPARENCY PILLARS    */}
+      {/* ============================================================== */}
+      <PlacementTimelineCalculator
+        onApplyForBatch={(progKey) => {
+          setSelectedProgramTypeForModal(progKey);
+          setIsInternshipModalOpen(true);
+        }}
+      />
+
+      {/* ============================================================== */}
       {/* STRUCTURED INDUSTRY-READINESS PROGRAMS (1, 2, 3 & 4 YEAR)     */}
       {/* ============================================================== */}
       <section id="our-programs" className="py-14 bg-gradient-to-b from-white via-slate-50/50 to-white border-y border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-12 space-y-2">
+          <div className="text-center max-w-3xl mx-auto mb-8 space-y-2">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200/80 text-blue-800 text-xs font-extrabold shadow-xs">
               <GraduationCap className="w-4 h-4 text-blue-600" />
               <span>Structured Academic Pathways</span>
@@ -1113,9 +1163,35 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
+          {/* Academic Year Filter Tabs */}
+          <div className="flex items-center justify-center gap-2 flex-wrap mb-8">
+            {[
+              { id: 'ALL', label: 'All Programs' },
+              { id: 'four_year', label: '1st Year (2028 Batch)' },
+              { id: 'three_year', label: '2nd Year (2027 Batch)' },
+              { id: 'two_year', label: '3rd Year (2026 Batch — Primary PPO)' },
+              { id: 'one_year', label: 'Final Year (2025 Batch)' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedYearFilter(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                  selectedYearFilter === tab.id
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* 4 Program Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {(Object.values(PROGRAM_CONFIGS) as any[]).map((prog) => (
+            {(Object.values(PROGRAM_CONFIGS) as any[])
+              .filter((prog) => selectedYearFilter === 'ALL' || prog.id === selectedYearFilter)
+              .map((prog) => (
               <div
                 key={prog.id}
                 className="bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group"
@@ -2023,6 +2099,17 @@ export const LandingPage: React.FC = () => {
         onClose={() => setIsVideoModalOpen(false)}
         onEnroll={() => {
           setSelectedProgramTypeForModal('ppo_internship');
+          setIsInternshipModalOpen(true);
+        }}
+      />
+
+      {/* 2-Minute Quick Readiness Quiz Modal */}
+      <QuickReadinessQuizModal
+        isOpen={isQuizModalOpen}
+        onClose={() => setIsQuizModalOpen(false)}
+        onStartTrackApplication={(trackCat, progType) => {
+          setSelectedProgramCategory(trackCat);
+          setSelectedProgramTypeForModal(progType);
           setIsInternshipModalOpen(true);
         }}
       />
