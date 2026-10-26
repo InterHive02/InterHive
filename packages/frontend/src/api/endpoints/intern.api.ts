@@ -123,6 +123,9 @@ export const internApi = {
   updateStatus: (id: string, status: string) =>
     apiClient.post(`/interns/${id}/status`, { status }),
 
+  evaluate: (id: string, evaluation: any) =>
+    apiClient.post(`/interns/${id}/evaluate`, evaluation),
+
   recalculateReadiness: (id: string) =>
     apiClient.post(`/interns/${id}/readiness/recalculate`),
 

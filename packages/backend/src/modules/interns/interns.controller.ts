@@ -184,7 +184,7 @@ export class InternsController {
   }
 
   @Post(':id/status')
-  @Roles(UserRole.ADMIN, UserRole.HR)
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
   @ApiOperation({ summary: 'Update intern status' })
   @ApiResponse({ status: 200, description: 'Status updated successfully' })
   async updateStatus(
@@ -192,6 +192,18 @@ export class InternsController {
     @Body('status') status: string,
   ) {
     return this.internsService.updateStatus(id, status);
+  }
+
+  @Post(':id/evaluate')
+  @Roles(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Submit manager performance evaluation & PPO recommendation' })
+  @ApiResponse({ status: 200, description: 'Evaluation submitted successfully' })
+  async evaluate(
+    @Param('id') id: string,
+    @Body() evaluationData: any,
+    @CurrentUser() user: User,
+  ) {
+    return this.internsService.submitEvaluation(id, evaluationData, user);
   }
 
   @Post('upload-resume')

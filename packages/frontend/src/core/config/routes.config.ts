@@ -46,13 +46,14 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
   // 3. Operations & Training Management (media_1789204058378.png)
   manager: [
     { path: '/manager/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-    { path: '/profile', label: 'Profile', icon: 'User' },
-    { path: '/projects', label: 'Projects', icon: 'FolderKanban' },
-    { path: '/attendance', label: 'Attendance', icon: 'Clock' },
-    { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
-    { path: '/settings', label: 'Settings', icon: 'Settings' },
     { path: '/manager/team', label: 'My Team', icon: 'Users' },
+    { path: '/manager/tasks', label: 'Tasks & Reviews', icon: 'CheckSquare' },
     { path: '/manager/projects', label: 'Team Projects', icon: 'Briefcase' },
+    { path: '/manager/evaluations', label: 'Performance & PPO', icon: 'Award' },
+    { path: '/manager/attendance', label: 'Team Attendance', icon: 'Clock' },
+    { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
+    { path: '/profile', label: 'Profile', icon: 'User' },
+    { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
 
   // 4. Partner Company Portal (media_1789204060076.png)
@@ -148,7 +149,10 @@ export const ROUTES: RouteConfig[] = [
 
   // Manager
   { path: '/manager/team', label: 'My Team', icon: 'Users', roles: ['manager'] },
+  { path: '/manager/tasks', label: 'Tasks & Reviews', icon: 'CheckSquare', roles: ['manager'] },
   { path: '/manager/projects', label: 'Team Projects', icon: 'Briefcase', roles: ['manager'] },
+  { path: '/manager/evaluations', label: 'Performance & PPO', icon: 'Award', roles: ['manager'] },
+  { path: '/manager/attendance', label: 'Team Attendance', icon: 'Clock', roles: ['manager'] },
 
   // Company
   { path: '/company/requirements', label: 'Requirements', icon: 'FileText', roles: ['company', 'admin'] },

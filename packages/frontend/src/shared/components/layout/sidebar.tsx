@@ -20,6 +20,7 @@ import {
   Target,
   Calendar,
   FileQuestion,
+  CheckSquare,
   LogOut,
   ChevronDown,
   X,
@@ -95,6 +96,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'briefcase':
       case 'teamprojects':
         return Briefcase;
+      case 'checksquare':
+      case 'tasks':
+        return CheckSquare;
       case 'target':
       case 'opportunities':
         return Target;

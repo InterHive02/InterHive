@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
+import { useAuth } from '../../../api/hooks/use-auth';
 import { LandingStatsEditor } from '../../../shared/components/common/landing-stats-editor';
 
 interface SprintBatch {
@@ -50,6 +51,7 @@ interface InterviewQueueItem {
 }
 
 export const ManagerDashboardPage: React.FC = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -246,12 +248,14 @@ export const ManagerDashboardPage: React.FC = () => {
           </button>
 
           {/* Action Buttons */}
-          <button
-            onClick={() => setShowLandingEditor(!showLandingEditor)}
-            className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121526] border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
-          >
-            {showLandingEditor ? 'Hide Stats Editor' : 'Edit Landing Metrics'}
-          </button>
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => setShowLandingEditor(!showLandingEditor)}
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#121526] border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
+            >
+              {showLandingEditor ? 'Hide Stats Editor' : 'Edit Landing Metrics'}
+            </button>
+          )}
 
           <button
             onClick={() => setShowNewSprintModal(true)}
@@ -295,7 +299,7 @@ export const ManagerDashboardPage: React.FC = () => {
       </div>
 
       {/* Expandable Landing Stats Editor */}
-      {showLandingEditor && (
+      {user?.role === 'admin' && showLandingEditor && (
         <div className="animate-in fade-in zoom-in-98 duration-200">
           <LandingStatsEditor />
         </div>

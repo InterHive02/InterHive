@@ -514,6 +514,77 @@ export class InternsService {
     };
   }
 
+  async submitEvaluation(id: string, evaluation: any, evaluatorUser?: any) {
+    let profile = await this.internProfileModel.findById(id);
+    let userId = profile?.userId?.toString();
+    if (!profile) {
+      profile = await this.internProfileModel.findOne({ userId: id });
+      userId = id;
+    }
+
+    const technical = Number(evaluation.technicalSkills || 85);
+    const projects = Number(evaluation.projects || 85);
+    const communication = Number(evaluation.communication || 80);
+    const problemSolving = Number(evaluation.problemSolving || 85);
+    const workflow = Number(evaluation.workflow || 80);
+    const collaboration = Number(evaluation.collaboration || 85);
+    const overall = Math.round(
+      (technical + projects + communication + problemSolving + workflow + collaboration) / 6,
+    );
+
+    if (userId) {
+      let readiness = await this.internReadinessModel.findOne({ userId });
+      const breakdown = {
+        technicalSkills: technical,
+        projects,
+        communication,
+        problemSolving,
+        industryWorkflow: workflow,
+        teamCollaboration: collaboration,
+        leadership: Number(evaluation.leadership || 75),
+        adaptability: Number(evaluation.adaptability || 80),
+      };
+
+      if (!readiness) {
+        readiness = new this.internReadinessModel({
+          userId,
+          overall,
+          breakdown,
+          history: [],
+        });
+      } else {
+        readiness.overall = overall;
+        readiness.breakdown = breakdown;
+      }
+
+      readiness.history.push({
+        score: overall,
+        breakdown,
+        date: new Date(),
+        event: `Performance Evaluation by ${evaluatorUser?.firstName || 'Manager'}: ${
+          evaluation.ppoRecommendation || 'PPO Recommended'
+        } - ${evaluation.notes || 'Meets expectations'}`,
+      });
+      await readiness.save();
+    }
+
+    if (profile && evaluation.ppoRecommendation) {
+      if (
+        evaluation.ppoRecommendation.includes('PPO') ||
+        evaluation.ppoRecommendation === 'ready'
+      ) {
+        profile.status = 'ready' as any;
+        await profile.save();
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Evaluation and readiness benchmark saved successfully',
+      data: { overall, evaluation },
+    };
+  }
+
   async uploadResume(userId: string, file: Express.Multer.File) {
     const profile = await this.internProfileModel.findOne({ userId });
     if (!profile) {

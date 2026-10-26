@@ -78,6 +78,9 @@ const CompanyMatchesPage = lazyLoad(() => import('./features/companies/pages/com
 // Pages - Manager (Lazy)
 const TeamManagementPage = lazyLoad(() => import('./features/manager/pages/team-management.page'), 'TeamManagementPage');
 const TeamProjectsPage = lazyLoad(() => import('./features/manager/pages/team-projects.page'), 'TeamProjectsPage');
+const TeamTasksPage = lazyLoad(() => import('./features/manager/pages/team-tasks.page'), 'TeamTasksPage');
+const TeamEvaluationsPage = lazyLoad(() => import('./features/manager/pages/team-evaluations.page'), 'TeamEvaluationsPage');
+const TeamAttendancePage = lazyLoad(() => import('./features/manager/pages/team-attendance.page'), 'TeamAttendancePage');
 
 // NotFound (Lazy)
 const NotFoundPage = lazyLoad(() => import('./pages/not-found.page'), 'NotFoundPage');
@@ -214,7 +217,10 @@ export const AppRoutes: React.FC = () => {
         >
           <Route path="/manager/dashboard" element={<ManagerDashboardPage />} />
           <Route path="/manager/team" element={<TeamManagementPage />} />
+          <Route path="/manager/tasks" element={<TeamTasksPage />} />
           <Route path="/manager/projects" element={<TeamProjectsPage />} />
+          <Route path="/manager/evaluations" element={<TeamEvaluationsPage />} />
+          <Route path="/manager/attendance" element={<TeamAttendancePage />} />
         </Route>
 
         {/* Company Routes */}
