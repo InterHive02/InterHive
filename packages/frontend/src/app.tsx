@@ -16,7 +16,7 @@ export const App: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="md" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
