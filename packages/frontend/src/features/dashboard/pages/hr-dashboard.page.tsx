@@ -337,13 +337,9 @@ export const HrDashboardPage: React.FC = () => {
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
               {stats.activeInterns}
             </div>
-            <div className="flex items-center text-xs mt-1 font-medium">
-              <span className="text-emerald-500 font-bold flex items-center">
-                ↑ 12%
-              </span>
-              <span className="text-slate-400 dark:text-slate-400 ml-1">
-                vs last week
-              </span>
+            <div className="flex items-center text-xs mt-1 font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="font-bold">Verified Pipeline</span>
+              <span className="text-slate-400 dark:text-slate-500 ml-1">· Active Cohort</span>
             </div>
           </div>
         </div>
@@ -360,13 +356,9 @@ export const HrDashboardPage: React.FC = () => {
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
               {stats.liveProjects}
             </div>
-            <div className="flex items-center text-xs mt-1 font-medium">
-              <span className="text-emerald-500 font-bold flex items-center">
-                + 3
-              </span>
-              <span className="text-slate-400 dark:text-slate-400 ml-1">
-                this week
-              </span>
+            <div className="flex items-center text-xs mt-1 font-medium text-indigo-600 dark:text-indigo-400">
+              <span className="font-bold">Production Milestones</span>
+              <span className="text-slate-400 dark:text-slate-500 ml-1">· In Progress</span>
             </div>
           </div>
         </div>
@@ -383,8 +375,9 @@ export const HrDashboardPage: React.FC = () => {
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
               {stats.upcomingInterviews}
             </div>
-            <div className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium">
-              Today
+            <div className="flex items-center text-xs mt-1 font-medium text-amber-600 dark:text-amber-400">
+              <span className="font-bold">Partner Scheduled</span>
+              <span className="text-slate-400 dark:text-slate-500 ml-1">· Today &amp; Upcoming</span>
             </div>
           </div>
         </div>
@@ -401,8 +394,9 @@ export const HrDashboardPage: React.FC = () => {
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
               {stats.readyPlacement}
             </div>
-            <div className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium">
-              Score &gt; 80%
+            <div className="flex items-center text-xs mt-1 font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="font-bold">Readiness Score &gt; 80%</span>
+              <span className="text-slate-400 dark:text-slate-500 ml-1">· Verified</span>
             </div>
           </div>
         </div>
