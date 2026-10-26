@@ -11,30 +11,54 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   fullScreen = false,
   label,
 }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-3',
-    lg: 'w-12 h-12 border-4',
-    xl: 'w-16 h-16 border-4',
+  const sizeConfig = {
+    sm: { wh: 16, border: 2, text: 5, glow: 4 },
+    md: { wh: 32, border: 2, text: 7, glow: 6 },
+    lg: { wh: 48, border: 3, text: 10, glow: 10 },
+    xl: { wh: 64, border: 3, text: 13, glow: 14 },
   };
 
-  const textClasses = {
-    sm: 'text-[5px]',
-    md: 'text-[7px]',
-    lg: 'text-[10px]',
-    xl: 'text-xs',
-  };
+  const { wh, border, text, glow } = sizeConfig[size] || sizeConfig.md;
 
   const spinner = (
     <div className={`flex flex-col items-center justify-center gap-3 ${fullScreen ? 'min-h-screen' : ''}`}>
-      <div className="relative inline-flex items-center justify-center">
-        {/* Original spinner ring — exactly as it was */}
+      <div
+        style={{
+          position: 'relative',
+          width: wh,
+          height: wh,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {/* The original spinning ring — border-t and border-b arcs with neon glow */}
         <div
-          className={`${sizeClasses[size]} rounded-full border-t-transparent border-primary animate-spin`}
+          className="animate-spin"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            borderWidth: border,
+            borderStyle: 'solid',
+            borderTopColor: '#4F46E5',
+            borderBottomColor: '#4F46E5',
+            borderLeftColor: 'transparent',
+            borderRightColor: 'transparent',
+            boxShadow: `0 0 ${glow}px rgba(79, 70, 229, 0.6), 0 0 ${glow * 2}px rgba(79, 70, 229, 0.3)`,
+          }}
         />
-        {/* IH text centered inside the ring */}
+        {/* "IH" stays centered while the ring rotates */}
         <span
-          className={`absolute ${textClasses[size]} text-primary font-black tracking-wider select-none`}
+          style={{
+            position: 'absolute',
+            color: '#818CF8',
+            fontWeight: 900,
+            fontSize: text,
+            letterSpacing: '0.08em',
+            userSelect: 'none',
+            lineHeight: 1,
+          }}
         >
           IH
         </span>
@@ -42,10 +66,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       {label && <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>}
     </div>
   );
-
-  if (fullScreen) {
-    return spinner;
-  }
 
   return spinner;
 };

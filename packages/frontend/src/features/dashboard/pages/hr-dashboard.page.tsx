@@ -61,7 +61,8 @@ interface InterviewItem {
 
 export const HrDashboardPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [notificationCount, setNotificationCount] = useState<number>(3);
+  const [alerts, setAlerts] = useState<Array<{ id: string; title: string; description: string; badge: string; color: string }>>([]);
+  const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showNotificationPopup, setShowNotificationPopup] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -105,9 +106,35 @@ export const HrDashboardPage: React.FC = () => {
           setSprints(payload.sprints);
         }
 
-        if (Array.isArray(payload.interviews)) {
-          setInterviews(payload.interviews);
+        const loadedInterviews = Array.isArray(payload.interviews) ? payload.interviews : [];
+        setInterviews(loadedInterviews);
+
+        // Build real, live notification alerts
+        const liveAlerts: Array<{ id: string; title: string; description: string; badge: string; color: string }> = [];
+        loadedInterviews.slice(0, 3).forEach((item: any) => {
+          liveAlerts.push({
+            id: `interview-${item.id}`,
+            title: `${item.companyName || 'Partner'} Interview`,
+            description: `${item.candidateName} scheduled for ${item.interviewTime}`,
+            badge: item.status || 'Interview',
+            color: 'indigo',
+          });
+        });
+
+        if (Array.isArray(payload.recentApplications)) {
+          payload.recentApplications.slice(0, 2).forEach((app: any) => {
+            liveAlerts.push({
+              id: `app-${app._id || app.id}`,
+              title: 'New Candidate Applied',
+              description: `${app.fullName} (${app.degree || 'Student'}) applied for ${app.programType || 'Internship'}`,
+              badge: 'Applicant',
+              color: 'emerald',
+            });
+          });
         }
+
+        setAlerts(liveAlerts);
+        setNotificationCount(liveAlerts.length);
       }
     } catch (err: any) {
       console.warn('Backend HR Dashboard API fallback to baseline:', err.message);
@@ -245,15 +272,33 @@ export const HrDashboardPage: React.FC = () => {
                     Clear All
                   </button>
                 </div>
-                <div className="space-y-2 mt-2 text-xs">
-                  <div className="p-2 rounded-xl bg-indigo-50/50 dark:bg-[#20254D]/50 text-slate-700 dark:text-slate-200">
-                    <p className="font-semibold text-indigo-600 dark:text-indigo-400">TechCorp Interview</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Rahul Sharma scheduled for 11:00 AM today.</p>
-                  </div>
-                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
-                    <p className="font-semibold">Batch 12 Milestone</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">18 Interns completed Sprint 3 React module.</p>
-                  </div>
+                <div className="space-y-2 mt-2 text-xs max-h-60 overflow-y-auto">
+                  {alerts.length === 0 ? (
+                    <div className="p-3 text-center text-slate-400 text-xs">
+                      No active pipeline alerts.
+                    </div>
+                  ) : (
+                    alerts.map((al) => (
+                      <div
+                        key={al.id}
+                        className={`p-2.5 rounded-xl text-slate-700 dark:text-slate-200 border ${
+                          al.color === 'emerald'
+                            ? 'bg-emerald-50/60 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/40'
+                            : 'bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-100 dark:border-indigo-900/40'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className={`font-semibold text-xs ${al.color === 'emerald' ? 'text-emerald-700 dark:text-emerald-300' : 'text-indigo-600 dark:text-indigo-400'}`}>
+                            {al.title}
+                          </p>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white dark:bg-slate-900/60 text-slate-500 uppercase">
+                            {al.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{al.description}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -267,12 +312,12 @@ export const HrDashboardPage: React.FC = () => {
             Review Companies
           </Link>
 
-          {/* Manage Interns Button */}
+          {/* Review Applications Button */}
           <Link
             to="/hr/applications"
             className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#6366F1] hover:bg-[#5254E0] text-white transition-colors shadow-xs shadow-indigo-500/20 whitespace-nowrap"
           >
-            Manage Interns
+            Review Applications
           </Link>
         </div>
       </div>
@@ -376,7 +421,7 @@ export const HrDashboardPage: React.FC = () => {
                 Active Training Sprints
               </h2>
               <Link
-                to="/hr/applications"
+                to="/hr/training"
                 className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors group"
               >
                 <span>View All</span>
@@ -737,11 +782,11 @@ export const HrDashboardPage: React.FC = () => {
                 Close
               </button>
               <Link
-                to="/hr/applications"
+                to="/hr/training"
                 onClick={() => setSelectedSprint(null)}
                 className="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-xs"
               >
-                Manage Sprint Interns
+                Manage Sprint Curriculum
               </Link>
             </div>
 

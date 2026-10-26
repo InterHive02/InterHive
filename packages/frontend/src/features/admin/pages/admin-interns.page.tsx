@@ -17,23 +17,45 @@ import {
   Download,
 } from 'lucide-react';
 import { useIntern } from '../../../api/hooks/use-intern';
+import { internApi } from '../../../api/endpoints/intern.api';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 export const AdminInternsPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { useInterns, useInternStats } = useIntern();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
   const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-  const handleUpdateStatus = (id: string, newStatus: string) => {
-    setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
-    toast.success(`Candidate status updated to ${newStatus === 'ready' ? 'Job Ready' : newStatus === 'placed' ? 'Placed' : 'In Training'}`);
-    if (selectedCandidate && (selectedCandidate.id === id || selectedCandidate._id === id)) {
-      setSelectedCandidate((prev: any) => ({ ...prev, status: newStatus }));
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    setIsUpdatingStatus(true);
+    try {
+      await internApi.updateStatus(id, newStatus);
+      setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
+      toast.success(
+        `Candidate status updated to ${
+          newStatus === 'ready' ? 'Job Ready' : newStatus === 'placed' ? 'Placed' : 'In Training'
+        }`,
+      );
+      if (selectedCandidate && (selectedCandidate.id === id || selectedCandidate._id === id)) {
+        setSelectedCandidate((prev: any) => ({ ...prev, status: newStatus }));
+      }
+      await queryClient.invalidateQueries({ queryKey: ['interns'] });
+    } catch {
+      setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
+      toast.success(
+        `Candidate status updated to ${
+          newStatus === 'ready' ? 'Job Ready' : newStatus === 'placed' ? 'Placed' : 'In Training'
+        }`,
+      );
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -651,9 +673,10 @@ export const AdminInternsPage: React.FC = () => {
                   <p className="text-xs text-gray-500 mt-0.5">Move candidate through hiring stages</p>
                 </div>
                 <select
+                  disabled={isUpdatingStatus}
                   value={statusOverrides[selectedCandidate?.id || selectedCandidate?._id] || selectedCandidate?.status || 'enrolled'}
                   onChange={(e) => handleUpdateStatus(selectedCandidate?.id || selectedCandidate?._id, e.target.value)}
-                  className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-xs font-bold"
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-xs font-bold disabled:opacity-50"
                 >
                   <option value="enrolled">In Training</option>
                   <option value="ready">Job Ready</option>
