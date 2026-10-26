@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Star, CheckCircle, XCircle, Mail, Phone, Award, TrendingUp } from 'lucide-react';
+import { User, Star, CheckCircle, XCircle, Mail, Phone, Award, TrendingUp, Search, Filter } from 'lucide-react';
 
 interface RecommendedInternsProps {
   interns: {

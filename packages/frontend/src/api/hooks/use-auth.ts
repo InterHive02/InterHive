@@ -69,16 +69,21 @@ export const useAuth = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) return null;
       try {
-        const response = await authApi.getProfile();
-        return response.data?.user || response.data;
+        const response: any = await authApi.getProfile();
+        const profile = response?.data?.data || response?.data?.user || response?.data;
+        if (profile && typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(profile));
+        }
+        return profile;
       } catch {
         clearAllSessionData();
         return null;
       }
     },
     enabled: hasToken,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+    cacheTime: 10 * 60 * 1000,
   });
 
   // Login
@@ -181,10 +186,13 @@ export const useAuth = () => {
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isLoading,
     forgotPassword: forgotPasswordMutation.mutate,
+    forgotPasswordAsync: forgotPasswordMutation.mutateAsync,
     isForgotPassword: forgotPasswordMutation.isLoading,
     resetPassword: resetPasswordMutation.mutate,
+    resetPasswordAsync: resetPasswordMutation.mutateAsync,
     isResettingPassword: resetPasswordMutation.isLoading,
     verifyEmail: verifyEmailMutation.mutate,
+    verifyEmailAsync: verifyEmailMutation.mutateAsync,
     isVerifyingEmail: verifyEmailMutation.isLoading,
     clearSession: clearAllSessionData,
     refetch,

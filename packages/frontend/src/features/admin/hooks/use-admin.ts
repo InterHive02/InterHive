@@ -55,14 +55,17 @@ export const useAdmin = () => {
           assessmentApi.getAll({ page: 1, limit: 100 }),
         ]);
 
-        const trainings =
+        const rawTrainings =
           trainingResponse.status === 'fulfilled'
             ? (trainingResponse.value.data?.data || trainingResponse.value.data || [])
             : [];
-        const assessments =
+        const trainings = Array.isArray(rawTrainings) ? rawTrainings : (rawTrainings as any)?.data || [];
+
+        const rawAssessments =
           assessmentResponse.status === 'fulfilled'
             ? (assessmentResponse.value.data?.data || assessmentResponse.value.data || [])
             : [];
+        const assessments = Array.isArray(rawAssessments) ? rawAssessments : (rawAssessments as any)?.data || [];
 
         const combined = [
           ...trainings.map((p: any) => ({

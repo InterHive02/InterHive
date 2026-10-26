@@ -132,7 +132,12 @@ export const useIntern = () => {
     return useQuery({
       queryKey: ['interns', 'all', params],
       queryFn: async () => {
-        const response = await internApi.getAll(params || { page: 1, limit: 50 });
+        const response = await internApi.getAll({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? 50,
+          status: params?.status,
+          search: params?.search,
+        });
         return response.data;
       },
     });

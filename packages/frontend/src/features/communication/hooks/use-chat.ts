@@ -12,7 +12,7 @@ export const useChat = (userId: string) => {
   // Load chats
   const loadChats = useCallback(async () => {
     try {
-      const response = await communicationApi.getChats(1, 50);
+      const response: any = await communicationApi.getChats(1, 50);
       const data = response?.data?.data || response?.data;
       if (Array.isArray(data)) {
         const mapped = data.map((c: any) => ({
@@ -36,7 +36,7 @@ export const useChat = (userId: string) => {
   // Load announcements
   const loadAnnouncements = useCallback(async () => {
     try {
-      const response = await communicationApi.getAnnouncements();
+      const response: any = await communicationApi.getAnnouncements();
       const data = response?.data?.data || response?.data;
       if (Array.isArray(data)) {
         const mapped = data.map((a: any) => ({
@@ -53,7 +53,7 @@ export const useChat = (userId: string) => {
   // Load messages for a chat
   const loadMessages = useCallback(async (chatId: string) => {
     try {
-      const response = await communicationApi.getMessages(chatId, 1, 50);
+      const response: any = await communicationApi.getMessages(chatId, 1, 50);
       const data = response?.data?.data || response?.data;
       if (Array.isArray(data)) {
         const sorted = [...data].sort(
@@ -104,7 +104,7 @@ export const useChat = (userId: string) => {
       );
 
       try {
-        const response = await communicationApi.sendMessage(chatId, {
+        const response: any = await communicationApi.sendMessage(chatId, {
           content,
           type,
           attachments: attachments?.map(f => ({

@@ -6,8 +6,9 @@ import { Link } from 'react-router-dom';
 
 export const CertificatePage: React.FC = () => {
   const { user } = useAuth();
-  const { useProfile } = useIntern();
+  const { useProfile, useReadiness } = useIntern();
   const { data: profile } = useProfile();
+  const { data: readinessData } = useReadiness();
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const studentName = profile?.personalInfo
@@ -16,7 +17,15 @@ export const CertificatePage: React.FC = () => {
     ? `${user.firstName} ${user.lastName}`.trim()
     : 'Ankit Soni';
 
+  const readinessScore = (readinessData as any)?.overall ?? (profile as any)?.readiness?.overall ?? 78;
+  const isUnlocked =
+    (profile as any)?.status === 'completed' ||
+    (profile as any)?.status === 'placed' ||
+    (user as any)?.internStatus === 'COMPLETED' ||
+    readinessScore >= 75;
+
   const handlePrint = () => {
+    if (!isUnlocked) return;
     window.print();
   };
 
@@ -43,7 +52,12 @@ export const CertificatePage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handlePrint}
-            className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1D33] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
+            disabled={!isUnlocked}
+            className={`px-4 py-2 rounded-xl border text-xs font-bold transition-colors flex items-center gap-2 shadow-2xs ${
+              isUnlocked
+                ? 'bg-white dark:bg-[#1A1D33] border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 cursor-pointer'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
+            }`}
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Print</span>
@@ -51,13 +65,30 @@ export const CertificatePage: React.FC = () => {
 
           <button
             onClick={handlePrint}
-            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all cursor-pointer"
+            disabled={!isUnlocked}
+            className={`px-5 py-2 rounded-xl text-xs font-black shadow-md flex items-center gap-2 transition-all ${
+              isUnlocked
+                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 cursor-pointer'
+                : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed shadow-none'
+            }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download Certificate (PDF)</span>
+            <span>{isUnlocked ? 'Download Certificate (PDF)' : 'Locked (Score < 75%)'}</span>
           </button>
         </div>
       </div>
+
+      {!isUnlocked && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
+          <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1 text-xs text-amber-800 dark:text-amber-300">
+            <p className="font-bold">Certificate Issuance Criteria In Progress</p>
+            <p className="text-amber-700 dark:text-amber-400 leading-relaxed">
+              Official certificates require completing all industrial deliverables, scoring at least <strong>75% Composite Readiness</strong> (Current: {readinessScore}%), and receiving manager milestone sign-off.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* CERTIFICATE DISPLAY FRAME MATCHING REFERENCE IMAGE 2 */}
       <div className="flex justify-center">

@@ -67,7 +67,7 @@ export const CompanyDashboardPage: React.FC = () => {
   }
 
   // Prepare company data
-  const companyData = {
+  const companyData: any = {
     id: profile.id,
     name: profile.companyInfo.name,
     legalName: profile.companyInfo.legalName,
@@ -86,7 +86,7 @@ export const CompanyDashboardPage: React.FC = () => {
     status: profile.status,
     rating: 4.5,
     totalHires: matches?.data?.filter((m: any) => m.status === 'hired').length || 0,
-    createdAt: profile.createdAt,
+    createdAt: profile.createdAt ? new Date(profile.createdAt) : new Date(),
   };
 
   // Prepare requirements data

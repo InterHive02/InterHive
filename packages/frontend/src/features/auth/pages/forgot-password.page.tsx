@@ -4,7 +4,7 @@ import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../../api/hooks/use-auth';
 
 export const ForgotPasswordPage: React.FC = () => {
-  const { forgotPassword, isSendingResetLink } = useAuth();
+  const { forgotPasswordAsync, isForgotPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -12,7 +12,7 @@ export const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     if (!email) return;
     try {
-      await forgotPassword(email);
+      await forgotPasswordAsync({ email });
       setIsSubmitted(true);
     } catch {
       setIsSubmitted(true); // Don't leak email existence
@@ -67,10 +67,10 @@ export const ForgotPasswordPage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isSendingResetLink}
+            disabled={isForgotPassword}
             className="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50"
           >
-            {isSendingResetLink ? 'Sending...' : 'Send Reset Link'}
+            {isForgotPassword ? 'Sending...' : 'Send Reset Link'}
           </button>
 
           <div className="text-center pt-2">

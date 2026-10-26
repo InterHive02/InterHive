@@ -225,7 +225,7 @@ export const CompanyDashboardPage: React.FC = () => {
       };
 
       // Call backend API
-      const res = await companyApi.createRequirement('current', payload);
+      const res: any = await companyApi.createRequirement('current', payload);
       if (res.data?.success || res.status === 200 || res.status === 201) {
         const createdReq: RequirementCard = {
           id: res.data?.data?._id || `req-${Date.now()}`,

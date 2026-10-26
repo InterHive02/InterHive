@@ -168,4 +168,35 @@ export const applicationsApi = {
       message: string;
       data: InternshipApplicationData;
     }>(`/applications/${id}/reject`, { feedback }),
+
+  getMyStatus: () =>
+    apiClient.get<{
+      success: boolean;
+      hasApplied: boolean;
+      data: {
+        id: string;
+        fullName: string;
+        email: string;
+        status: string;
+        programType?: string;
+        academicYear?: string;
+        institution?: string;
+        degree?: string;
+        appliedDate?: string;
+        interview?: any;
+        interviewDate?: string;
+        interviewTime?: string;
+        interviewMode?: string;
+        interviewMeetLink?: string;
+        accountCreated?: boolean;
+        createdUserId?: string;
+      } | null;
+    }>('/applications/my-status'),
+
+  directEnroll: (programType?: string) =>
+    apiClient.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>('/applications/direct-enroll', { programType }),
 };

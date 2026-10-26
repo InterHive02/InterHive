@@ -69,6 +69,7 @@ const AdminCompaniesPage = lazyLoad(() => import('./features/admin/pages/admin-c
 const AdminAssessmentsPage = lazyLoad(() => import('./features/admin/pages/admin-assessments.page'), 'AdminAssessmentsPage');
 const AdminTrainingPage = lazyLoad(() => import('./features/admin/pages/admin-training.page'), 'AdminTrainingPage');
 const AdminAnalyticsPage = lazyLoad(() => import('./features/admin/pages/admin-analytics.page'), 'AdminAnalyticsPage');
+const AdminLandingCmsPage = lazyLoad(() => import('./features/admin/pages/admin-landing-cms.page'), 'AdminLandingCmsPage');
 const AdminSettingsPage = lazyLoad(() => import('./features/admin/pages/admin-settings.page'), 'AdminSettingsPage');
 
 // Pages - Company (Lazy)
@@ -181,6 +182,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/applications" element={<HrApplicationsPage />} />
           <Route path="/admin/leads" element={<HrLeadsPage />} />
+          <Route path="/admin/landing-cms" element={<AdminLandingCmsPage />} />
           <Route path="/admin/interns" element={<AdminInternsPage />} />
           <Route path="/admin/companies" element={<AdminCompaniesPage />} />
           <Route path="/admin/assessments" element={<AdminAssessmentsPage />} />

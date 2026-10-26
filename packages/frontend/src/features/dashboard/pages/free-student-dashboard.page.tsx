@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../../api/hooks/use-auth';
+import { applicationsApi } from '../../../api/endpoints/applications.api';
 import { InternshipApplicationModal } from '../../landing/components/internship-application-modal';
 import { FreeResourcesModal, ResourceModalType } from '../components/free-resources-modal';
 import { ProgramDetailsModal } from '../../landing/components/program-details-modal';
@@ -31,18 +34,50 @@ import {
 import { toast } from 'react-hot-toast';
 
 export const FreeStudentDashboardPage: React.FC = () => {
-  const { user } = useAuth();
+    const { user, refetch: refetchAuth } = useAuth();
+  const [searchParams] = useSearchParams();
+  const isLockedTriggered = searchParams.get('locked') === 'true';
+  const lockedFeature = searchParams.get('feature');
+
+  useEffect(() => {
+    if (isLockedTriggered) {
+      toast.error(
+        `🔒 Access Restricted: ${lockedFeature ? decodeURIComponent(lockedFeature) : 'This feature'} requires an active Premium Internship. Apply or upgrade below!`,
+        { duration: 6000, id: 'locked-feature-toast' }
+      );
+    }
+  }, [isLockedTriggered, lockedFeature]);
+
+  // Live status query directly from MongoDB
+  const { data: statusRes, refetch: refetchStatus } = useQuery({
+    queryKey: ['application-my-status', user?.email],
+    queryFn: async () => {
+      try {
+        const res = await applicationsApi.getMyStatus();
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!user?.email,
+    staleTime: 10 * 1000,
+  });
+
+  const appData = statusRes?.data;
+  const hasApplied = Boolean(statusRes?.hasApplied || (typeof window !== 'undefined' && localStorage.getItem(`hasAppliedPpo_${user?.id || user?.email}`) === 'true'));
+
+  useEffect(() => {
+    if (appData?.accountCreated || appData?.status === 'selected') {
+      refetchAuth();
+    }
+  }, [appData?.accountCreated, appData?.status, refetchAuth]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [selectedProgramTypeForModal, setSelectedProgramTypeForModal] = useState<string | undefined>(undefined);
   const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeResourceModal, setActiveResourceModal] = useState<ResourceModalType>(null);
-
-  // Check local storage for application submission state scoped to current user
-  const appStorageKey = user?.id ? `hasAppliedPpo_${user.id}` : (user?.email ? `hasAppliedPpo_${user.email}` : 'hasAppliedPpo');
-  const hasAppliedLocal = typeof window !== 'undefined' ? localStorage.getItem(appStorageKey) === 'true' : false;
-  const [hasApplied, setHasApplied] = useState(hasAppliedLocal);
 
   const studentName = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Student';
   const studentEmail = user?.email || 'student@interhive.in';
@@ -51,10 +86,11 @@ export const FreeStudentDashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleApplicationSuccess = () => {
-    setHasApplied(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(appStorageKey, 'true');
+    const handleApplicationSuccess = () => {
+    refetchStatus();
+    refetchAuth();
+    if (typeof window !== 'undefined' && user?.id) {
+      localStorage.setItem(`hasAppliedPpo_${user.id}`, 'true');
     }
   };
 
@@ -180,47 +216,100 @@ export const FreeStudentDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Application Status Tracker Box */}
+      {/* 2. Application Status Tracker Box (Live MongoDB Synced) */}
       <div className="rounded-2xl bg-white dark:bg-[#121526] border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-              hasApplied 
-                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' 
+              appData?.status === 'selected'
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                : appData?.status === 'interview_scheduled'
+                ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20'
+                : hasApplied
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                 : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
             }`}>
-              {hasApplied ? <Clock className="w-6 h-6 animate-spin-slow" /> : <FileText className="w-6 h-6" />}
+              {appData?.status === 'selected' ? (
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              ) : appData?.status === 'interview_scheduled' ? (
+                <Sparkles className="w-6 h-6 text-purple-500" />
+              ) : hasApplied ? (
+                <Clock className="w-6 h-6 animate-spin-slow text-amber-500" />
+              ) : (
+                <FileText className="w-6 h-6 text-indigo-500" />
+              )}
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-bold text-slate-900 dark:text-white text-base">PPO Program Selection Status</h3>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  hasApplied
+                  appData?.status === 'selected'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                    : appData?.status === 'interview_scheduled'
+                    ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
+                    : hasApplied
                     ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
                 }`}>
-                  {hasApplied ? 'Application Under HR Review' : 'Not Applied Yet'}
+                  {appData?.status === 'selected'
+                    ? '🎉 Selected — Premium Workspace Active'
+                    : appData?.status === 'interview_scheduled'
+                    ? 'Interview Scheduled'
+                    : hasApplied
+                    ? 'Application Under HR Review'
+                    : 'Not Applied Yet'}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {hasApplied
-                  ? 'Your application form has been received! Our HR team is screening your profile for interview scheduling.'
+                {appData?.status === 'selected'
+                  ? 'Congratulations! You have been selected for the PPO Internship. Your premium workspace privileges are active.'
+                  : appData?.status === 'interview_scheduled'
+                  ? `Technical Interview set for ${appData.interviewDate || 'Upcoming'} at ${appData.interviewTime || '11:00 AM'}. Please be prepared.`
+                  : hasApplied
+                  ? 'Your application has been received and verified in MongoDB! Our HR team is screening your profile for interview scheduling.'
                   : 'To unlock full PPO intern privileges (live projects, stipends, corporate certificates), you must complete the application form and clear the interview.'}
               </p>
+
+              {appData?.interviewMeetLink && (
+                <div className="mt-2.5 flex items-center gap-2">
+                  <a
+                    href={appData.interviewMeetLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Join Google Meet Room</span>
+                  </a>
+                  <span className="text-[11px] text-slate-400">Mode: {appData.interviewMode || 'Online Video'}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <button
-            onClick={handleOpenApplicationModal}
-            className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 flex items-center gap-2 cursor-pointer ${
-              hasApplied
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20'
-            }`}
-          >
-            <span>{hasApplied ? 'View / Update Details' : 'Start Application'}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {appData?.status === 'selected' ? (
+              <button
+                onClick={() => refetchAuth()}
+                className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer transition-all"
+              >
+                <span>Launch Premium Workspace</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleOpenApplicationModal}
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 flex items-center gap-2 cursor-pointer ${
+                  hasApplied
+                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20'
+                }`}
+              >
+                <span>{hasApplied ? 'View / Update Details' : 'Start Application'}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -238,7 +327,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {(Object.values(PROGRAM_CONFIGS) as any[]).map((prog) => (
             <div
               key={prog.id}

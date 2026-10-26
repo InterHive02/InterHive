@@ -28,6 +28,7 @@ import {
   Sun,
   Moon,
   ShieldAlert,
+  LayoutTemplate,
 } from 'lucide-react';
 import { getNavRoutes } from '../../../core/config/routes.config';
 import { UserRole } from '@interhive/shared';
@@ -131,6 +132,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'calendar':
       case 'interviews':
         return Calendar;
+      case 'layouttemplate':
+      case 'landingcms':
+      case 'maintainlanding':
+        return LayoutTemplate;
       default:
         return Circle;
     }

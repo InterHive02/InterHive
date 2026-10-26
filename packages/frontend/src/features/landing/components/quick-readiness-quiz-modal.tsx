@@ -241,10 +241,10 @@ export const QuickReadinessQuizModal: React.FC<QuickReadinessQuizModalProps> = (
               Step {step} of 3
             </span>
             <div className="flex items-center gap-2">
-              {step > 1 && (
+              {typeof step === 'number' && step > 1 && (
                 <button
                   type="button"
-                  onClick={() => setStep((s) => (s > 1 ? ((s - 1) as any) : 1))}
+                  onClick={() => setStep((s) => (s === 3 ? 2 : 1))}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
                 >
                   Back

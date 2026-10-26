@@ -8,7 +8,7 @@ import { forgotPasswordSchema, ForgotPasswordFormData } from '../validations/aut
 import { toast } from 'react-hot-toast';
 
 export const ForgotPasswordForm: React.FC = () => {
-  const { forgotPassword, isForgotPassword } = useAuth();
+  const { forgotPasswordAsync, isForgotPassword } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const {
@@ -22,7 +22,7 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
-      await forgotPassword(data);
+      await forgotPasswordAsync({ email: data.email });
       setIsSubmitted(true);
       toast.success('Password reset email sent! Please check your inbox.');
     } catch (error: any) {

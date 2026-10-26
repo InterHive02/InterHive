@@ -68,6 +68,20 @@ export class ApplicationsController {
     return this.applicationsService.getHrDashboardData();
   }
 
+  @Get('my-status')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user live internship application status' })
+  async getMyStatus(@CurrentUser() user: User) {
+    return this.applicationsService.getMyStatus(user.email, (user as any)._id?.toString() || user.id);
+  }
+
+  @Post('direct-enroll')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Direct self-serve enrollment into Premium internship program' })
+  async directEnroll(@CurrentUser() user: User, @Body('programType') programType?: string) {
+    return this.applicationsService.fastTrackUpgrade(user, programType);
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiBearerAuth()

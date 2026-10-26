@@ -35,7 +35,7 @@ export const LoginForm: React.FC = () => {
   // Password Login Submit
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await loginAsync(data);
+      await loginAsync({ email: data.email, password: data.password || '' });
       // Navigation is handled cleanly inside useAuth based on user's exact role
     } catch (error: any) {
       setError('root', {

@@ -35,7 +35,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const accessLevel = localUser?.accessLevel || (userRole === 'student' ? 'BASIC' : 'PREMIUM');
 
   if (requiresPremium && (userRole === 'student' || accessLevel === 'BASIC')) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={`/dashboard?locked=true&feature=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   if (allowedRoles) {

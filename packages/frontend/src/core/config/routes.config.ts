@@ -4,7 +4,7 @@ export interface RouteConfig {
   path: string;
   label: string;
   icon?: string;
-  roles?: UserRole[];
+  roles?: (UserRole | string)[];
   children?: RouteConfig[];
   requiresAuth?: boolean;
   hideInNav?: boolean;
@@ -21,6 +21,7 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
     { path: '/admin/applications', label: 'Applications', icon: 'FileText' },
     { path: '/admin/companies', label: 'Manage Companies', icon: 'Building2' },
     { path: '/admin/leads', label: 'Company Leads', icon: 'Building' },
+    { path: '/admin/landing-cms', label: 'Maintain Landing Page', icon: 'LayoutTemplate' },
     { path: '/admin/assessments', label: 'Assessments', icon: 'FileQuestion' },
     { path: '/admin/training', label: 'Training', icon: 'BookOpen' },
     { path: '/admin/analytics', label: 'Analytics', icon: 'BarChart3' },
@@ -89,23 +90,6 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
     { path: '/certificate', label: 'Reports', icon: 'Award' },
     { path: '/settings', label: 'Settings', icon: 'Settings' },
   ],
-
-  // Mentor / Evaluator roles
-  mentor: [
-    { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-    { path: '/profile', label: 'Profile', icon: 'User' },
-    { path: '/projects', label: 'Projects', icon: 'Briefcase' },
-    { path: '/training', label: 'Training', icon: 'BookOpen' },
-    { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
-    { path: '/settings', label: 'Settings', icon: 'Settings' },
-  ],
-  evaluator: [
-    { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-    { path: '/profile', label: 'Profile', icon: 'User' },
-    { path: '/assessments', label: 'Assessments', icon: 'ClipboardCheck' },
-    { path: '/communication', label: 'Messages', icon: 'MessageSquare', badge: 4 },
-    { path: '/settings', label: 'Settings', icon: 'Settings' },
-  ],
 };
 
 // Global route registry
@@ -134,6 +118,7 @@ export const ROUTES: RouteConfig[] = [
   { path: '/admin/leads', label: 'Company Leads', icon: 'Building', roles: ['admin'] },
   { path: '/admin/interns', label: 'Manage Interns', icon: 'Users', roles: ['admin'] },
   { path: '/admin/companies', label: 'Manage Companies', icon: 'Building2', roles: ['admin'] },
+  { path: '/admin/landing-cms', label: 'Maintain Landing Page', icon: 'LayoutTemplate', roles: ['admin'] },
   { path: '/admin/assessments', label: 'Assessments', icon: 'FileQuestion', roles: ['admin'] },
   { path: '/admin/training', label: 'Training', icon: 'BookOpen', roles: ['admin'] },
   { path: '/admin/analytics', label: 'Analytics', icon: 'BarChart3', roles: ['admin'] },

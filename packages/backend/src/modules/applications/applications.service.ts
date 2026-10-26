@@ -21,7 +21,7 @@ import {
 import { Inject, forwardRef } from '@nestjs/common';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../../common/mail/mail.service';
-import { UserRole, NotificationCategory, NotificationPriority } from '@interhive/shared';
+import { UserRole, NotificationCategory, NotificationPriority, PROGRAM_CONFIGS } from '@interhive/shared';
 import { CommunicationService } from '../communication/communication.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -83,9 +83,11 @@ export class ApplicationsService {
 
     await application.save();
 
+    const programTitle = (PROGRAM_CONFIGS as any)[dto.programType]?.title || dto.programType;
+
     // Send confirmation email asynchronously without blocking the HTTP response
     this.mailService
-      .sendApplicationReceivedEmail(cleanEmail, dto.fullName)
+      .sendApplicationReceivedEmail(cleanEmail, dto.fullName, programTitle)
       .then(() => {
         this.logger.log(`📧 Application confirmation email sent to ${cleanEmail}`);
       })
@@ -246,10 +248,13 @@ export class ApplicationsService {
       result: 'pending',
     };
 
+    const programTitle = (PROGRAM_CONFIGS as any)[application.programType]?.title || application.programType;
+
     application.status = 'interview_scheduled';
+    (application.interview as any).programType = application.programType;
     await application.save();
 
-    // Send interview invitation email to applicant asynchronously
+    // Send interview invitation email to applicant asynchronously with program name
     this.mailService
       .sendApplicationInterviewEmail({
         to: application.email,
@@ -260,6 +265,7 @@ export class ApplicationsService {
         linkOrLocation: dto.linkOrLocation || 'Google Meet (link will be sent)',
         interviewer: dto.interviewer,
         notes: dto.notes,
+        programName: programTitle,
       })
       .then(() => {
         this.logger.log(`📧 Interview invitation email dispatched to ${application.email}`);
@@ -338,6 +344,8 @@ export class ApplicationsService {
     const firstName = nameParts[0] || 'Intern';
     const lastName = nameParts.slice(1).join(' ') || 'Student';
 
+    const isNewUser = !user;
+
     if (!user) {
       user = new this.userModel({
         email: cleanEmail,
@@ -349,6 +357,7 @@ export class ApplicationsService {
         role: UserRole.INTERN,
         accessLevel: 'PREMIUM',
         internStatus: 'ACTIVE',
+        programType: application.programType,
         skills: application.skills || [],
         position: `${application.degree || 'Engineering'} Intern`,
         education: [
@@ -366,12 +375,16 @@ export class ApplicationsService {
 
       await user.save();
     } else {
-      user.mustChangePassword = true;
+      // PRESERVE existing user password and credentials!
       user.applicationId = application._id as any;
       user.role = UserRole.INTERN;
       user.accessLevel = 'PREMIUM';
       user.internStatus = 'ACTIVE';
-      user.password = tempPassword;
+      user.programType = application.programType;
+      if (!user.employeeId) {
+        user.employeeId = empId;
+      }
+      // Do not overwrite user.password or set mustChangePassword for existing accounts
       await user.save();
     }
 
@@ -379,7 +392,7 @@ export class ApplicationsService {
     try {
       await this.communicationService.ensureRoleBasedChatsForUser(user._id.toString());
     } catch (chatErr: any) {
-      this.logger.error(`Failed to auto-provision chats for new intern ${user.email}: ${chatErr.message}`);
+      this.logger.error(`Failed to auto-provision chats for intern ${user.email}: ${chatErr.message}`);
     }
 
     // Update application record
@@ -400,7 +413,7 @@ export class ApplicationsService {
         fullName: application.fullName,
         employeeId: user.employeeId,
         loginEmail: cleanEmail,
-        temporaryPassword: tempPassword,
+        temporaryPassword: isNewUser ? tempPassword : '(Your existing login password)',
         loginUrl,
       })
       .then(() => {
@@ -412,12 +425,15 @@ export class ApplicationsService {
 
     return {
       success: true,
-      message: `Intern account created successfully! Credentials have been sent to ${cleanEmail}.`,
+      message: isNewUser
+        ? `Intern account created successfully! Credentials sent to ${cleanEmail}.`
+        : `Account upgraded to Premium Intern! Existing password preserved for ${cleanEmail}.`,
       data: {
         userId: user._id,
         employeeId: user.employeeId,
         email: user.email,
-        temporaryPassword: tempPassword,
+        temporaryPassword: isNewUser ? tempPassword : null,
+        isNewUser,
         fullName: application.fullName,
       },
     };
@@ -460,7 +476,7 @@ export class ApplicationsService {
   }
 
   async getStats() {
-    const [total, byStatus] = await Promise.all([
+    const [total, byStatus, byProgramAndStatus, activeInternsByProgram] = await Promise.all([
       this.applicationModel.countDocuments(),
       this.applicationModel.aggregate([
         {
@@ -469,6 +485,18 @@ export class ApplicationsService {
             count: { $sum: 1 },
           },
         },
+      ]),
+      this.applicationModel.aggregate([
+        {
+          $group: {
+            _id: { programType: '$programType', status: '$status' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      this.userModel.aggregate([
+        { $match: { role: UserRole.INTERN, accessLevel: 'PREMIUM' } },
+        { $group: { _id: '$programType', count: { $sum: 1 } } },
       ]),
     ]);
 
@@ -483,7 +511,48 @@ export class ApplicationsService {
     };
 
     byStatus.forEach((item: any) => {
-      statsMap[item._id] = item.count;
+      if (item._id && statsMap[item._id] !== undefined) {
+        statsMap[item._id] = item.count;
+      }
+    });
+
+    const programKeys = ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'];
+    const programStats: Record<string, any> = {};
+
+    programKeys.forEach((key) => {
+      programStats[key] = {
+        total: 0,
+        new: 0,
+        under_review: 0,
+        shortlisted: 0,
+        interview_scheduled: 0,
+        interview_completed: 0,
+        selected: 0,
+        rejected: 0,
+        activeInterns: 0,
+      };
+    });
+
+    let legacyReviewCount = 0;
+
+    byProgramAndStatus.forEach((item: any) => {
+      const prog = item._id?.programType;
+      const st = item._id?.status;
+      if (prog && programStats[prog]) {
+        programStats[prog].total += item.count;
+        if (st && programStats[prog][st] !== undefined) {
+          programStats[prog][st] += item.count;
+        }
+      } else {
+        legacyReviewCount += item.count;
+      }
+    });
+
+    activeInternsByProgram.forEach((item: any) => {
+      const prog = item._id;
+      if (prog && programStats[prog]) {
+        programStats[prog].activeInterns = item.count;
+      }
     });
 
     return {
@@ -491,6 +560,8 @@ export class ApplicationsService {
       data: {
         total,
         ...statsMap,
+        programStats,
+        legacyReviewCount,
       },
     };
   }
@@ -498,6 +569,7 @@ export class ApplicationsService {
   async getHrDashboardData() {
     try {
       // 1. Applications & Interview Queue
+      const statsResult = await this.getStats();
       const [allApps, totalApps, scheduledInterviews, selectedCount] = await Promise.all([
         this.applicationModel.find().sort({ createdAt: -1 }).limit(10),
         this.applicationModel.countDocuments(),
@@ -579,6 +651,8 @@ export class ApplicationsService {
             liveProjects: liveProjectsCount,
             upcomingInterviews: scheduledInterviews.length,
             readyPlacement: readyPlacementCount > 0 ? readyPlacementCount : selectedCount,
+            programStats: statsResult.data.programStats,
+            legacyReviewCount: statsResult.data.legacyReviewCount,
           },
           sprints,
           interviews,
@@ -594,5 +668,110 @@ export class ApplicationsService {
         data: null,
       };
     }
+  }
+
+  async getMyStatus(email: string, userId?: string) {
+    const cleanEmail = email.toLowerCase().trim();
+    const query: any = {
+      $or: [
+        { email: cleanEmail },
+      ],
+    };
+
+    if (userId && Types.ObjectId.isValid(userId)) {
+      query.$or.push({ createdUserId: new Types.ObjectId(userId) });
+    }
+
+    const application = await this.applicationModel
+      .findOne(query)
+      .sort({ createdAt: -1 });
+
+    if (!application) {
+      return {
+        success: true,
+        hasApplied: false,
+        data: null,
+      };
+    }
+
+    return {
+      success: true,
+      hasApplied: true,
+      data: {
+        id: application._id,
+        fullName: application.fullName,
+        email: application.email,
+        status: application.status,
+        programType: application.programType,
+        academicYear: application.academicYear,
+        institution: application.institution,
+        degree: application.degree,
+        appliedDate: (application as any).appliedDate || (application as any).createdAt,
+        interview: application.interview,
+        interviewDate: application.interview?.date,
+        interviewTime: application.interview?.time,
+        interviewMode: application.interview?.mode,
+        interviewMeetLink: application.interview?.linkOrLocation,
+        accountCreated: application.accountCreated,
+        createdUserId: application.createdUserId,
+      },
+    };
+  }
+
+  async fastTrackUpgrade(user: any, programType?: string) {
+    const cleanEmail = user.email.toLowerCase().trim();
+    let existingApp = await this.applicationModel.findOne({ email: cleanEmail });
+
+    if (!existingApp) {
+      existingApp = new this.applicationModel({
+        fullName: `${user.firstName || 'Student'} ${user.lastName || ''}`.trim(),
+        email: cleanEmail,
+        phone: user.phone || '+91 98765 43210',
+        institution: user.education?.[0]?.institution || 'InterHive Technical Academy',
+        degree: user.education?.[0]?.degree || 'B.Tech Computer Science',
+        academicYear: '3rd Year',
+        programType: programType || 'TWO_YEAR',
+        status: 'selected',
+        accountCreated: true,
+        createdUserId: user._id || user.id,
+        appliedDate: new Date(),
+      });
+      await existingApp.save();
+    } else {
+      existingApp.status = 'selected';
+      existingApp.accountCreated = true;
+      existingApp.createdUserId = user._id || user.id;
+      await existingApp.save();
+    }
+
+    // Upgrade user record
+    const userDoc = await this.userModel.findById(user._id || user.id);
+    if (userDoc) {
+      userDoc.role = UserRole.INTERN;
+      userDoc.accessLevel = 'PREMIUM';
+      userDoc.internStatus = 'ACTIVE';
+      userDoc.applicationId = existingApp._id as any;
+      if (!userDoc.employeeId) {
+        userDoc.employeeId = `EMP${Date.now().toString(36).toUpperCase()}`;
+      }
+      await userDoc.save();
+
+      try {
+        await this.communicationService.ensureRoleBasedChatsForUser(userDoc._id.toString());
+      } catch (e: any) {
+        this.logger.warn(`Could not provision chats: ${e.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Account successfully upgraded to Premium Intern workspace!',
+      data: {
+        role: UserRole.INTERN,
+        accessLevel: 'PREMIUM',
+        internStatus: 'ACTIVE',
+        applicationId: existingApp._id,
+      },
+    };
   }
 }

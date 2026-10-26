@@ -28,6 +28,7 @@ var ProgramType = /* @__PURE__ */ ((ProgramType2) => {
   ProgramType2["TWO_YEAR"] = "TWO_YEAR";
   ProgramType2["THREE_YEAR"] = "THREE_YEAR";
   ProgramType2["FOUR_YEAR"] = "FOUR_YEAR";
+  ProgramType2["PPO"] = "PPO";
   return ProgramType2;
 })(ProgramType || {});
 var AcademicYear = /* @__PURE__ */ ((AcademicYear2) => {

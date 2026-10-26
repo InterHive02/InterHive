@@ -80,6 +80,14 @@ export const HrDashboardPage: React.FC = () => {
     readyPlacement: 0,
   });
 
+  const [programStats, setProgramStats] = useState<Record<string, any>>({
+    ONE_YEAR: { total: 0, new: 0, shortlisted: 0, interview_scheduled: 0, selected: 0, activeInterns: 0 },
+    TWO_YEAR: { total: 0, new: 0, shortlisted: 0, interview_scheduled: 0, selected: 0, activeInterns: 0 },
+    THREE_YEAR: { total: 0, new: 0, shortlisted: 0, interview_scheduled: 0, selected: 0, activeInterns: 0 },
+    FOUR_YEAR: { total: 0, new: 0, shortlisted: 0, interview_scheduled: 0, selected: 0, activeInterns: 0 },
+    PPO: { total: 0, new: 0, shortlisted: 0, interview_scheduled: 0, selected: 0, activeInterns: 0 },
+  });
+
   const defaultSprints: SprintItem[] = [];
   const defaultInterviews: InterviewItem[] = [];
 
@@ -101,6 +109,9 @@ export const HrDashboardPage: React.FC = () => {
           upcomingInterviews: payload.stats.upcomingInterviews !== undefined ? payload.stats.upcomingInterviews : 0,
           readyPlacement: payload.stats.readyPlacement || 0,
         });
+        if (payload.stats.programStats) {
+          setProgramStats(payload.stats.programStats);
+        }
 
         if (Array.isArray(payload.sprints)) {
           setSprints(payload.sprints);

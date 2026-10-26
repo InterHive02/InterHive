@@ -41,13 +41,13 @@ export const attendanceApi = {
     apiClient.post('/attendance/lunch/end'),
 
   getToday: () =>
-    apiClient.get('/attendance/today'),
+    apiClient.get<any>('/attendance/today'),
 
   getHistory: (startDate?: string, endDate?: string, page: number = 1, limit: number = 10) =>
-    apiClient.get('/attendance/history', { params: { startDate, endDate, page, limit } }),
+    apiClient.get<any>('/attendance/history', { params: { startDate, endDate, page, limit } }),
 
   getStats: (month?: number, year?: number) =>
-    apiClient.get('/attendance/stats', { params: { month, year } }),
+    apiClient.get<any>('/attendance/stats', { params: { month, year } }),
 
   // Admin/Manager
   getAll: (params: { page: number; limit: number; date?: string; department?: string; status?: string }) =>

@@ -1,6 +1,256 @@
 import { Email, PhoneNumber, UUID } from './types/index.js';
 export { AcademicYear, Address, AnalyticsEvent, ApiResponse, ApplicationStatus, Assessment, AssessmentAnswer, AssessmentFeedback, AssessmentOption, AssessmentQuestion, AssessmentResult, AssessmentStatus, AssessmentSubmission, AssessmentType, BaseAssessmentResult, BaseEntity, Certification, Company, CompanyCollaboration, CompanyRating, CompanyRequirement, CompanyStatus, CompanySubscription, ContactInfo, Education, EmploymentType, Experience, FileUpload, Gender, HiringProcess, InternApplication, InternProfile, InternProjectEvaluation, InternStatus, InternWorkflowStatus, Location, NotificationCategory, NotificationPriority, NotificationType, OfferDetails, PaginatedResponse, PaginationParams, ProgramType, Project, ProjectContribution, ProjectDeliverable, ProjectEvaluation, ProjectParticipation, ProjectPhase, ProjectResource, ProjectStatus, ProjectSubtask, ProjectTask, ReadinessScore, ReadinessScoreHistory, RequirementStatus, Skill, SkillLevel, TaskComment, TaskStatus, TestResult, Timestamp, TrainingEnrollment, TrainingModuleProgress, URLString, UserAccessLevel, UserRole, UserStatus } from './types/index.js';
-export { ADMIN_PERMISSIONS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType } from './constants/index.js';
+export { ADMIN_PERMISSIONS, ALL_PROGRAM_KEYS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType, getProgramConfig, isValidProgramType } from './constants/index.js';
+
+interface LandingThemeConfig {
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+    surfaceColor: string;
+    textColor: string;
+    fontFamily: string;
+    borderRadius: string;
+    enableAnimations: boolean;
+}
+interface LandingSeoConfig {
+    metaTitle: string;
+    metaDescription: string;
+    metaKeywords: string;
+    ogTitle: string;
+    ogDescription: string;
+    ogImage: string;
+    canonicalUrl: string;
+}
+interface LandingNavbarLink {
+    label: string;
+    href: string;
+    isExternal?: boolean;
+    order: number;
+    isVisible: boolean;
+}
+interface LandingNavbarConfig {
+    brandName: string;
+    logoUrl?: string;
+    links: LandingNavbarLink[];
+    ctaButtonText: string;
+    ctaButtonLink: string;
+    showCtaButton: boolean;
+}
+interface LandingFooterColumn {
+    title: string;
+    links: Array<{
+        label: string;
+        href: string;
+        isExternal?: boolean;
+    }>;
+}
+interface LandingFooterConfig {
+    brandName: string;
+    tagline: string;
+    copyrightText: string;
+    columns: LandingFooterColumn[];
+    socialLinks: Array<{
+        platform: string;
+        url: string;
+        icon: string;
+    }>;
+}
+interface HeroBackgroundConfig {
+    type: 'image' | 'gradient' | 'color';
+    url: string;
+    opacity: number;
+    overlayGradient: string;
+}
+interface HeroCtaButton {
+    text: string;
+    action: 'modal_application' | 'modal_quiz' | 'modal_video' | 'link';
+    targetUrl?: string;
+    variant: 'primary' | 'secondary' | 'outline';
+    isVisible: boolean;
+}
+interface HeroSectionConfig {
+    badgeText: string;
+    headlineMain: string;
+    headlineGradient: string;
+    ppoDefinition: string;
+    description: string;
+    background: HeroBackgroundConfig;
+    featureBadges: Array<{
+        title: string;
+        subtitle: string;
+        icon: string;
+    }>;
+    ctaButtons: HeroCtaButton[];
+    showcases: Array<{
+        id: string;
+        trackName: string;
+        curriculum: string;
+        badgeInitial: string;
+        badgeColor: string;
+        progress: number;
+        activeStep?: number;
+        currentStage: string;
+        currentStageDesc: string;
+        modules: string;
+        projects: string;
+        tests: string;
+        stipend: string;
+        ppoTarget: string;
+    }>;
+}
+interface JourneyStepItem {
+    stepNumber: string;
+    title: string;
+    description: string;
+    badgeColor: string;
+    icon: string;
+}
+interface JourneySectionConfig {
+    tag: string;
+    title: string;
+    subtitle: string;
+    linkText: string;
+    linkUrl: string;
+    steps: JourneyStepItem[];
+    featurePills: Array<{
+        icon: string;
+        title: string;
+        desc: string;
+    }>;
+}
+interface WhyUsCardItem {
+    icon: string;
+    title: string;
+    description: string;
+    iconBg: string;
+    iconColor: string;
+}
+interface WhyUsSectionConfig {
+    tag: string;
+    title: string;
+    subtitle: string;
+    cards: WhyUsCardItem[];
+    storyLinkText: string;
+    storyLinkUrl: string;
+}
+interface FeatureCardItem {
+    icon: string;
+    title: string;
+    description: string;
+    linkUrl: string;
+    iconBg: string;
+    iconColor: string;
+}
+interface FeaturesSectionConfig {
+    tag: string;
+    headlineMain: string;
+    headlineGradient: string;
+    cards: FeatureCardItem[];
+    cursiveText: string;
+}
+interface FaqItem {
+    question: string;
+    answer: string;
+    linkText?: string;
+    linkUrl?: string;
+}
+interface FaqSectionConfig {
+    tag: string;
+    title: string;
+    subtitle: string;
+    items: FaqItem[];
+    helpLinkText: string;
+    helpLinkUrl: string;
+}
+interface NewsletterSectionConfig {
+    badge: string;
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    buttonText: string;
+    successMessage: string;
+}
+interface EqualOpportunitySectionConfig {
+    title: string;
+    description: string;
+    buttonText: string;
+}
+interface DualTargetSectionConfig {
+    studentCard: {
+        tag: string;
+        title: string;
+        description: string;
+        buttonText: string;
+        buttonLink: string;
+        sublinkText: string;
+        sublinkUrl: string;
+    };
+    companyCard: {
+        tag: string;
+        title: string;
+        description: string;
+        buttonText: string;
+        sublinkText: string;
+        sublinkUrl: string;
+    };
+}
+interface StickyCtaConfig {
+    title: string;
+    badge: string;
+    subtitle: string;
+    buttonText: string;
+    isVisible: boolean;
+}
+interface SectionMeta {
+    id: string;
+    name: string;
+    order: number;
+    isVisible: boolean;
+}
+interface LandingPageConfig {
+    _id?: string;
+    version: number;
+    isPublished: boolean;
+    publishedAt?: string;
+    publishedBy?: string;
+    lastEditedBy?: string;
+    updatedAt?: string;
+    theme: LandingThemeConfig;
+    seo: LandingSeoConfig;
+    navbar: LandingNavbarConfig;
+    footer: LandingFooterConfig;
+    sectionsMeta: SectionMeta[];
+    hero: HeroSectionConfig;
+    journey: JourneySectionConfig;
+    whyUs: WhyUsSectionConfig;
+    features: FeaturesSectionConfig;
+    equalOpportunity: EqualOpportunitySectionConfig;
+    dualTarget: DualTargetSectionConfig;
+    faq: FaqSectionConfig;
+    newsletter: NewsletterSectionConfig;
+    stickyCta: StickyCtaConfig;
+}
+interface MediaAssetItem {
+    _id: string;
+    filename: string;
+    originalName: string;
+    url: string;
+    mimeType: string;
+    size: number;
+    altText: string;
+    uploadedBy?: string;
+    createdAt: string;
+}
+interface LandingRevisionItem {
+    _id: string;
+    version: number;
+    notes?: string;
+    publishedBy?: string;
+    publishedAt: string;
+    config: LandingPageConfig;
+}
+
+declare const DEFAULT_LANDING_CMS_CONFIG: LandingPageConfig;
 
 declare class Validators {
     static isEmail(email: string): email is Email;
@@ -75,4 +325,4 @@ declare class Helpers {
     static throttle<T extends (...args: any[]) => any>(fn: T, limit: number): (...args: Parameters<T>) => void;
 }
 
-export { Email, Formatters, Helpers, PhoneNumber, UUID, Validators };
+export { DEFAULT_LANDING_CMS_CONFIG, DualTargetSectionConfig, Email, EqualOpportunitySectionConfig, FaqItem, FaqSectionConfig, FeatureCardItem, FeaturesSectionConfig, Formatters, Helpers, HeroBackgroundConfig, HeroCtaButton, HeroSectionConfig, JourneySectionConfig, JourneyStepItem, LandingFooterColumn, LandingFooterConfig, LandingNavbarConfig, LandingNavbarLink, LandingPageConfig, LandingRevisionItem, LandingSeoConfig, LandingThemeConfig, MediaAssetItem, NewsletterSectionConfig, PhoneNumber, SectionMeta, StickyCtaConfig, UUID, Validators, WhyUsCardItem, WhyUsSectionConfig };

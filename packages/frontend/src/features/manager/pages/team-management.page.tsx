@@ -33,10 +33,18 @@ export const TeamManagementPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedTrack, setSelectedTrack] = useState<string>('all');
+  const [selectedProgram, setSelectedProgram] = useState<string>('all');
 
   // Drawer & modals
   const [selectedIntern, setSelectedIntern] = useState<any | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState<boolean>(false);
+  const [taskTitle, setTaskTitle] = useState<string>('');
+  const [taskDescription, setTaskDescription] = useState<string>('');
+  const [taskPriority, setTaskPriority] = useState<string>('high');
+  const [taskDueDate, setTaskDueDate] = useState<string>('In 3 Days');
+  const [taskPoints, setTaskPoints] = useState<number>(3);
+  const [isSubmittingTask, setIsSubmittingTask] = useState<boolean>(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
 
   // New allocation form
@@ -44,6 +52,46 @@ export const TeamManagementPage: React.FC = () => {
   const [newMemberEmail, setNewMemberEmail] = useState<string>('');
   const [newMemberTrack, setNewMemberTrack] = useState<string>('Full-Stack Web Engineering');
   const [newMemberCollege, setNewMemberCollege] = useState<string>('');
+
+  const handleAssignTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskTitle.trim() || !selectedIntern) {
+      toast.error('Please enter a task title');
+      return;
+    }
+    setIsSubmittingTask(true);
+    try {
+      const newTask = {
+        id: `task-${Date.now()}`,
+        projectId: 'proj-sprint',
+        projectName: selectedIntern.track || 'Production Sprint Project',
+        title: taskTitle.trim(),
+        description: taskDescription.trim() || 'Sprint deliverable assigned by Manager',
+        assignedInternId: selectedIntern.id,
+        assignedInternName: selectedIntern.name,
+        priority: taskPriority as any,
+        status: 'in_progress',
+        dueDate: taskDueDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+      };
+
+      const existingTasksRaw = localStorage.getItem('interhive_manager_tasks_store');
+      let existingTasks = [];
+      if (existingTasksRaw) {
+        try { existingTasks = JSON.parse(existingTasksRaw); } catch {}
+      }
+      const updatedTasks = [newTask, ...existingTasks];
+      localStorage.setItem('interhive_manager_tasks_store', JSON.stringify(updatedTasks));
+
+      toast.success(`Task assigned to ${selectedIntern.name}!`);
+      setIsAssignTaskModalOpen(false);
+      setTaskTitle('');
+      setTaskDescription('');
+    } catch (err) {
+      toast.error('Failed to assign task');
+    } finally {
+      setIsSubmittingTask(false);
+    }
+  };
 
   const loadTeamRoster = async () => {
     setIsLoading(true);
@@ -84,6 +132,7 @@ export const TeamManagementPage: React.FC = () => {
           rawStatus: item.status || 'in_training',
           readiness,
           mentor: 'Aditya Varma',
+          programType: item.programType || item.userId?.programType || 'PPO',
         });
       });
 
@@ -366,6 +415,19 @@ export const TeamManagementPage: React.FC = () => {
             <option value="Data">Data & AI</option>
             <option value="DevOps">DevOps & SRE</option>
           </select>
+
+          <select
+            value={selectedProgram}
+            onChange={(e) => setSelectedProgram(e.target.value)}
+            className="px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121526] text-slate-700 dark:text-slate-200"
+          >
+            <option value="all">All 5 Programs</option>
+            <option value="ONE_YEAR">1-Year Program</option>
+            <option value="TWO_YEAR">2-Year Program</option>
+            <option value="THREE_YEAR">3-Year Program</option>
+            <option value="FOUR_YEAR">4-Year Program</option>
+            <option value="PPO">PPO Program</option>
+          </select>
         </div>
       </div>
 
@@ -551,6 +613,14 @@ export const TeamManagementPage: React.FC = () => {
               </button>
 
               <button
+                onClick={() => setIsAssignTaskModalOpen(true)}
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Assign Sprint Task to Intern
+              </button>
+
+              <button
                 onClick={() => {
                   setSelectedIntern(null);
                   navigate('/communication');
@@ -562,6 +632,129 @@ export const TeamManagementPage: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      
+      {/* Assign Sprint Task Modal */}
+      {isAssignTaskModalOpen && selectedIntern && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <form
+            onSubmit={handleAssignTask}
+            className="bg-white dark:bg-[#121526] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Assign Sprint Task</h3>
+                <p className="text-xs text-slate-400">Assignee: {selectedIntern.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAssignTaskModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Task Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  placeholder="e.g. Implement Redis Session Caching & Token Blacklist"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Description & Deliverables
+                </label>
+                <textarea
+                  rows={3}
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  placeholder="Provide explicit sprint acceptance criteria and architectural guidelines..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Priority
+                  </label>
+                  <select
+                    value={taskPriority}
+                    onChange={(e) => setTaskPriority(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white font-semibold"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Story Points
+                  </label>
+                  <select
+                    value={taskPoints}
+                    onChange={(e) => setTaskPoints(Number(e.target.value))}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white font-semibold"
+                  >
+                    <option value={1}>1 pt (Easy)</option>
+                    <option value={2}>2 pts</option>
+                    <option value={3}>3 pts (Medium)</option>
+                    <option value={5}>5 pts (Complex)</option>
+                    <option value={8}>8 pts (Epic)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Due In
+                  </label>
+                  <select
+                    value={taskDueDate}
+                    onChange={(e) => setTaskDueDate(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white font-semibold"
+                  >
+                    <option value="Tomorrow">Tomorrow</option>
+                    <option value="In 3 Days">In 3 Days</option>
+                    <option value="End of Week">End of Week</option>
+                    <option value="Sprint End">Sprint End</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsAssignTaskModalOpen(false)}
+                className="px-4 py-2 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingTask}
+                className="px-4 py-2 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{isSubmittingTask ? 'Assigning...' : 'Confirm Assignment'}</span>
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

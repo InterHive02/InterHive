@@ -7,7 +7,7 @@ export const useDashboard = () => {
       queryKey: ['dashboard', 'activities'],
       queryFn: async () => {
         try {
-          const response = await apiClient.get('/analytics/dashboard/activities');
+          const response: any = await apiClient.get('/analytics/dashboard/activities');
           const data = response?.data?.data ?? response?.data ?? [];
           return Array.isArray(data) ? data : [];
         } catch (error) {

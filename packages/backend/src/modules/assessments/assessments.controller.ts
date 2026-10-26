@@ -21,8 +21,11 @@ import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { UserRole } from '@interhive/shared';
 import { User } from '../users/schemas/user.schema';
 
+import { PremiumGuard } from '../../core/guards/premium.guard';
+
 @ApiTags('Assessments')
 @Controller('assessments')
+@UseGuards(PremiumGuard)
 @ApiBearerAuth()
 export class AssessmentsController {
   constructor(private readonly assessmentsService: AssessmentsService) {}

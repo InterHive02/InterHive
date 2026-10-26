@@ -96,6 +96,12 @@ export class UserResponseDto {
   })
   manager?: string;
 
+  accessLevel?: string;
+  internStatus?: string;
+  programType?: string;
+  assignedManager?: any;
+  assignedHr?: any;
+
   @ApiProperty({
     example: true,
     description: 'Is user active',
@@ -156,6 +162,11 @@ export class UserResponseDto {
     this.employmentType = user.employmentType;
     this.department = user.department?._id || user.department;
     this.manager = user.manager?._id || user.manager;
+    this.accessLevel = user.accessLevel || 'BASIC';
+    this.internStatus = user.internStatus;
+    this.programType = user.programType;
+    this.assignedManager = user.assignedManager || user.manager;
+    this.assignedHr = user.assignedHr;
     this.isActive = user.isActive;
     this.isVerified = user.isVerified;
     this.lastLogin = user.lastLogin;

@@ -56,8 +56,11 @@ export class CreateApplicationDto {
   semester: string;
 
   @IsString()
-  @IsOptional()
-  programType?: string;
+  @IsNotEmpty({ message: 'Program selection is mandatory. Please select one of the five InterHive programs.' })
+  @IsIn(['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'], {
+    message: 'Invalid program selected. Must be ONE_YEAR, TWO_YEAR, THREE_YEAR, FOUR_YEAR, or PPO.',
+  })
+  programType: string;
 
   @IsString()
   @IsOptional()

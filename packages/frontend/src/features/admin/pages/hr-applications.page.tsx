@@ -469,6 +469,7 @@ export const HrApplicationsPage: React.FC = () => {
               <option value="TWO_YEAR">2-Year Program (3rd & Final Year)</option>
               <option value="THREE_YEAR">3-Year Program (2nd Year Onwards)</option>
               <option value="FOUR_YEAR">4-Year Program (1st Year Onwards)</option>
+              <option value="PPO">PPO Program (Pre-Placement Offer)</option>
             </select>
           </div>
 
@@ -610,6 +611,7 @@ export const HrApplicationsPage: React.FC = () => {
                   />
                 </th>
                 <th className="py-3.5 px-4">Applicant</th>
+                <th className="py-3.5 px-4">Program</th>
                 <th className="py-3.5 px-4">College / Course</th>
                 <th className="py-3.5 px-4">Skills</th>
                 <th className="py-3.5 px-4">Status</th>

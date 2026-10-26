@@ -20,7 +20,7 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
             retry: 1,
             refetchOnWindowFocus: false,
             staleTime: 5 * 60 * 1000,
-            gcTime: 10 * 60 * 1000,
+            cacheTime: 10 * 60 * 1000,
             refetchOnMount: true,
             refetchOnReconnect: true,
           },

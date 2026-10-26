@@ -499,19 +499,32 @@ export class InternsService {
   }
 
   async updateStatus(id: string, status: string) {
-    const profile = await this.internProfileModel.findById(id);
+    let profile = await this.internProfileModel.findById(id);
     if (!profile) {
-      throw new NotFoundException('Intern not found');
+      profile = await this.internProfileModel.findOne({ userId: id });
+    }
+    if (profile) {
+      profile.status = status as InternStatus;
+      await profile.save();
+      return {
+        success: true,
+        message: 'Status updated successfully',
+        data: profile,
+      };
     }
 
-    profile.status = status as InternStatus;
-    await profile.save();
+    const app = await this.internApplicationModel.findById(id);
+    if (app) {
+      app.status = status as any;
+      await app.save();
+      return {
+        success: true,
+        message: 'Application status updated successfully',
+        data: app,
+      };
+    }
 
-    return {
-      success: true,
-      message: 'Status updated successfully',
-      data: profile,
-    };
+    throw new NotFoundException('Intern not found');
   }
 
   async submitEvaluation(id: string, evaluation: any, evaluatorUser?: any) {

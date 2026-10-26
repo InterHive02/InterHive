@@ -6,7 +6,7 @@ import { useAuth } from '../../../api/hooks/use-auth';
 export const VerifyEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { verifyEmail, isVerifyingEmail } = useAuth();
+  const { verifyEmailAsync, isVerifyingEmail } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export const VerifyEmailPage: React.FC = () => {
       setStatus('error');
       return;
     }
-    verifyEmail(token)
+    verifyEmailAsync(token)
       .then(() => setStatus('success'))
       .catch(() => setStatus('error'));
   }, [token]);

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   BookOpen,
@@ -19,7 +19,10 @@ import {
   ShieldCheck,
   Calendar,
   Circle,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Mail,
+  UserCheck
 } from 'lucide-react';
 import { ReadinessScoreCard } from '../components/readiness-score-card';
 import { SkillBreakdown } from '../components/skill-breakdown';
@@ -38,6 +41,7 @@ import { LoadingSpinner } from '../../../shared/components/common/loading-spinne
 import { toast } from 'react-hot-toast';
 
 export const InternDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { useReadiness, useProfile } = useIntern();
   const { useMyProjects } = useProject();
@@ -57,7 +61,9 @@ export const InternDashboardPage: React.FC = () => {
   // Active view tab inside dashboard
   const [activeTab, setActiveTab] = useState<'journey' | 'training' | 'assessments' | 'matching' | 'workspace'>('journey');
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
-  const [selectedProgramKey, setSelectedProgramKey] = useState<ProgramTypeKey>('TWO_YEAR');
+  const activeProgramKey = ((user as any)?.programType || 'PPO') as ProgramTypeKey;
+  const currentProgramConfig = (PROGRAM_CONFIGS as any)[activeProgramKey] || PROGRAM_CONFIGS.PPO;
+  const [selectedProgramKey, setSelectedProgramKey] = useState<ProgramTypeKey>(activeProgramKey);
   const [searchQuery, setSearchQuery] = useState('');
 
   const isLoading = profileLoading || readinessLoading || projectsLoading || activitiesLoading;
@@ -334,9 +340,17 @@ export const InternDashboardPage: React.FC = () => {
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-0.5">
               Current Enrollment
             </span>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              PPO Track — Software Engineering
-            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                Your Program: {currentProgramConfig.title}
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                {currentProgramConfig.duration}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {currentProgramConfig.mainObjective}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -570,6 +584,119 @@ export const InternDashboardPage: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      
+      {/* 3.5. ASSIGNED MENTORSHIP & CORPORATE LEADERSHIP TEAM */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Assigned Mentorship & Program Leadership</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Your dedicated supervisor for sprint code reviews, performance evaluations, and PPO qualification.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/communication')}
+            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Open Staff Chat</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Card 1: Assigned Engineering Manager */}
+          <div className="bg-white dark:bg-[#151829] rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                  {((user as any)?.assignedManager?.firstName?.[0] || (user as any)?.manager?.firstName?.[0] || 'A')}
+                  {((user as any)?.assignedManager?.lastName?.[0] || (user as any)?.manager?.lastName?.[0] || 'V')}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                      {(user as any)?.assignedManager?.firstName
+                        ? `${(user as any).assignedManager.firstName} ${(user as any).assignedManager.lastName || ''}`.trim()
+                        : (user as any)?.manager?.firstName
+                        ? `${(user as any).manager.firstName} ${(user as any).manager.lastName || ''}`.trim()
+                        : 'Aditya Varma'}
+                    </h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      Active Lead
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    {(user as any)?.assignedManager?.position || (user as any)?.manager?.position || 'Engineering Manager & Tech Lead'}
+                  </p>
+                  <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-1">
+                    <Mail className="w-3 h-3 text-slate-400" />
+                    <span>{(user as any)?.assignedManager?.email || (user as any)?.manager?.email || 'manager@interhive.in'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 font-medium">Sprint Code Reviewer</span>
+              <button
+                onClick={() => navigate('/communication')}
+                className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Message Manager</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: Assigned HR Coordinator */}
+          <div className="bg-white dark:bg-[#151829] rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                  {((user as any)?.assignedHr?.firstName?.[0] || 'H')}
+                  {((user as any)?.assignedHr?.lastName?.[0] || 'R')}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                      {(user as any)?.assignedHr?.firstName
+                        ? `${(user as any).assignedHr.firstName} ${(user as any).assignedHr.lastName || ''}`.trim()
+                        : 'Hannah HR'}
+                    </h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      PPO Coordinator
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    {(user as any)?.assignedHr?.position || 'Talent Acquisition & Program Lead'}
+                  </p>
+                  <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-1">
+                    <Mail className="w-3 h-3 text-slate-400" />
+                    <span>{(user as any)?.assignedHr?.email || 'hr@interhive.in'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 font-medium">Stipends & Placement Match</span>
+              <button
+                onClick={() => navigate('/communication')}
+                className="px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Connect with HR</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* 4. WORKSPACE TABS SELECTOR */}

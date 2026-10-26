@@ -52,8 +52,8 @@ export class InternshipApplication {
 
   @Prop({
     type: String,
-    enum: ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR'],
-    default: 'ONE_YEAR',
+    enum: ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'],
+    required: true,
     index: true,
   })
   programType: string;
@@ -139,6 +139,7 @@ export class InternshipApplication {
       interviewer: { type: String },
       notes: { type: String },
       result: { type: String, enum: ['pending', 'passed', 'failed'], default: 'pending' },
+      programType: { type: String, enum: ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'] },
     },
   })
   interview?: {
@@ -149,6 +150,7 @@ export class InternshipApplication {
     interviewer?: string;
     notes?: string;
     result?: 'pending' | 'passed' | 'failed';
+    programType?: string;
   };
 
   @Prop({

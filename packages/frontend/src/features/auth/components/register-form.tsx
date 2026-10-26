@@ -103,7 +103,7 @@ export const RegisterForm: React.FC = () => {
     setIsVerifyingOtp(true);
     try {
       const response = await authApi.verifyOtp(otpEmail, otpCode.trim());
-      const payload = response.data || response;
+      const payload: any = response.data || response;
       const { user, accessToken, refreshToken } = payload;
       if (accessToken) localStorage.setItem('accessToken', accessToken);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);

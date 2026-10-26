@@ -20,6 +20,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var constants_exports = {};
 __export(constants_exports, {
   ADMIN_PERMISSIONS: () => ADMIN_PERMISSIONS,
+  ALL_PROGRAM_KEYS: () => ALL_PROGRAM_KEYS,
   APPLICATION_STATUS: () => APPLICATION_STATUS,
   ASSESSMENT_STATUS: () => ASSESSMENT_STATUS,
   ATTENDANCE_STATUS: () => ATTENDANCE_STATUS,
@@ -44,7 +45,9 @@ __export(constants_exports, {
   ROLE_PERMISSIONS: () => ROLE_PERMISSIONS,
   SKILL_CATEGORIES: () => SKILL_CATEGORIES,
   SKILL_DEFINITIONS: () => SKILL_DEFINITIONS,
-  TASK_STATUS: () => TASK_STATUS
+  TASK_STATUS: () => TASK_STATUS,
+  getProgramConfig: () => getProgramConfig,
+  isValidProgramType: () => isValidProgramType
 });
 module.exports = __toCommonJS(constants_exports);
 
@@ -467,7 +470,8 @@ var PROGRAM_TYPES = {
   ONE_YEAR: "ONE_YEAR",
   TWO_YEAR: "TWO_YEAR",
   THREE_YEAR: "THREE_YEAR",
-  FOUR_YEAR: "FOUR_YEAR"
+  FOUR_YEAR: "FOUR_YEAR",
+  PPO: "PPO"
 };
 var PROGRAM_CONFIGS = {
   ONE_YEAR: {
@@ -667,6 +671,56 @@ var PROGRAM_CONFIGS = {
         ]
       }
     ]
+  },
+  PPO: {
+    id: "PPO",
+    title: "PPO Program",
+    duration: "6 Months Fast-Track",
+    targetAcademicYear: "Pre-Final / Final Year",
+    allowedAcademicYears: ["3rd", "3rd Year", "Final", "Final Year", "4th Year", "Graduated"],
+    shortDescription: "An intensive, corporate-partner fast-track training and live project internship aimed at direct Pre-Placement Offers.",
+    mainObjective: "Fast-track corporate training, production project sprints, and direct PPO interviews with hiring partners.",
+    summaryFocus: "Intensive Training + Live Project Sprint + Direct PPO Interview",
+    summaryTarget: "1 Corporate Capstone Project + Direct Hiring Partner Matching",
+    badge: "Direct PPO Fast-Track",
+    roadmap: [
+      {
+        yearLabel: "Month 1-2",
+        stageName: "Enterprise Foundation & Technical Sprint",
+        targetFocus: "System Architecture & Production Workflows",
+        targetCount: "Diagnostic Evaluation & Skill Sprint",
+        activities: [
+          "Enterprise architecture deep dive",
+          "Production Git & CI/CD workflows",
+          "System design & coding sprints",
+          "Weekly mentor 1-on-1 reviews"
+        ]
+      },
+      {
+        yearLabel: "Month 3-4",
+        stageName: "Live Client / Corporate Project Delivery",
+        targetFocus: "Production Engineering & Deliverables",
+        targetCount: "1 Live Corporate Project Deliverable",
+        activities: [
+          "Assigned team project under engineering manager",
+          "Agile sprint ceremonies & daily check-ins",
+          "Production code reviews & pull requests",
+          "Mid-term performance appraisal"
+        ]
+      },
+      {
+        yearLabel: "Month 5-6",
+        stageName: "Pre-Placement Evaluation & Direct Hiring",
+        targetFocus: "Partner Interviews & PPO Offers",
+        targetCount: "Verified Credential + Partner Interviews",
+        activities: [
+          "Final performance evaluation by manager",
+          "Corporate hiring partner matchmaking",
+          "Direct technical & HR interview loops",
+          "PPO offer finalization & onboarding"
+        ]
+      }
+    ]
   }
 };
 var PROGRAM_ELIGIBILITY_MATRIX = {
@@ -685,9 +739,20 @@ var PROGRAM_ELIGIBILITY_MATRIX = {
   "4th Year": "ONE_YEAR"
 };
 var PROGRAM_DISCLAIMER = "Note: The specified number of internships and training opportunities are program targets and roadmap milestones designed to build maximum industry readiness, and do not constitute an unconditional guarantee of placement.";
+var ALL_PROGRAM_KEYS = ["ONE_YEAR", "TWO_YEAR", "THREE_YEAR", "FOUR_YEAR", "PPO"];
+var getProgramConfig = (key) => {
+  if (key && key in PROGRAM_CONFIGS) {
+    return PROGRAM_CONFIGS[key];
+  }
+  return PROGRAM_CONFIGS.ONE_YEAR;
+};
+var isValidProgramType = (key) => {
+  return typeof key === "string" && key in PROGRAM_CONFIGS;
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ADMIN_PERMISSIONS,
+  ALL_PROGRAM_KEYS,
   APPLICATION_STATUS,
   ASSESSMENT_STATUS,
   ATTENDANCE_STATUS,
@@ -712,6 +777,8 @@ var PROGRAM_DISCLAIMER = "Note: The specified number of internships and training
   ROLE_PERMISSIONS,
   SKILL_CATEGORIES,
   SKILL_DEFINITIONS,
-  TASK_STATUS
+  TASK_STATUS,
+  getProgramConfig,
+  isValidProgramType
 });
 //# sourceMappingURL=index.js.map

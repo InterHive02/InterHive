@@ -467,13 +467,13 @@ export class MailService {
     );
   }
 
-  async sendApplicationReceivedEmail(to: string, fullName: string) {
+  async sendApplicationReceivedEmail(to: string, fullName: string, programName?: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
         <h2 style="color: #4f46e5; margin-top: 0;">Application Received! 🚀</h2>
         <p style="font-size: 14px; color: #334155;">Dear ${fullName},</p>
         <p style="font-size: 14px; color: #334155; line-height: 1.6;">
-          Thank you for applying for an internship opportunity at <strong>InterHive</strong>. We have successfully received your application.
+          Thank you for applying for the <strong>${programName || 'InterHive Industry-Readiness Program'}</strong>. We have successfully received your application.
         </p>
         <p style="font-size: 14px; color: #334155; line-height: 1.6;">
           Our HR and technical review team will review your qualifications, skills, and portfolio. If shortlisted, you will receive an invitation for an interview directly via email.
@@ -485,7 +485,7 @@ export class MailService {
         <p style="font-size: 12px; color: #94a3b8; text-align: center;">InterHive Inc. • From Intern to Industry</p>
       </div>
     `;
-    return this.sendEmail(to, `Application Received - InterHive Internship Program`, html);
+    return this.sendEmail(to, `Application Received - ${programName || 'InterHive Internship Program'}`, html);
   }
 
   async sendApplicationInterviewEmail(data: {
@@ -497,13 +497,14 @@ export class MailService {
     linkOrLocation: string;
     interviewer?: string;
     notes?: string;
+    programName?: string;
   }) {
     const isOnline = data.mode === 'online';
     const html = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div style="text-align: center; margin-bottom: 24px;">
           <h1 style="color: #4f46e5; margin: 0; font-size: 26px; font-weight: 800;">Interview Invitation 📅</h1>
-          <p style="color: #64748b; font-size: 14px; margin-top: 6px;">InterHive Internship Technical Evaluation</p>
+          <p style="color: #64748b; font-size: 14px; margin-top: 6px;">${data.programName ? data.programName + ' • ' : ''}Technical Evaluation</p>
         </div>
 
         <p style="font-size: 15px; color: #1e293b; line-height: 1.6;">
@@ -518,6 +519,10 @@ export class MailService {
           <h3 style="margin-top: 0; color: #1e293b; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">🗓️ Session Schedule</h3>
           
           <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; width: 140px;"><strong>Program:</strong></td>
+              <td style="padding: 6px 0; color: #4f46e5; font-weight: bold;">${data.programName || 'Industry-Readiness'}</td>
+            </tr>
             <tr>
               <td style="padding: 6px 0; color: #64748b; width: 140px;"><strong>Date:</strong></td>
               <td style="padding: 6px 0; color: #0f172a; font-weight: bold;">${data.date}</td>

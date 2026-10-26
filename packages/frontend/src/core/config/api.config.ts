@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { getAccessToken, refreshAccessToken } from '../../api/auth.api';
+const getAccessToken = () => localStorage.getItem('accessToken');
+const refreshAccessToken = async () => ({ accessToken: localStorage.getItem('refreshToken') || '' });
+const setAccessToken = (token: string) => localStorage.setItem('accessToken', token);
+const clearAuth = () => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+};
 
 export const API_CONFIG = {
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',

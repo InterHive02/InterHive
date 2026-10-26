@@ -209,7 +209,7 @@ export const AdminDashboardPage: React.FC = () => {
         lastName: userToEdit.lastName || '',
         email: userToEdit.email || '',
         role: userToEdit.role || 'intern',
-        department: userToEdit.department || 'Engineering',
+        department: (userToEdit as any).department || 'Engineering',
         phone: userToEdit.phone || '',
       });
       setIsUserModalOpen(true);
@@ -799,7 +799,7 @@ export const AdminDashboardPage: React.FC = () => {
           {/* ──────────────── TAB 3: COMPANIES ──────────────── */}
           {activeTab === 'companies' && (
             <CompanyManagement
-              companies={companies || []}
+              companies={(companies as any) || []}
               onAdd={handleAddCompany}
               onEdit={(id) => toast.success(`Edit company ID: ${id}`)}
               onDelete={handleDeleteCompany}

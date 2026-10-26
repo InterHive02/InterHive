@@ -46,10 +46,58 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
-import { PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, ProgramTypeKey } from '@interhive/shared';
+import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
+import {
+  PROGRAM_CONFIGS,
+  PROGRAM_DISCLAIMER,
+  ProgramTypeKey,
+  LandingPageConfig,
+  DEFAULT_LANDING_CMS_CONFIG,
+} from '@interhive/shared';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [cmsConfig, setCmsConfig] = useState<LandingPageConfig>(DEFAULT_LANDING_CMS_CONFIG);
+
+  useEffect(() => {
+    const loadCmsConfig = async () => {
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const isDraftPreview = searchParams.get('preview') === 'draft';
+        const res = isDraftPreview
+          ? await landingCmsApi.getDraftConfig()
+          : await landingCmsApi.getPublicConfig();
+        if (res.data?.success && res.data?.data) {
+          setCmsConfig(res.data.data);
+        }
+      } catch (err) {
+        console.warn('Could not load landing CMS config, falling back to defaults.', err);
+      }
+    };
+    loadCmsConfig();
+  }, []);
+
+  // Update SEO Meta
+  useEffect(() => {
+    if (cmsConfig?.seo?.metaTitle) {
+      document.title = cmsConfig.seo.metaTitle;
+    }
+    if (cmsConfig?.seo?.metaDescription) {
+      let descMeta = document.querySelector('meta[name="description"]');
+      if (!descMeta) {
+        descMeta = document.createElement('meta');
+        descMeta.setAttribute('name', 'description');
+        document.head.appendChild(descMeta);
+      }
+      descMeta.setAttribute('content', cmsConfig.seo.metaDescription);
+    }
+  }, [cmsConfig?.seo]);
+
+  const isSectionVisible = (sectionId: string): boolean => {
+    const s = cmsConfig?.sectionsMeta?.find((item) => item.id === sectionId);
+    return s ? s.isVisible : true;
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [liveRequirements, setLiveRequirements] = useState<any[]>([]);
@@ -162,14 +210,19 @@ export const LandingPage: React.FC = () => {
     }
   ];
 
+  const currentShowcases = (cmsConfig?.hero?.showcases && cmsConfig.hero.showcases.length > 0)
+    ? cmsConfig.hero.showcases
+    : trackShowcases;
+
   const [activeTrackIndex, setActiveTrackIndex] = useState(0);
+  const currentTrack = currentShowcases[activeTrackIndex] || currentShowcases[0] || trackShowcases[0];
 
   useEffect(() => {
     const trackTimer = setInterval(() => {
-      setActiveTrackIndex((prev) => (prev + 1) % trackShowcases.length);
+      setActiveTrackIndex((prev) => (prev + 1) % currentShowcases.length);
     }, 6000);
     return () => clearInterval(trackTimer);
-  }, [trackShowcases.length]);
+  }, [currentShowcases.length]);
 
   const faqItems = [
     {
@@ -195,6 +248,10 @@ export const LandingPage: React.FC = () => {
       answer: 'No prior internship or professional work experience is required. As long as you have learned core fundamentals in your domain, our readiness assessment helps you demonstrate that ability to employers.',
     },
   ];
+
+  const activeFaqItems = (cmsConfig?.faq?.items && cmsConfig.faq.items.length > 0)
+    ? cmsConfig.faq.items
+    : faqItems;
 
   // Dynamic Landing Page Metrics from live backend / admin overrides
   const [statsData, setStatsData] = useState<{
@@ -227,7 +284,7 @@ export const LandingPage: React.FC = () => {
     fetchStats();
 
     const loadLandingStats = () => {
-      // 1. Try reading from cached stat items
+      // 1. Try reading from cached stat items (API-seeded, admin-verified values only)
       try {
         const cached = localStorage.getItem('interhive_landing_stat_items');
         if (cached) {
@@ -238,23 +295,11 @@ export const LandingPage: React.FC = () => {
         }
       } catch (e) {}
 
-      // 2. Try reading from legacy landing stats editor key (topCompanies, activeInternships, etc)
-      try {
-        const legacy = localStorage.getItem('interhive_landing_stats');
-        if (legacy) {
-          const parsed = JSON.parse(legacy);
-          if (parsed) {
-            setDynamicLandingStats([
-              { key: 'students_trained', label: 'Students Trained', value: parsed.studentsPlaced || '50K+', suffix: '', icon: 'Users', order: 1, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
-              { key: 'internships_provided', label: 'Internships Provided', value: parsed.activeInternships || '10K+', suffix: '', icon: 'Briefcase', order: 2, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
-              { key: 'partner_companies', label: 'Partner Companies', value: parsed.topCompanies || '500+', suffix: '', icon: 'Building2', order: 3, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
-              { key: 'ppo_conversion', label: 'User Rating / Conversion', value: parsed.userRating || '4.8/5', suffix: '', icon: 'Trophy', order: 4, useManualValue: true, manualValue: null, lastManualEditAt: null, lastEditedBy: null },
-            ]);
-          }
-        }
-      } catch (e) {}
+      // Legacy localStorage key removed — it contained unverified placeholder values
+      // that did not reflect real platform data. Stats are now sourced exclusively
+      // from the backend (admin-managed via Admin → Landing Stats).
 
-      // 3. Fetch from backend API
+      // 2. Fetch from backend API
       statsApi.getLandingStats()
         .then(res => {
           if (res.data?.success && Array.isArray(res.data?.data) && res.data.data.length > 0) {
@@ -406,17 +451,19 @@ export const LandingPage: React.FC = () => {
       />
 
       {/* 100% FULL-BLEED HERO SECTION WITH FULL PAGE COVERAGE */}
+      {isSectionVisible('hero') && (
       <section className="relative pt-6 pb-28 overflow-hidden bg-gradient-to-br from-[#EBF3FF] via-[#F4F8FC] to-[#F3E8FF]">
         
         {/* 100% Full-bleed Hero Background Image Spanning Entire Width (inset-0 w-full) */}
         <img
-          src="/interhive_full_bg.png"
+          src={cmsConfig.hero?.background?.url || "/interhive_full_bg.png"}
           alt="InterHive Hero Tech Campus Background"
           width={1920}
           height={1080}
           loading="eager"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover object-right-top opacity-80 mix-blend-multiply pointer-events-none z-0 max-w-full"
+          style={{ opacity: cmsConfig.hero?.background?.opacity ?? 0.8 }}
+          className="absolute inset-0 w-full h-full object-cover object-right-top mix-blend-multiply pointer-events-none z-0 max-w-full"
         />
 
         {/* Soft Linear Gradient Gradient Overlay for Text Readability */}
@@ -439,29 +486,31 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-sm">
                   <GraduationCap className="w-4 h-4 text-purple-600" />
-                  <span>6-Month Structured PPO Track: 2 Months Training + 4 Months Paid Corporate Internship</span>
+                  <span>{cmsConfig.hero?.badgeText || '6-Month Structured PPO Track: 2 Months Training + 4 Months Paid Corporate Internship'}</span>
                 </div>
               </div>
 
               {/* Headlines */}
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-                  From Campus Selection <br />
-                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Full-Time PPO.</span>
+                  {cmsConfig.hero?.headlineMain || 'From Campus Selection'} <br />
+                  to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">{cmsConfig.hero?.headlineGradient || 'Full-Time PPO.'}</span>
                 </h1>
 
                 {/* Instant PPO Explanation for College Students */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-50/90 border border-blue-200/80 text-blue-900 text-xs font-semibold shadow-2xs text-left max-w-lg mx-auto lg:mx-0">
-                  <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
-                    ℹ
-                  </span>
-                  <span>
-                    <strong>PPO = Pre-Placement Offer</strong>: A confirmed job offer secured <em>before</em> your final college semester.
-                  </span>
-                </div>
+                {cmsConfig.hero?.ppoDefinition && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-50/90 border border-blue-200/80 text-blue-900 text-xs font-semibold shadow-2xs text-left max-w-lg mx-auto lg:mx-0">
+                    <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                      ℹ
+                    </span>
+                    <span>
+                      {cmsConfig.hero.ppoDefinition}
+                    </span>
+                  </div>
+                )}
 
                 <p className="text-sm sm:text-base text-slate-600 font-semibold max-w-lg mx-auto lg:mx-0">
-                  Practical 2-month industrial training followed by 4-month paid corporate internships with direct PPO conversion. 100% free for all college students.
+                  {cmsConfig.hero?.description || 'Practical 2-month industrial training followed by 4-month paid corporate internships with direct PPO conversion. 100% free for all college students.'}
                 </p>
               </div>
 
@@ -506,7 +555,7 @@ export const LandingPage: React.FC = () => {
                   }}
                   className="px-6 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>Join the PPO Track</span>
+                  <span>{cmsConfig.hero?.ctaButtons?.[0]?.text || 'Join the PPO Track'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
@@ -516,7 +565,7 @@ export const LandingPage: React.FC = () => {
                   className="px-5 py-3.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 font-bold text-xs sm:text-sm shadow-xs hover:border-blue-300 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-blue-600" />
-                  <span>2-Min Track Quiz</span>
+                  <span>{cmsConfig.hero?.ctaButtons?.[1]?.text || '2-Min Track Quiz'}</span>
                 </button>
 
                 <button
@@ -595,7 +644,7 @@ export const LandingPage: React.FC = () => {
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                          {trackShowcases[activeTrackIndex].curriculum}
+                          {currentTrack.curriculum}
                         </p>
                       </div>
                     </div>
@@ -603,9 +652,9 @@ export const LandingPage: React.FC = () => {
                     <div className="flex items-center justify-between sm:justify-end gap-2">
                       {/* Interactive Track Switcher Tabs */}
                       <div className="flex items-center gap-1 bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/60">
-                        {trackShowcases.map((tr, tIdx) => (
+                        {currentShowcases.map((tr, tIdx) => (
                           <button
-                            key={tr.id}
+                            key={tr.id || tIdx}
                             type="button"
                             onClick={() => setActiveTrackIndex(tIdx)}
                             className={`px-2 py-0.5 rounded-md text-[9px] font-black transition-all cursor-pointer ${
@@ -620,11 +669,11 @@ export const LandingPage: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 pl-2 border-l border-slate-100">
-                        <div className={`w-7 h-7 rounded-full ${trackShowcases[activeTrackIndex].badgeColor} text-white text-xs font-black flex items-center justify-center shadow-xs transition-colors`}>
-                          {trackShowcases[activeTrackIndex].badgeInitial}
+                        <div className={`w-7 h-7 rounded-full ${currentTrack.badgeColor || 'bg-blue-600'} text-white text-xs font-black flex items-center justify-center shadow-xs transition-colors`}>
+                          {currentTrack.badgeInitial}
                         </div>
                         <span className="text-xs font-bold text-slate-700 hidden sm:inline">
-                          {trackShowcases[activeTrackIndex].id === 'fullstack' ? 'Full Stack' : trackShowcases[activeTrackIndex].id === 'cloud' ? 'DevOps' : 'AI & Data'}
+                          {currentTrack.id === 'fullstack' ? 'Full Stack' : currentTrack.id === 'cloud' ? 'DevOps' : 'AI & Data'}
                         </span>
                       </div>
                     </div>
@@ -672,10 +721,10 @@ export const LandingPage: React.FC = () => {
                       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/40 border border-slate-200/70 shadow-2xs">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                            {trackShowcases[activeTrackIndex].trackName}
+                            {currentTrack.trackName}
                           </span>
                           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                            {trackShowcases[activeTrackIndex].currentStage}
+                            {currentTrack.currentStage}
                           </span>
                         </div>
 
@@ -683,12 +732,12 @@ export const LandingPage: React.FC = () => {
                         <div className="space-y-1">
                           <div className="flex justify-between text-[10px] font-extrabold text-slate-500">
                             <span>Track Completion</span>
-                            <span className="text-blue-600">{trackShowcases[activeTrackIndex].progress}%</span>
+                            <span className="text-blue-600">{currentTrack.progress}%</span>
                           </div>
                           <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                             <div 
                               className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500" 
-                              style={{ width: `${trackShowcases[activeTrackIndex].progress}%` }} 
+                              style={{ width: `${currentTrack.progress}%` }} 
                             />
                           </div>
                         </div>
@@ -722,57 +771,57 @@ export const LandingPage: React.FC = () => {
                               </div>
                               <span className="text-[8px] font-black text-slate-600 mt-1">Training</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 4 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${(currentTrack.activeStep ?? 4) >= 4 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 4: Company Matching */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                trackShowcases[activeTrackIndex].activeStep === 4 
+                                (currentTrack.activeStep ?? 4) === 4 
                                   ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                  : trackShowcases[activeTrackIndex].activeStep > 4 
+                                  : (currentTrack.activeStep ?? 4) > 4 
                                   ? 'bg-emerald-500 text-white' 
                                   : 'bg-slate-200 text-slate-600'
                               }`}>
-                                {trackShowcases[activeTrackIndex].activeStep > 4 ? <Check className="w-3 h-3 stroke-[3]" /> : '4'}
+                                {(currentTrack.activeStep ?? 4) > 4 ? <Check className="w-3 h-3 stroke-[3]" /> : '4'}
                               </div>
                               <span className="text-[8px] font-black text-slate-600 mt-1">Matching</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 5 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${(currentTrack.activeStep ?? 4) >= 5 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 5: Company Internship */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                trackShowcases[activeTrackIndex].activeStep === 5 
+                                (currentTrack.activeStep ?? 4) === 5 
                                 ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                : trackShowcases[activeTrackIndex].activeStep > 5 
+                                : (currentTrack.activeStep ?? 4) > 5 
                                 ? 'bg-emerald-500 text-white' 
                                 : 'bg-slate-200 text-slate-600 opacity-60'
                             }`}>
-                                {trackShowcases[activeTrackIndex].activeStep > 5 ? <Check className="w-3 h-3 stroke-[3]" /> : '5'}
+                                {(currentTrack.activeStep ?? 4) > 5 ? <Check className="w-3 h-3 stroke-[3]" /> : '5'}
                               </div>
                               <span className="text-[8px] font-bold text-slate-500 mt-1">Internship</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 6 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${(currentTrack.activeStep ?? 4) >= 6 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 6: Evaluation */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                trackShowcases[activeTrackIndex].activeStep === 6 
+                                (currentTrack.activeStep ?? 4) === 6 
                                   ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                                  : trackShowcases[activeTrackIndex].activeStep > 6 
+                                  : (currentTrack.activeStep ?? 4) > 6 
                                   ? 'bg-emerald-500 text-white' 
                                   : 'bg-slate-200 text-slate-600 opacity-60'
                             }`}>
-                                {trackShowcases[activeTrackIndex].activeStep > 6 ? <Check className="w-3 h-3 stroke-[3]" /> : '6'}
+                                {(currentTrack.activeStep ?? 4) > 6 ? <Check className="w-3 h-3 stroke-[3]" /> : '6'}
                               </div>
                               <span className="text-[8px] font-bold text-slate-500 mt-1">Evaluation</span>
                             </div>
-                            <div className={`flex-1 h-0.5 mx-1 ${trackShowcases[activeTrackIndex].activeStep >= 7 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            <div className={`flex-1 h-0.5 mx-1 ${(currentTrack.activeStep ?? 4) >= 7 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
 
                             {/* Step 7: PPO */}
                             <div className="flex flex-col items-center">
                               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${
-                                trackShowcases[activeTrackIndex].activeStep === 7 
+                                (currentTrack.activeStep ?? 4) === 7 
                                   ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' 
                                   : 'bg-slate-200 text-slate-600 opacity-60'
                               }`}>
@@ -806,10 +855,10 @@ export const LandingPage: React.FC = () => {
                               </div>
                               <div>
                                 <h5 className="font-black text-slate-900 text-xs">
-                                  {trackShowcases[activeTrackIndex].currentStage}
+                                  {currentTrack.currentStage}
                                 </h5>
                                 <p className="text-[10px] text-slate-500 leading-tight mt-0.5 font-medium">
-                                  {trackShowcases[activeTrackIndex].currentStageDesc}
+                                  {currentTrack.currentStageDesc}
                                 </p>
                               </div>
                             </div>
@@ -817,10 +866,10 @@ export const LandingPage: React.FC = () => {
                           
                           <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-slate-100">
                             <span className="text-[10px] font-bold text-slate-600">
-                              Stipend Track: <strong className="text-slate-900">{trackShowcases[activeTrackIndex].stipend}</strong>
+                              Stipend Track: <strong className="text-slate-900">{currentTrack.stipend}</strong>
                             </span>
                             <span className="text-[10px] font-black text-emerald-600">
-                              {trackShowcases[activeTrackIndex].ppoTarget}
+                              {currentTrack.ppoTarget}
                             </span>
                           </div>
                         </div>
@@ -833,13 +882,13 @@ export const LandingPage: React.FC = () => {
                                 Standard Milestones
                               </span>
                               <span className="text-[10px] font-black text-emerald-600">
-                                {trackShowcases[activeTrackIndex].progress === 100 ? '100% PPO' : 'On Track'}
+                                {currentTrack.progress === 100 ? '100% PPO' : 'On Track'}
                               </span>
                             </div>
                             <div className="w-full h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden">
                               <div 
                                 className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
-                                style={{ width: `${trackShowcases[activeTrackIndex].progress}%` }} 
+                                style={{ width: `${currentTrack.progress}%` }} 
                               />
                             </div>
                           </div>
@@ -848,19 +897,19 @@ export const LandingPage: React.FC = () => {
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Modules</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {trackShowcases[activeTrackIndex].modules}
+                                {currentTrack.modules}
                               </span>
                             </div>
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Projects</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {trackShowcases[activeTrackIndex].projects}
+                                {currentTrack.projects}
                               </span>
                             </div>
                             <div>
                               <span className="block text-[8px] text-slate-400 font-bold uppercase">Tests</span>
                               <span className="text-[10px] font-black text-slate-800">
-                                {trackShowcases[activeTrackIndex].tests}
+                                {currentTrack.tests}
                               </span>
                             </div>
                           </div>
@@ -919,10 +968,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
       </section>
+      )}
 
       {/* ============================================================== */}
       {/* 1. YOUR JOURNEY TO A PPO (MATCHING REFERENCE IMAGE 1)          */}
       {/* ============================================================== */}
+      {isSectionVisible('journey') && (
       <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -1133,20 +1184,24 @@ export const LandingPage: React.FC = () => {
         </div>
 
       </section>
+      )}
 
       {/* ============================================================== */}
       {/* 1.5 INTERACTIVE PLACEMENT CALCULATOR & TRANSPARENCY PILLARS    */}
       {/* ============================================================== */}
+      {isSectionVisible('timelineCalculator') && (
       <PlacementTimelineCalculator
         onApplyForBatch={(progKey) => {
           setSelectedProgramTypeForModal(progKey);
           setIsInternshipModalOpen(true);
         }}
       />
+      )}
 
       {/* ============================================================== */}
       {/* STRUCTURED INDUSTRY-READINESS PROGRAMS (1, 2, 3 & 4 YEAR)     */}
       {/* ============================================================== */}
+      {isSectionVisible('programs') && (
       <section id="our-programs" className="py-14 bg-gradient-to-b from-white via-slate-50/50 to-white border-y border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -1262,53 +1317,52 @@ export const LandingPage: React.FC = () => {
 
         </div>
       </section>
+      )}
 
       {/* ============================================================== */}
       {/* 2. DYNAMIC PLATFORM STATS STRIP                                */}
+      {/* Only rendered when admin has configured and published stats.   */}
+      {/* Hidden if no backend data is available (no fake defaults).     */}
       {/* ============================================================== */}
-      <section className="py-8 bg-slate-50/70 border-y border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {(dynamicLandingStats.length > 0 ? dynamicLandingStats : [
-              { key: 'students_trained', label: 'Students Trained', value: 5000, suffix: '+', icon: 'Users' },
-              { key: 'internships_provided', label: 'Internships Provided', value: 1200, suffix: '+', icon: 'Briefcase' },
-              { key: 'partner_companies', label: 'Partner Companies', value: 80, suffix: '+', icon: 'Building2' },
-              { key: 'ppo_conversion', label: 'PPO Conversion Rate', value: 70, suffix: '%+', icon: 'Trophy' },
-            ]).map((stat, idx) => {
-              const iconMap: Record<string, { comp: any; color: string }> = {
-                students_trained: { comp: Users, color: 'bg-blue-50 text-blue-600' },
-                internships_provided: { comp: Briefcase, color: 'bg-indigo-50 text-indigo-600' },
-                partner_companies: { comp: Building2, color: 'bg-purple-50 text-purple-600' },
-                ppo_conversion: { comp: Trophy, color: 'bg-emerald-50 text-emerald-600' },
-              };
-              const meta = iconMap[stat.key] || { comp: Trophy, color: 'bg-blue-50 text-blue-600' };
-              const IconComponent = meta.comp;
-              const formattedVal = typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value;
+      {isSectionVisible('stats') && dynamicLandingStats.filter(s => typeof s.value === 'number' ? s.value > 0 : Boolean(s.value)).length > 0 && (
+        <section className="py-8 bg-slate-50/70 border-y border-slate-200/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {dynamicLandingStats.filter(s => typeof s.value === 'number' ? s.value > 0 : Boolean(s.value)).map((stat, idx) => {
+                const iconMap: Record<string, { comp: any; color: string }> = {
+                  students_trained: { comp: Users, color: 'bg-blue-50 text-blue-600' },
+                  internships_provided: { comp: Briefcase, color: 'bg-indigo-50 text-indigo-600' },
+                  partner_companies: { comp: Building2, color: 'bg-purple-50 text-purple-600' },
+                  ppo_conversion: { comp: Trophy, color: 'bg-emerald-50 text-emerald-600' },
+                };
+                const meta = iconMap[stat.key] || { comp: Trophy, color: 'bg-blue-50 text-blue-600' };
+                const IconComponent = meta.comp;
+                const formattedVal = typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value;
 
-              return (
-                <div key={stat.key || idx} className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-xl ${meta.color} flex items-center justify-center shrink-0`}>
-                    <IconComponent className="w-5 h-5" />
+                return (
+                  <div key={stat.key || idx} className="flex items-center gap-3">
+                    <div className={`w-11 h-11 rounded-xl ${meta.color} flex items-center justify-center shrink-0`}>
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
+                        {formattedVal}{stat.suffix || ''}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
+                        {stat.label}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block font-black text-slate-900 text-lg sm:text-xl leading-none">
-                      {formattedVal}{stat.suffix || ''}
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-bold mt-0.5 block">
-                      {stat.label}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      )}
       {/* ============================================================== */}
       {/* 2.1 OUR PARTNER COMPANIES (ONLY VISIBLE IF ADMIN ADDS PARTNERS) */}
       {/* ============================================================== */}
-      {publicPartners.length > 0 && (
+      {isSectionVisible('partners') && publicPartners.length > 0 && (
         <section className="py-12 bg-white border-b border-slate-200/60">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
@@ -1360,6 +1414,7 @@ export const LandingPage: React.FC = () => {
 
 
       {/* 2. WHY INTERHIVE / TRUST & DIFFERENTIATION SECTION */}
+      {isSectionVisible('whyUs') && (
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -1436,8 +1491,10 @@ export const LandingPage: React.FC = () => {
           </Link>
         </div>
       </section>
+      )}
 
       {/* FEATURE GRID SECTION */}
+      {isSectionVisible('features') && (
       <section id="features" className="pt-16 pb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -1556,8 +1613,10 @@ export const LandingPage: React.FC = () => {
         </div>
 
       </section>
+      )}
 
       {/* EXPLORE OPPORTUNITIES SECTION */}
+      {isSectionVisible('opportunities') && (
       <section id="explore-opportunities" className="pt-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
@@ -1731,12 +1790,13 @@ export const LandingPage: React.FC = () => {
         )}
 
       </section>
+      )}
 
       {/* ============================================================== */}
       {/* 2.5 VERIFIED STUDENT STORIES & PPO PLACEMENTS                 */}
       {/* (ONLY RENDERED IF ADMIN ADDS REAL TESTIMONIALS IN ADMIN SETTINGS) */}
       {/* ============================================================== */}
-      {publicTestimonials.length > 0 && (
+      {isSectionVisible('testimonials') && publicTestimonials.length > 0 && (
         <section className="py-16 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/60 border-y border-slate-200/60">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -1838,6 +1898,7 @@ export const LandingPage: React.FC = () => {
       )}
 
       {/* Equal Opportunity Trust Guarantee Banner */}
+      {isSectionVisible('equalOpportunity') && (
       <section className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-50/90 via-white to-indigo-50/90 border border-blue-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-center gap-4">
@@ -1864,8 +1925,10 @@ export const LandingPage: React.FC = () => {
           </button>
         </div>
       </section>
+      )}
 
       {/* 3. "FOR STUDENTS" VS "FOR COMPANIES" TRUST BLOCK */}
+      {isSectionVisible('dualTarget') && (
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
@@ -1939,8 +2002,10 @@ export const LandingPage: React.FC = () => {
 
         </div>
       </section>
+      )}
 
       {/* 4. FAQ SECTION */}
+      {isSectionVisible('faq') && (
       <section className="py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -1958,7 +2023,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Accordion List */}
         <div className="space-y-3">
-          {faqItems.map((faq, index) => {
+          {activeFaqItems.map((faq, index) => {
             const isOpen = openFaqIndex === index;
             return (
               <div
@@ -2009,8 +2074,10 @@ export const LandingPage: React.FC = () => {
           </Link>
         </div>
       </section>
+      )}
 
       {/* 5. NEWSLETTER / COHORT PLACEMENT ALERTS */}
+      {isSectionVisible('newsletter') && (
       <section className="py-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 rounded-3xl p-6 sm:p-8 border border-blue-100/90 text-center shadow-xs">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-200/60 text-blue-700 text-[11px] font-bold shadow-2xs mb-3">
@@ -2050,8 +2117,10 @@ export const LandingPage: React.FC = () => {
           )}
         </div>
       </section>
+      )}
 
       {/* RESTORED: COMPANY OUTREACH CONNECT BAR (ABOVE FOOTER) */}
+      {isSectionVisible('companyBar') && (
       <div className="py-6 bg-slate-900 text-center border-t border-slate-800">
         <button
           onClick={() => setIsCompanyModalOpen(true)}
@@ -2061,6 +2130,7 @@ export const LandingPage: React.FC = () => {
           <span>Are you a company looking to connect? Click here →</span>
         </button>
       </div>
+      )}
 
       {/* FOOTER */}
       <PublicFooter
@@ -2115,7 +2185,7 @@ export const LandingPage: React.FC = () => {
       />
 
       {/* Sticky Persistent CTA Bar (Slides in smoothly after scrolling past hero) */}
-      {showStickyCta && (
+      {showStickyCta && isSectionVisible('stickyCta') && (
         <aside aria-label="Quick application" className="fixed bottom-4 left-0 right-0 z-40 px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="max-w-3xl mx-auto bg-slate-900/95 backdrop-blur-xl text-white rounded-2xl p-3 sm:p-3.5 shadow-2xl border border-slate-700/60 flex items-center justify-between gap-3 pointer-events-auto">
             <div className="flex items-center gap-3">

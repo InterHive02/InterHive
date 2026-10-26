@@ -32,11 +32,12 @@ const mapSemesterToAcademicYear = (semester: string): AcademicYear => {
 };
 
 const PROGRAM_OPTIONS = [
-  { value: 'NONE', label: 'Standard Internship (No specific multi-year program)' },
+  { value: '', label: '-- Select Your Program (Mandatory) --' },
   { value: ProgramType.ONE_YEAR, label: '1-Year Program (Final Year Students)' },
   { value: ProgramType.TWO_YEAR, label: '2-Year Program (3rd & Final Year Students)' },
   { value: ProgramType.THREE_YEAR, label: '3-Year Program (2nd Year Onwards)' },
   { value: ProgramType.FOUR_YEAR, label: '4-Year Program (1st Year Onwards)' },
+  { value: ProgramType.PPO, label: 'PPO Program (Pre-Placement Offer Fast-Track)' },
 ];
 
 interface CountryDialCode {
@@ -242,7 +243,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
     semester: '6th Semester',
     graduationYear: String(currentYear + 1),
     cgpa: '',
-    programType: preselectedProgramType || 'NONE',
+    programType: (preselectedProgramType === 'ppo' || preselectedProgramType === 'ppo_internship') ? ProgramType.PPO : (preselectedProgramType || ''),
 
     // Step 3: Domain & Skills
     skills: '',
@@ -553,16 +554,19 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
       return false;
     }
 
-    if (formData.programType && formData.programType !== 'NONE') {
-      const currentAcademicYear = mapSemesterToAcademicYear(formData.semester);
-      const eligibleYears = PROGRAM_ELIGIBILITY_MATRIX[formData.programType as ProgramType];
-      if (eligibleYears && !eligibleYears.includes(currentAcademicYear)) {
-        const progConfig = PROGRAM_CONFIGS[formData.programType as ProgramType];
-        setErrorMessage(
-          `Based on your current academic standing (${currentAcademicYear} Year), the ${progConfig?.title || 'selected program'} is not available. Target academic year: ${progConfig?.targetAcademicYear}.`
-        );
-        return false;
-      }
+    if (!formData.programType || formData.programType === 'NONE') {
+      setErrorMessage('Please select one of the five official programs before proceeding.');
+      return false;
+    }
+
+    const currentAcademicYear = mapSemesterToAcademicYear(formData.semester);
+    const eligibleYears = PROGRAM_ELIGIBILITY_MATRIX[formData.programType as ProgramType];
+    if (formData.programType !== 'PPO' && eligibleYears && !eligibleYears.includes(currentAcademicYear)) {
+      const progConfig = PROGRAM_CONFIGS[formData.programType as ProgramType];
+      setErrorMessage(
+        `Based on your current academic standing (${currentAcademicYear} Year), the ${progConfig?.title || 'selected program'} is recommended for ${progConfig?.targetAcademicYear}. Please select the program matching your academic level.`
+      );
+      return false;
     }
 
     return true;
@@ -644,7 +648,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
         semester: formData.semester,
         graduationYear: formData.graduationYear,
         cgpa: formData.cgpa.trim(),
-        programType: formData.programType !== 'NONE' ? formData.programType : undefined,
+        programType: formData.programType,
         academicYear: mapSemesterToAcademicYear(formData.semester),
         rollNumber: '',
         skills: parsedSkills.length > 0 ? parsedSkills : ['JavaScript', 'React'],
@@ -1269,12 +1273,14 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                       <p className={hintCls}>Optional. Enter CGPA (e.g. 8.5) or percentage (e.g. 85%).</p>
                     </div>
 
-                    {/* Program Selection */}
+                    {/* Program Selection - Mandatory 5 Programs */}
                     <div className="min-[600px]:col-span-2">
                       <label className={labelCls}>
-                        Select Program Level <span className="text-slate-400 font-normal text-[12.5px] ml-1">(Choose a structured multi-year roadmap)</span>
+                        Select Your Program <span className="text-red-500 font-bold">*</span>
+                        <span className="text-slate-400 font-normal text-[12.5px] ml-1">(Mandatory — Choose exactly one of the five programs)</span>
                       </label>
                       <select
+                        required
                         value={formData.programType}
                         onChange={e => setFormData({ ...formData, programType: e.target.value })}
                         className={selectCls}
@@ -1285,7 +1291,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
                           </option>
                         ))}
                       </select>
-                      {formData.programType !== 'NONE' && (
+                      {formData.programType && formData.programType !== 'NONE' && (
                         <div className="mt-2.5 p-3.5 rounded-[12px] bg-primary/5 border border-primary/20 text-[13px]">
                           <div className="font-semibold text-primary dark:text-primary-light">
                             {PROGRAM_CONFIGS[formData.programType as ProgramType]?.title} ({PROGRAM_CONFIGS[formData.programType as ProgramType]?.duration})

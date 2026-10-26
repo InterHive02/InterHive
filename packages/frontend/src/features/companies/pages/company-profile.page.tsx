@@ -29,7 +29,7 @@ export const CompanyProfilePage: React.FC = () => {
     );
   }
 
-  const companyData = {
+  const companyData: any = {
     id: profile.id,
     name: profile.companyInfo.name,
     legalName: profile.companyInfo.legalName,
@@ -48,7 +48,7 @@ export const CompanyProfilePage: React.FC = () => {
     status: profile.status,
     rating: 4.5,
     totalHires: 0,
-    createdAt: profile.createdAt,
+    createdAt: profile.createdAt ? new Date(profile.createdAt) : new Date(),
   };
 
   return (

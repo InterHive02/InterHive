@@ -7,7 +7,7 @@ export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
   const navigate = useNavigate();
-  const { resetPassword, isResettingPassword } = useAuth();
+  const { resetPasswordAsync, isResettingPassword } = useAuth();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +20,7 @@ export const ResetPasswordPage: React.FC = () => {
       return;
     }
     try {
-      await resetPassword({ token, password });
+      await resetPasswordAsync({ token, newPassword: password });
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to reset password');

@@ -307,7 +307,9 @@ export class AuthService {
       user = await this.userModel
         .findById(userId)
         .populate('department')
-        .populate('manager');
+        .populate('manager', 'firstName lastName email profilePhoto position employeeId')
+        .populate('assignedManager', 'firstName lastName email profilePhoto position employeeId')
+        .populate('assignedHr', 'firstName lastName email profilePhoto position employeeId');
     } catch {
       user = await this.userModel.findById(userId);
     }
@@ -317,6 +319,11 @@ export class AuthService {
     }
 
     const userData = user.toObject ? user.toObject() : user;
+    if (userData) {
+      if (!userData.assignedManager && userData.manager) {
+        userData.assignedManager = userData.manager;
+      }
+    }
     if (userData.password) {
       delete userData.password;
     }

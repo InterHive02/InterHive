@@ -90,7 +90,9 @@ export class UsersService {
       this.userModel
         .find(query)
         .populate('department')
-        .populate('manager')
+        .populate('manager', 'firstName lastName email profilePhoto position employeeId')
+        .populate('assignedManager', 'firstName lastName email profilePhoto position employeeId')
+        .populate('assignedHr', 'firstName lastName email profilePhoto position employeeId')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),

@@ -30,10 +30,10 @@ export interface LandingStatItem {
 
 /** Default seed rows that are created on first boot if the collection is empty */
 const DEFAULT_STATS: Omit<PlatformStat, keyof Document>[] = [
-  { key: 'students_trained',    label: 'Students Trained',         manualValue: 5000,  suffix: '+',  useManualValue: true,  icon: 'users',    order: 1, lastManualEditAt: null, lastEditedBy: null },
-  { key: 'internships_provided', label: 'Internships Provided',    manualValue: 1200,  suffix: '+',  useManualValue: true,  icon: 'briefcase', order: 2, lastManualEditAt: null, lastEditedBy: null },
-  { key: 'partner_companies',   label: 'Partner Companies',        manualValue: 80,    suffix: '+',  useManualValue: true,  icon: 'building2', order: 3, lastManualEditAt: null, lastEditedBy: null },
-  { key: 'ppo_conversion',      label: 'PPO Conversion (Target)',  manualValue: 70,    suffix: '%+', useManualValue: true,  icon: 'trophy',   order: 4, lastManualEditAt: null, lastEditedBy: null },
+  { key: 'students_trained',    label: 'Students Trained',             manualValue: 0,   suffix: '+',  useManualValue: true,  icon: 'users',    order: 1, lastManualEditAt: null, lastEditedBy: null },
+  { key: 'internships_provided', label: 'Internships Provided',        manualValue: 0,   suffix: '+',  useManualValue: true,  icon: 'briefcase', order: 2, lastManualEditAt: null, lastEditedBy: null },
+  { key: 'partner_companies',   label: 'Partner Companies',            manualValue: 0,   suffix: '+',  useManualValue: true,  icon: 'building2', order: 3, lastManualEditAt: null, lastEditedBy: null },
+  { key: 'ppo_conversion',      label: 'PPO Conversion Goal (%)',      manualValue: 0,   suffix: '%',  useManualValue: true,  icon: 'trophy',   order: 4, lastManualEditAt: null, lastEditedBy: null },
 ];
 
 @Injectable()
@@ -191,7 +191,8 @@ export class StatsService {
         students_trained: totalApplications,         // All applicants ever = trained pipeline
         internships_provided: studentsPlaced || activeInternshipsCount,
         partner_companies: companyCount,
-        ppo_conversion: 70,                          // Target — cannot be auto-computed yet
+        // ppo_conversion is admin-managed only — cannot be reliably auto-computed from DB
+        // Admins should set this manually via Admin → Landing Stats when real data is available
       };
     } catch (err: any) {
       this.logger.error(`Error computing live stats: ${err.message}`);

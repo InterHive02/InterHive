@@ -1,6 +1,11 @@
 import { apiClient } from '../client';
 
 export interface CompanyProfile {
+  _id?: string;
+  id?: string;
+  status?: string;
+  createdAt?: string;
+  coverImage?: string;
   companyInfo: {
     name: string;
     legalName: string;
@@ -11,6 +16,7 @@ export interface CompanyProfile {
     website?: string;
     description?: string;
     logo?: string;
+    coverImage?: string;
   };
   contact: {
     primaryContact: {

@@ -235,7 +235,7 @@ export const AssessmentResults: React.FC<AssessmentResultsProps> = ({
           Back to Assessments
         </button>
         <button
-          onClick={() => navigate(`/assessments/${results.id}/take`)}
+          onClick={() => navigate(`/assessments/${(results as any).id || (results as any)._id || ''}/take`)}
           className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           Retake Assessment

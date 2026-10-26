@@ -73,6 +73,14 @@ export class User {
   internStatus: string;
 
   @Prop({
+    type: String,
+    enum: ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'],
+    required: false,
+    index: true,
+  })
+  programType?: string;
+
+  @Prop({
     type: Types.ObjectId,
     ref: 'User',
   })

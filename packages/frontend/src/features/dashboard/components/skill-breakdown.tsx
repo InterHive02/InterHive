@@ -145,7 +145,7 @@ export const SkillBreakdown: React.FC<SkillBreakdownProps> = ({ skills = [] }) =
               const lx = center + labelRadius * Math.cos(angle);
               const ly = center + labelRadius * Math.sin(angle);
 
-              let textAnchor = 'middle';
+              let textAnchor: 'middle' | 'start' | 'end' = 'middle';
               if (Math.cos(angle) > 0.3) textAnchor = 'start';
               if (Math.cos(angle) < -0.3) textAnchor = 'end';
 

@@ -3,6 +3,7 @@ export const PROGRAM_TYPES = {
   TWO_YEAR: 'TWO_YEAR',
   THREE_YEAR: 'THREE_YEAR',
   FOUR_YEAR: 'FOUR_YEAR',
+  PPO: 'PPO',
 } as const;
 
 export type ProgramTypeKey = typeof PROGRAM_TYPES[keyof typeof PROGRAM_TYPES];
@@ -228,6 +229,56 @@ export const PROGRAM_CONFIGS: Record<ProgramTypeKey, ProgramConfig> = {
       },
     ],
   },
+  PPO: {
+    id: 'PPO',
+    title: 'PPO Program',
+    duration: '6 Months Fast-Track',
+    targetAcademicYear: 'Pre-Final / Final Year',
+    allowedAcademicYears: ['3rd', '3rd Year', 'Final', 'Final Year', '4th Year', 'Graduated'],
+    shortDescription: 'An intensive, corporate-partner fast-track training and live project internship aimed at direct Pre-Placement Offers.',
+    mainObjective: 'Fast-track corporate training, production project sprints, and direct PPO interviews with hiring partners.',
+    summaryFocus: 'Intensive Training + Live Project Sprint + Direct PPO Interview',
+    summaryTarget: '1 Corporate Capstone Project + Direct Hiring Partner Matching',
+    badge: 'Direct PPO Fast-Track',
+    roadmap: [
+      {
+        yearLabel: 'Month 1-2',
+        stageName: 'Enterprise Foundation & Technical Sprint',
+        targetFocus: 'System Architecture & Production Workflows',
+        targetCount: 'Diagnostic Evaluation & Skill Sprint',
+        activities: [
+          'Enterprise architecture deep dive',
+          'Production Git & CI/CD workflows',
+          'System design & coding sprints',
+          'Weekly mentor 1-on-1 reviews',
+        ],
+      },
+      {
+        yearLabel: 'Month 3-4',
+        stageName: 'Live Client / Corporate Project Delivery',
+        targetFocus: 'Production Engineering & Deliverables',
+        targetCount: '1 Live Corporate Project Deliverable',
+        activities: [
+          'Assigned team project under engineering manager',
+          'Agile sprint ceremonies & daily check-ins',
+          'Production code reviews & pull requests',
+          'Mid-term performance appraisal',
+        ],
+      },
+      {
+        yearLabel: 'Month 5-6',
+        stageName: 'Pre-Placement Evaluation & Direct Hiring',
+        targetFocus: 'Partner Interviews & PPO Offers',
+        targetCount: 'Verified Credential + Partner Interviews',
+        activities: [
+          'Final performance evaluation by manager',
+          'Corporate hiring partner matchmaking',
+          'Direct technical & HR interview loops',
+          'PPO offer finalization & onboarding',
+        ],
+      },
+    ],
+  },
 };
 
 export const PROGRAM_ELIGIBILITY_MATRIX: Record<string, ProgramTypeKey> = {
@@ -248,3 +299,16 @@ export const PROGRAM_ELIGIBILITY_MATRIX: Record<string, ProgramTypeKey> = {
 
 export const PROGRAM_DISCLAIMER =
   'Note: The specified number of internships and training opportunities are program targets and roadmap milestones designed to build maximum industry readiness, and do not constitute an unconditional guarantee of placement.';
+
+export const ALL_PROGRAM_KEYS: ProgramTypeKey[] = ['ONE_YEAR', 'TWO_YEAR', 'THREE_YEAR', 'FOUR_YEAR', 'PPO'];
+
+export const getProgramConfig = (key?: string): ProgramConfig => {
+  if (key && key in PROGRAM_CONFIGS) {
+    return PROGRAM_CONFIGS[key as ProgramTypeKey];
+  }
+  return PROGRAM_CONFIGS.ONE_YEAR;
+};
+
+export const isValidProgramType = (key?: string): boolean => {
+  return typeof key === 'string' && key in PROGRAM_CONFIGS;
+};

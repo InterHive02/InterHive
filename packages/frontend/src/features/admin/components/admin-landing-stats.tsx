@@ -187,6 +187,10 @@ export const AdminLandingStats: React.FC = () => {
           <strong>Manual mode</strong> shows exactly the number you enter.{' '}
           <strong>Live mode</strong> shows real counts from the database (applications, companies, etc).
           "Sync from System" pulls current DB counts and switches all stats to live mode.
+          <br />
+          <strong className="text-amber-900 dark:text-amber-200">Important:</strong>{' '}
+          Stats with a value of <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">0</code> are hidden on the public landing page until you set real numbers.
+          Only publish stats that reflect genuine platform activity.
         </span>
       </div>
 

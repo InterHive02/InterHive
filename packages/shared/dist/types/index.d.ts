@@ -92,7 +92,8 @@ declare enum ProgramType {
     ONE_YEAR = "ONE_YEAR",
     TWO_YEAR = "TWO_YEAR",
     THREE_YEAR = "THREE_YEAR",
-    FOUR_YEAR = "FOUR_YEAR"
+    FOUR_YEAR = "FOUR_YEAR",
+    PPO = "PPO"
 }
 declare enum AcademicYear {
     FIRST_YEAR = "1st",

@@ -27,6 +27,7 @@ import { CommunicationModule } from './modules/communication/communication.modul
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { ContentModule } from './modules/content/content.module';
+import { LandingCmsModule } from './modules/landing-cms/landing-cms.module';
 
 // Common
 import { DatabaseModule } from './common/database/database.module';
@@ -109,6 +110,7 @@ import { CorrelationIdMiddleware } from './core/middleware/correlation-id.middle
     ApplicationsModule,
     StatsModule,
     ContentModule,
+    LandingCmsModule,
   ],
   providers: [
     {

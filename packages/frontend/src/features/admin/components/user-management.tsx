@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Edit2, Trash2, Ban, CheckCircle, MoreVertical, User, Mail, Phone, Calendar, Shield } from 'lucide-react';
+import { Search, Filter, Plus, Edit2, Trash2, Ban, CheckCircle, MoreVertical, User, Mail, Phone, Calendar, Shield, XCircle } from 'lucide-react';
 
 interface UserManagementProps {
   onAdd?: () => void;

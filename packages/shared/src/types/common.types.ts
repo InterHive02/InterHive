@@ -108,6 +108,7 @@ export enum ProgramType {
   TWO_YEAR = 'TWO_YEAR',
   THREE_YEAR = 'THREE_YEAR',
   FOUR_YEAR = 'FOUR_YEAR',
+  PPO = 'PPO',
 }
 
 export enum AcademicYear {

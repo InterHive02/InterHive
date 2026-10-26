@@ -34,6 +34,7 @@ interface AppConfig {
 }
 
 export const APP_CONFIG: AppConfig = {
+  environment: (import.meta.env.MODE as 'development' | 'staging' | 'production') || (import.meta.env.PROD ? 'production' : 'development'),
   appName: import.meta.env.VITE_APP_NAME || 'InterHive',
   appVersion: import.meta.env.VITE_APP_VERSION || '1.1.0',
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://interhive-backend.onrender.com/api/v1' : 'http://localhost:3000'),

@@ -21,11 +21,17 @@ export const useCompany = () => {
       },
     });
 
-  const useCompanies = (params: { page: number; limit: number; search?: string; industry?: string; status?: string }) =>
+  const useCompanies = (params?: { page?: number; limit?: number; search?: string; industry?: string; status?: string }) =>
     useQuery({
       queryKey: ['companies', params],
       queryFn: async () => {
-        const response = await companyApi.getAll(params);
+        const response = await companyApi.getAll({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? 20,
+          search: params?.search,
+          industry: params?.industry,
+          status: params?.status,
+        });
         return response.data;
       },
     });
