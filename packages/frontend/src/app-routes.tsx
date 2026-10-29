@@ -28,6 +28,8 @@ const SsoCallbackPage = lazyLoad(() => import('./features/auth/pages/sso-callbac
 // Pages - Landing & Public
 import { LandingPage } from './features/landing/pages/landing.page';
 const AboutPage = lazyLoad(() => import('./features/landing/pages/about.page'), 'AboutPage');
+const ForInternsPage = lazyLoad(() => import('./features/landing/pages/for-interns.page'), 'ForInternsPage');
+const ForCompaniesPage = lazyLoad(() => import('./features/landing/pages/for-companies.page'), 'ForCompaniesPage');
 const ProgramsPage = lazyLoad(() => import('./features/landing/pages/programs.page'), 'ProgramsPage');
 const ContactPage = lazyLoad(() => import('./features/landing/pages/contact.page'), 'ContactPage');
 const CertificatePage = lazyLoad(() => import('./features/dashboard/pages/certificate.page'), 'CertificatePage');
@@ -110,6 +112,8 @@ export const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public Pages */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/for-interns" element={<ForInternsPage />} />
+        <Route path="/for-companies" element={<ForCompaniesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/programs" element={<ProgramsPage />} />
         <Route path="/our-programs" element={<ProgramsPage />} />

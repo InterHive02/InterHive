@@ -59,6 +59,11 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
             <h5 className="text-sm font-black text-white mb-4">For Students</h5>
             <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
               <li>
+                <Link to="/for-interns" className="text-blue-400 hover:text-blue-300 font-bold hover:underline transition-all block">
+                  For Interns Overview →
+                </Link>
+              </li>
+              <li>
                 <Link to="/programs" className="text-slate-300 hover:text-blue-400 hover:underline transition-all block">
                   Explore Internships
                 </Link>
@@ -83,6 +88,11 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           <div>
             <h5 className="text-sm font-black text-white mb-4">For Companies</h5>
             <ul className="space-y-2.5 text-xs text-slate-300 font-semibold">
+              <li>
+                <Link to="/for-companies" className="text-indigo-400 hover:text-indigo-300 font-bold hover:underline transition-all block">
+                  For Companies Overview →
+                </Link>
+              </li>
               <li>
                 <button 
                   onClick={onOpenCompanyModal} 

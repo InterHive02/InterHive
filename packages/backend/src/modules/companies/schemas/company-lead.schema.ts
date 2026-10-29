@@ -19,11 +19,20 @@ export class CompanyLead {
   @Prop({ trim: true, default: '' })
   phone: string;
 
+  @Prop({ trim: true, default: '' })
+  designation?: string;
+
   @Prop({ trim: true })
   website?: string;
 
   @Prop({ trim: true, default: 'Technology' })
   industry?: string;
+
+  @Prop({ type: [String], default: [] })
+  requiredSkills?: string[];
+
+  @Prop({ trim: true, default: '' })
+  preferredProgram?: string;
 
   @Prop({ trim: true, default: 'Engineering Interns' })
   hiringRequirement: string;

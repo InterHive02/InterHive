@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 interface PublicNavbarProps {
-  activePage?: 'home' | 'about' | 'programs' | 'contact';
+  activePage?: 'home' | 'about' | 'programs' | 'contact' | 'for-interns' | 'for-companies';
   onOpenInternshipModal: () => void;
   onOpenCompanyModal: () => void;
 }
@@ -61,18 +61,26 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
           >
             PPO Program
           </Link>
-          <button
-            onClick={onOpenInternshipModal}
-            className="hover:text-blue-600 transition-colors cursor-pointer font-bold"
+          <Link
+            to="/for-interns"
+            className={`relative py-1 transition-colors ${
+              activePage === 'for-interns'
+                ? 'text-blue-600 border-b-2 border-blue-600 font-extrabold'
+                : 'hover:text-blue-600'
+            }`}
           >
             For Interns
-          </button>
-          <button
-            onClick={onOpenCompanyModal}
-            className="hover:text-blue-600 transition-colors cursor-pointer font-bold"
+          </Link>
+          <Link
+            to="/for-companies"
+            className={`relative py-1 transition-colors ${
+              activePage === 'for-companies'
+                ? 'text-blue-600 border-b-2 border-blue-600 font-extrabold'
+                : 'hover:text-blue-600'
+            }`}
           >
             For Companies
-          </button>
+          </Link>
           <Link
             to="/about"
             className={`relative py-1 transition-colors ${
@@ -158,26 +166,38 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
                 <span className="text-xs text-blue-600 font-extrabold">Active</span>
               )}
             </Link>
-            <button
-              onClick={() => {
-                setIsMobileNavOpen(false);
-                navigate('/register');
-              }}
-              className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
+            <Link
+              to="/for-interns"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+                activePage === 'for-interns'
+                  ? 'bg-blue-50 text-blue-600 font-extrabold'
+                  : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
+              }`}
             >
               <span>For Interns</span>
-              <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Get Started</span>
-            </button>
-            <button
-              onClick={() => {
-                setIsMobileNavOpen(false);
-                onOpenCompanyModal();
-              }}
-              className="text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors flex items-center justify-between cursor-pointer"
+              {activePage === 'for-interns' ? (
+                <span className="text-xs text-blue-600 font-extrabold">Active</span>
+              ) : (
+                <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Students</span>
+              )}
+            </Link>
+            <Link
+              to="/for-companies"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+                activePage === 'for-companies'
+                  ? 'bg-blue-50 text-blue-600 font-extrabold'
+                  : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
+              }`}
             >
               <span>For Companies</span>
-              <span className="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Hire</span>
-            </button>
+              {activePage === 'for-companies' ? (
+                <span className="text-xs text-blue-600 font-extrabold">Active</span>
+              ) : (
+                <span className="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Hire</span>
+              )}
+            </Link>
             <Link
               to="/about"
               onClick={() => setIsMobileNavOpen(false)}

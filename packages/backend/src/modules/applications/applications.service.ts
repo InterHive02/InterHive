@@ -102,6 +102,88 @@ export class ApplicationsService {
     };
   }
 
+  async createStudentInquiry(data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    college: string;
+    degree: string;
+    currentYear: string;
+    skills?: string | string[];
+    preferredProgram?: string;
+    careerGoal?: string;
+    consent?: boolean;
+  }) {
+    if (!data.fullName || !data.email || !data.phone || !data.college || !data.degree) {
+      throw new BadRequestException('Please provide all required fields (Name, Email, Phone, College, Degree).');
+    }
+
+    const cleanEmail = data.email.toLowerCase().trim();
+    const skillsArray = Array.isArray(data.skills)
+      ? data.skills
+      : typeof data.skills === 'string'
+      ? data.skills.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    let mappedProgram = 'PPO';
+    if (data.preferredProgram === 'Free') mappedProgram = 'ONE_YEAR';
+    else if (data.preferredProgram === 'Premium') mappedProgram = 'PPO';
+    else if (data.preferredProgram === 'Need Guidance') mappedProgram = 'FOUR_YEAR';
+
+    const inquiry = new this.applicationModel({
+      fullName: data.fullName.trim(),
+      email: cleanEmail,
+      phone: data.phone.trim(),
+      institution: data.college.trim(),
+      degree: data.degree.trim(),
+      semester: data.currentYear || '3rd Year',
+      academicYear: data.currentYear || '3rd Year',
+      programType: mappedProgram,
+      skills: skillsArray,
+      areasOfInterest: [data.preferredProgram || 'General'],
+      reasonForApplying: data.careerGoal || 'Student inquiry via For Interns landing page',
+      additionalInfo: JSON.stringify({
+        source: 'for-interns-landing-inquiry',
+        preferredProgram: data.preferredProgram,
+        careerGoal: data.careerGoal,
+      }),
+      status: 'new',
+      resumeUrl: '',
+      consentTimestamp: new Date().toISOString(),
+      accountCreated: false,
+    });
+
+    await inquiry.save();
+
+    // Trigger HR email notification asynchronously
+    try {
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 0;">🎓 New Student Career Inquiry</h2>
+          <p style="font-size: 14px; color: #334155;">A new student inquiry was submitted via the <strong>/for-interns</strong> landing page:</p>
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569; width: 140px;">Student Name:</td><td style="padding: 8px 0; color: #0f172a;">${data.fullName}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Email:</td><td style="padding: 8px 0; color: #2563eb;"><a href="mailto:${cleanEmail}">${cleanEmail}</a></td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone:</td><td style="padding: 8px 0; color: #0f172a;">${data.phone}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">College / Inst:</td><td style="padding: 8px 0; color: #0f172a;">${data.college}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Degree / Course:</td><td style="padding: 8px 0; color: #0f172a;">${data.degree}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Current Year:</td><td style="padding: 8px 0; color: #0f172a;">${data.currentYear || 'Not specified'}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Skills / Interests:</td><td style="padding: 8px 0; color: #0f172a;">${skillsArray.join(', ') || 'General'}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Program Preference:</td><td style="padding: 8px 0; color: #0f172a;">${data.preferredProgram || 'Need Guidance'}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #475569;">Career Goal / Note:</td><td style="padding: 8px 0; color: #0f172a;">${data.careerGoal || 'None'}</td></tr>
+          </table>
+        </div>
+      `;
+      this.mailService.sendEmail('interhive.info@gmail.com', `🎓 New Student Career Inquiry - ${data.fullName}`, emailContent).catch(() => {});
+    } catch (e) {}
+
+    return {
+      success: true,
+      message: 'Thank you! Your career inquiry has been received. The InterHive student guidance team will reach out to help you choose the best path forward.',
+      data: inquiry,
+    };
+  }
+
   async findAll(params: {
     page?: number;
     limit?: number;

@@ -37,6 +37,15 @@ export class ApplicationsController {
     return this.applicationsService.create(createApplicationDto);
   }
 
+  @Public()
+  @Post('inquiry')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Public submission of student career inquiry' })
+  @ApiResponse({ status: 201, description: 'Student inquiry submitted successfully' })
+  async createInquiry(@Body() body: any) {
+    return this.applicationsService.createStudentInquiry(body);
+  }
+
   @Get()
   @Roles(UserRole.ADMIN, UserRole.HR)
   @ApiBearerAuth()

@@ -412,22 +412,36 @@ export class CompaniesService {
     contactPerson: string;
     email: string;
     phone: string;
+    designation?: string;
     techStack?: string;
+    requiredSkills?: string[] | string;
     internCount?: string;
+    preferredProgram?: string;
     message?: string;
     website?: string;
     industry?: string;
     additionalInfo?: string;
   }) {
+    const skillsArray = Array.isArray(data.requiredSkills)
+      ? data.requiredSkills
+      : typeof data.requiredSkills === 'string'
+      ? data.requiredSkills.split(',').map((s) => s.trim()).filter(Boolean)
+      : data.techStack
+      ? data.techStack.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
     // Persist lead to database
     const lead = new this.leadModel({
       companyName: data.companyName || 'Unknown Company',
       contactPerson: data.contactPerson || 'Representative',
       email: (data.email || 'info@company.com').toLowerCase().trim(),
       phone: data.phone || '',
+      designation: data.designation || '',
       website: data.website || '',
       industry: data.industry || 'Technology',
-      hiringRequirement: data.techStack || 'Software Interns',
+      requiredSkills: skillsArray,
+      preferredProgram: data.preferredProgram || '',
+      hiringRequirement: data.techStack || skillsArray.join(', ') || 'Software Interns',
       internCount: data.internCount || '1-5',
       message: data.message || '',
       additionalInfo: data.additionalInfo || '',

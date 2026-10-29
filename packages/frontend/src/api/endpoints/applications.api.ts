@@ -61,6 +61,23 @@ export interface InternshipApplicationData {
 }
 
 export const applicationsApi = {
+  submitInquiry: (data: {
+    fullName: string;
+    email: string;
+    phone: string;
+    college: string;
+    degree: string;
+    currentYear: string;
+    skills?: string | string[];
+    preferredProgram?: string;
+    careerGoal?: string;
+    consent?: boolean;
+  }) =>
+    apiClient.post<{ success: boolean; message: string; data: any }>(
+      '/applications/inquiry',
+      data,
+    ),
+
   submitApplication: (data: Partial<InternshipApplicationData>) =>
     apiClient.post<{ success: boolean; message: string; data: InternshipApplicationData }>(
       '/applications',

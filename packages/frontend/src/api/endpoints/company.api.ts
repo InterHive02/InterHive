@@ -125,13 +125,16 @@ export const companyApi = {
     contactPerson: string;
     email: string;
     phone: string;
+    designation?: string;
     techStack?: string;
+    requiredSkills?: string[] | string;
     internCount?: string;
+    preferredProgram?: string;
     message?: string;
     website?: string;
     industry?: string;
     additionalInfo?: string;
-  }) => apiClient.post('/companies/inquiry', data),
+  }) => apiClient.post<{ success: boolean; message: string; data?: any }>('/companies/inquiry', data),
 
   getLeads: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
     apiClient.get<any[]>('/companies/leads', { params }),
