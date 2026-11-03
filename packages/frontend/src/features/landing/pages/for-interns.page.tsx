@@ -20,10 +20,10 @@ import {
   Calendar,
   ShieldCheck,
   AlertCircle,
-  HelpCircle,
   Terminal,
   Send,
-  Zap
+  Zap,
+  Code2
 } from 'lucide-react';
 import { PublicNavbar } from '../components/public-navbar';
 import { PublicFooter } from '../components/public-footer';
@@ -34,7 +34,7 @@ import { applicationsApi } from '../../../api/endpoints/applications.api';
 export const ForInternsPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Page Modals
+  // Modals
   const [isInternshipModalOpen, setIsInternshipModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
@@ -49,14 +49,11 @@ export const ForInternsPage: React.FC = () => {
     }
     metaDesc.setAttribute(
       'content',
-      'Prepare for internships with structured learning, practical projects, skill development, performance tracking, and relevant company connections through InterHive.'
+      'Bridge the gap between college theory and industry expectations. Work on real production code, receive 1-on-1 code reviews, and connect directly with hiring companies.'
     );
   }, []);
 
-  // Timeline Step State
-  const [activeTimelineStep, setActiveTimelineStep] = useState(0);
-
-  // Preview Dashboard Tab State
+  // Dashboard Tab Preview State
   const [previewTab, setPreviewTab] = useState<'tasks' | 'attendance' | 'skills' | 'feedback'>('tasks');
 
   // FAQ Accordion State
@@ -71,7 +68,7 @@ export const ForInternsPage: React.FC = () => {
     degree: '',
     currentYear: '3rd Year',
     skills: '',
-    preferredProgram: 'Need Guidance',
+    preferredProgram: 'PPO Program',
     careerGoal: '',
     consent: false,
   });
@@ -80,6 +77,18 @@ export const ForInternsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const selectProgramAndScroll = (programName: string) => {
+    setFormData(prev => ({ ...prev, preferredProgram: programName }));
+    scrollToSection('student-inquiry');
+  };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -95,1360 +104,766 @@ export const ForInternsPage: React.FC = () => {
       errors.phone = 'Please enter a valid 10-digit mobile number';
     }
     if (!formData.college.trim()) errors.college = 'College or University name is required';
-    if (!formData.degree.trim()) errors.degree = 'Degree / Course is required';
+    if (!formData.degree.trim()) errors.degree = 'Degree / Branch is required';
     if (!formData.consent) errors.consent = 'You must agree to the privacy policy to submit';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    if (formErrors[name]) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
   const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
       const response = await applicationsApi.submitInquiry({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        college: formData.college,
-        degree: formData.degree,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        college: formData.college.trim(),
+        degree: formData.degree.trim(),
         currentYear: formData.currentYear,
-        skills: formData.skills,
+        skills: formData.skills.trim(),
         preferredProgram: formData.preferredProgram,
-        careerGoal: formData.careerGoal,
+        careerGoal: formData.careerGoal.trim(),
         consent: formData.consent,
       });
 
       if (response.data && response.data.success) {
         setSubmitSuccess(true);
-        setFormData({
-          fullName: '',
-          email: '',
-          phone: '',
-          college: '',
-          degree: '',
-          currentYear: '3rd Year',
-          skills: '',
-          preferredProgram: 'Need Guidance',
-          careerGoal: '',
-          consent: false,
-        });
       } else {
-        setSubmitError(response.data?.message || 'Failed to submit inquiry. Please try again.');
+        setSubmitError(response.data?.message || 'Submission failed. Please try again.');
       }
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Server connection error. Please verify your internet and try again.';
-      setSubmitError(msg);
+      console.error('Inquiry submission error:', err);
+      setSubmitError(
+        err.response?.data?.message || 'Failed to submit inquiry. Please check your network and try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Timeline Steps
-  const timelineSteps = [
+  // 5 Major Programs
+  const programs = [
     {
-      step: '01',
-      title: 'Assess',
-      tag: 'Skill Diagnostic',
-      desc: 'Take an objective, domain-specific assessment evaluating fundamental coding, problem solving, and system intuition.',
-      icon: Target,
+      id: '1-Year Program',
+      title: '1-Year Program',
+      badge: 'Foundation to Product',
+      duration: '12 Months',
+      description: 'Master modern full-stack development, Git branching, unit testing, and deploy your first production SaaS application.',
+      idealFor: '1st & 2nd Year Students',
       color: 'from-blue-600 to-indigo-600',
     },
     {
-      step: '02',
-      title: 'Train',
-      tag: 'Industry Sprints',
-      desc: 'Participate in structured sprints covering production Git workflows, professional code reviews, and workplace expectations.',
-      icon: BookOpen,
+      id: '2-Year Program',
+      title: '2-Year Program',
+      badge: 'Architecture & Mastery',
+      duration: '24 Months',
+      description: 'Deep dive into microservices, database optimization, cloud deployments, and collaborative open-source sprints.',
+      idealFor: '2nd & 3rd Year Students',
       color: 'from-indigo-600 to-purple-600',
     },
     {
-      step: '03',
-      title: 'Build',
-      tag: 'Hands-on Projects',
-      desc: 'Develop real-world software modules, build pull requests, adhere to strict deadlines, and collaborate as an engineering team.',
-      icon: Code,
+      id: '3-Year Program',
+      title: '3-Year Program',
+      badge: 'Enterprise Engineering',
+      duration: '36 Months',
+      description: 'Comprehensive software engineering mastery, cloud infrastructure (Docker/AWS), CI/CD, and system design leadership.',
+      idealFor: 'Early College Students',
       color: 'from-purple-600 to-pink-600',
     },
     {
-      step: '04',
-      title: 'Evaluate',
-      tag: 'Rubric Review',
-      desc: 'Receive comprehensive, multidimensional performance evaluations from experienced engineering managers and mentors.',
-      icon: Award,
-      color: 'from-pink-600 to-rose-600',
+      id: '4-Year Program',
+      title: '4-Year Program',
+      badge: 'Complete Career Path',
+      duration: '48 Months',
+      description: 'End-to-end industry readiness running parallel to your degree, transforming you into a top 1% junior tech lead.',
+      idealFor: '1st Year College Students',
+      color: 'from-teal-600 to-emerald-600',
     },
     {
-      step: '05',
-      title: 'Connect',
-      tag: 'Talent Matching',
-      desc: 'Your verified skill profile and attendance record are matched with relevant verified company openings that fit your profile.',
-      icon: Users,
-      color: 'from-rose-600 to-amber-600',
-    },
-    {
-      step: '06',
-      title: 'Interview',
-      tag: 'Company Rounds',
-      desc: 'Enter targeted technical rounds with hiring partners having already demonstrated verifiable project artifacts.',
-      icon: Briefcase,
-      color: 'from-amber-600 to-emerald-600',
-    },
-    {
-      step: '07',
-      title: 'Potential Hire',
-      tag: 'Career Transition',
-      desc: 'Perform on live internship projects with clear pathways toward Pre-Placement Offers (PPOs) and full-time employment.',
-      icon: GraduationCap,
-      color: 'from-emerald-600 to-teal-600',
+      id: 'PPO Program',
+      title: 'PPO Program',
+      badge: 'Pre-Placement Fast Track',
+      duration: '6 Months Intensive',
+      description: 'Rigorous sprint training, portfolio polishing, and direct interviews targeting Pre-Placement Offers from verified companies.',
+      idealFor: 'Final & Pre-Final Year Students',
+      color: 'from-blue-700 to-blue-900',
+      popular: true,
     },
   ];
 
-  // FAQ Items
-  const faqList = [
+  // Top 5 FAQs
+  const faqs = [
     {
-      q: 'What is InterHive?',
-      a: 'InterHive is an Industry-Readiness & Talent Connect Platform. We bridge the critical gap between college education and employer expectations through structured preparation sprints, practical project simulations, verified attendance tracking, and connections with hiring partner companies.',
+      q: 'Can I balance InterHive alongside college classes and semester exams?',
+      a: 'Yes, 100%. The program is built specifically for college students. Tasks are sprint-based with flexible weekend schedules. During exam weeks, you can pause or adjust your sprint velocity without penalty.'
     },
     {
-      q: 'Who can apply?',
-      a: 'Any college student or recent graduate looking to enter technology and engineering domains can apply. We welcome students across 1st, 2nd, 3rd, and Final years, as well as recent graduates seeking practical industry experience.',
+      q: 'Are students from non-Computer Science branches eligible?',
+      a: 'Absolutely. What matters to hiring companies is your ability to write clean, working code and solve problems—not the branch stamped on your degree. Many of our highest-ranked candidates come from Mechanical, Civil, and Electrical streams.'
     },
     {
-      q: 'How does InterHive prepare students for internships?',
-      a: 'We move students beyond passive video tutorials into realistic engineering workflows. You will work on real code repositories, open GitHub pull requests, receive code review feedback, follow agile sprints, and attend professional workplace readiness sessions.',
+      q: 'How does InterHive connect me with companies?',
+      a: 'Unlike job boards where your PDF resume gets lost among thousands of applicants, InterHive provides partnering hiring leads with verified GitHub code repositories, architecture benchmark scores, and sprint attendance logs. Companies review your actual output and interview you directly.'
     },
     {
-      q: 'How is intern attendance and performance monitored?',
-      a: 'InterHive provides dedicated dashboards where students clock daily task attendance, log sprint hours, submit assignment deliverables, and receive milestone scores. This verifiable track record gives hiring partners confidence in your workplace discipline.',
+      q: 'What happens when I get stuck on a technical blocker?',
+      a: 'You are never on your own. You have access to dedicated platform technical mentors, live weekly code review sessions, and an active peer developer community to review pull requests and debug errors.'
     },
     {
-      q: 'How does company matching work?',
-      a: 'Rather than blasting resumes blindly, InterHive matches your verified skill assessment scores, completed project demonstrations, and attendance reliability with specific technical requirements posted by our verified partner employers.',
-    },
-    {
-      q: 'Are internships or job offers guaranteed?',
-      a: 'No platform can honestly guarantee employment. Final hiring and internship selection decisions always rest entirely with the partner employers based on your technical merit, interview performance, and project contributions. InterHive provides the structured preparation, verified evidence, and company introductions to maximize your opportunities.',
-    },
-    {
-      q: 'How can I get help choosing a program?',
-      a: 'You can submit the student inquiry form below! Our student counseling team will review your current academic year, domain interests, and career goals to recommend whether our 1-Year, 2-Year, 3-Year, 4-Year, or direct 6-Month PPO Track is the optimal fit.',
-    },
+      q: 'What kind of proof or certificate do I receive upon completion?',
+      a: 'You receive a digitally verifiable InterHive Industry-Readiness Certificate with a unique credential ID and a permanent public portfolio link showcasing all merged PRs, project architectures, and benchmark ratings.'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-[#F0F5FA] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      {/* Header Navigation */}
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+      {/* Navigation */}
       <PublicNavbar
-        activePage="for-interns"
         onOpenInternshipModal={() => setIsInternshipModalOpen(true)}
         onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
       />
 
-      {/* ============================================================== */}
-      {/* SECTION 1: PREMIUM HERO SECTION                                */}
-      {/* ============================================================== */}
-      <section className="relative pt-12 pb-24 md:pt-16 md:pb-32 overflow-hidden bg-gradient-to-br from-[#EBF3FF] via-[#F4F8FC] to-[#F3E8FF]">
-        {/* Ambient Glows */}
-        <div className="absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -right-20 w-96 h-96 rounded-full bg-purple-400/20 blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#3b82f6_0.8px,transparent_0.8px)] [background-size:26px_26px]" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Left Hero Content */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+      <main>
+        {/* ============================================================ */}
+        {/* HERO SECTION: INSPIRING, DIRECT & CRISP                      */}
+        {/* ============================================================ */}
+        <section className="relative pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden bg-gradient-to-b from-[#F0F5FF] via-[#F8FAFC] to-[#F8FAFC]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center max-w-3xl mx-auto space-y-6">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 text-xs font-extrabold shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 text-xs sm:text-sm font-semibold shadow-xs">
                 <Sparkles className="w-4 h-4 text-blue-600" />
-                <span>Industry-Readiness & Talent Connect Platform for Students</span>
+                <span>Cohort Admissions Open &bull; Zero Cost Initial Evaluation</span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-                Don't Just Apply for Internships. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Don't Just Apply for Internships.{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700">
                   Become Industry-Ready.
                 </span>
               </h1>
 
-              {/* Supporting Copy */}
-              <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                InterHive helps students bridge the gap between academic learning and industry expectations through structured preparation, practical projects, skill development, performance tracking, and connections with relevant companies.
+              {/* Subheadline */}
+              <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                Tired of ghosted applications and fake certificate tasks? InterHive trains you through real production sprints, 1-on-1 code reviews, and introduces you to companies ready to hire.
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
-                  type="button"
                   onClick={() => scrollToSection('student-inquiry')}
-                  className="px-7 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-600/25 transition-all duration-200 hover:-translate-y-0.5"
                 >
-                  <span>Start Your Journey</span>
+                  <span>Apply for Next Cohort</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() => scrollToSection('how-it-works')}
-                  className="px-6 py-3.5 rounded-full bg-white text-slate-700 hover:text-blue-600 hover:bg-slate-50 border border-slate-200/90 font-bold text-sm shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                  onClick={() => scrollToSection('programs-grid')}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 shadow-xs transition"
                 >
-                  <span>How InterHive Works</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <Layers className="w-4 h-4 text-slate-500" />
+                  <span>Explore the 5 Programs</span>
                 </button>
               </div>
 
-              {/* Trust Indicators */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-500 font-bold border-t border-slate-200/60">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>100% Free Readiness Assessment</span>
+              {/* Key Highlights Strip */}
+              <div className="pt-8 grid grid-cols-3 gap-4 border-t border-slate-200/80 max-w-2xl mx-auto text-center">
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">5 Programs</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">1-Year to PPO Track</p>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Real GitHub Pull-Request Workflows</span>
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-blue-600">100%</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Practical Git Repos</p>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Verified Partner Company Connect</span>
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600">Direct</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Company Intros</p>
                 </div>
               </div>
             </div>
-
-            {/* Right Hero Visual (3D-Inspired Student Journey Progression) */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                
-                {/* Main Glass Card Preview */}
-                <div className="rounded-3xl bg-white/90 backdrop-blur-xl border border-slate-200/80 shadow-2xl p-6 relative z-10 space-y-5">
-                  {/* Card Header */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/30">
-                        IH
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black text-slate-900 leading-none">Student Career Workspace</h4>
-                        <span className="text-[11px] text-slate-500 font-semibold">Active Track: PPO Engineering Sprint</span>
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
-                      Verified Ready
-                    </span>
-                  </div>
-
-                  {/* 4 Floating Progression Steps inside Card */}
-                  <div className="space-y-3">
-                    <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-                          <Target className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">1. Skill Diagnostic Score</div>
-                          <div className="text-[10px] text-slate-500 font-medium">92% Technical Fundamentals</div>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-blue-600">Passed</span>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
-                          <Clock className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">2. Sprint Attendance Tracking</div>
-                          <div className="text-[10px] text-slate-500 font-medium">98.4% On-Time Check-In Record</div>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-indigo-600">Active</span>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center">
-                          <Code className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">3. Practical Pull Request</div>
-                          <div className="text-[10px] text-slate-500 font-medium">Full Stack REST API + Auth Module</div>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-purple-600">Approved</span>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
-                          <Building2 className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">4. Partner Company Connect</div>
-                          <div className="text-[10px] text-slate-500 font-medium">Eligible for Corporate Internship</div>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-emerald-600">Matched</span>
-                    </div>
-                  </div>
-
-                  {/* Card Footer Progress Bar */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <div className="flex justify-between text-[11px] font-bold text-slate-600 mb-1.5">
-                      <span>Overall Industry-Readiness</span>
-                      <span className="text-blue-600 font-extrabold">94% Ready</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full w-[94%]" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subtle Floating Decorative Elements */}
-                <div className="absolute -top-4 -right-4 px-3.5 py-2 rounded-2xl bg-white border border-slate-200/80 shadow-lg flex items-center gap-2 z-20">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs font-bold text-slate-800">Verified Evidence</span>
-                </div>
-
-                <div className="absolute -bottom-4 -left-4 px-3.5 py-2 rounded-2xl bg-slate-900 text-white shadow-xl flex items-center gap-2 z-20">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-bold">Fast-Track PPO Hiring</span>
-                </div>
-
-              </div>
-            </div>
-
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ============================================================== */}
-      {/* SECTION 2: THE PROBLEM STUDENTS FACE                           */}
-      {/* ============================================================== */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-extrabold text-rose-600 tracking-widest uppercase">
-            THE REALITY CHECK
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Your Degree Is the Beginning. Industry Readiness Takes More.
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 font-medium">
-            College teaches you theory, but engineering teams hire for production execution. Here is why the traditional path creates friction for ambitious students:
-          </p>
-        </div>
-
-        {/* 6 Problem Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">1. Limited Practical Experience</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Syllabi focus heavily on semester examinations and theoretical concepts, leaving students without exposure to production Git branching, CI/CD, and real-world legacy codebases.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-rose-600">
-              Impact: Struggles during initial engineering onboarding
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black">
-                <Briefcase className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">2. Difficulty Finding Meaningful Internships</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Most internet job boards are saturated with certificate-selling schemes, unpaid data-entry tasks, or cold application portals where resumes vanish into black holes.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-amber-600">
-              Impact: Wasted summer months with zero career progress
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black">
-                <Terminal className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">3. Lack of Industry-Relevant Skills</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Modern tools like Docker, microservices, cloud APIs, and automated testing evolve exponentially faster than university curricula can update their standard textbooks.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-blue-600">
-              Impact: Skills gap between campus projects and job specs
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black">
-                <Users className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">4. Limited Workplace & Interview Prep</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Students rarely receive authentic technical interview simulations, system design guidance, or feedback on professional asynchronous communication and workplace etiquette.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-indigo-600">
-              Impact: High rejection rates at the final managerial rounds
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-black">
-                <FileCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">5. Inability to Demonstrate Actual Performance</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                A 2-page resume with generic todo-app projects does not prove reliability, work discipline, clean code architecture, or consistency under real development deadlines.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-purple-600">
-              Impact: Recruiters cannot distinguish real talent from resume fluff
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
-                <HelpCircle className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">6. Uncertainty About Matching Companies</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Students often spend months sending blind applications to hundreds of organizations without understanding which companies genuinely value their specific technical strengths.
-              </p>
-            </div>
-            <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] font-bold text-emerald-600">
-              Impact: Burnout and misplaced expectations
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* SECTION 3: THE INTERHIVE SOLUTION                              */}
-      {/* ============================================================== */}
-      <section className="py-20 bg-white border-y border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-              THE COMPLETE ECOSYSTEM
+        {/* ============================================================ */}
+        {/* SECTION 2: THE REALITY CHECK (COLLEGE VS INTERHIVE)           */}
+        {/* ============================================================ */}
+        <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+              The Reality Gap
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              A Structured Journey from Student to Industry-Ready Talent.
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Why 90% of College Applications Get Ignored
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 font-medium">
-              We replaced random guesswork with six interconnected pillars built directly into our platform:
-            </p>
           </div>
 
-          {/* 6 Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <Target className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">1. Skill Assessment</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Objective, diagnostic technical evaluations help students identify exactly where they excel and which specific competencies require targeted improvement before facing real interviewers.
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold">
+                Traditional Approach
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-blue-600">
-                <span>Diagnostic analytics & gap reports</span>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">2. Industry Preparation</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Structured learning tracks covering asynchronous professional communication, technical standards, code quality benchmarks, agile expectations, and realistic interview drills.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-indigo-600">
-                <span>Practical workplace curriculum</span>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <Code className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">3. Practical Projects</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Gain authentic hands-on experience through real-world-style engineering tasks, GitHub pull requests, merge conflict resolution, sprint deadlines, and collaborative team branches.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-purple-600">
-                <span>Production repository artifacts</span>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <Clock className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">4. Attendance & Progress Monitoring</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Daily attendance check-ins, assigned work status, deliverable completion, and sprint velocity are transparently tracked through our dedicated student and manager dashboards.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-rose-600">
-                <span>Verifiable track record of discipline</span>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <Award className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">5. Performance Evaluation</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Detailed, rubric-based evaluations provide clear visibility into your technical output, collaboration, problem solving, and constructive areas for professional growth.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-emerald-600">
-                <span>Transparent mentor feedback</span>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mb-6 font-bold shadow-xs">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">6. Company Connection</h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  Connect prepared candidates with suitable company opportunities based on actual verified skills, domain interests, program eligibility, and specific employer hiring needs.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-xs font-extrabold text-amber-600">
-                <span>Direct partner interview pipelines</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* SECTION 4: HOW IT WORKS (RESPONSIVE INTERACTIVE TIMELINE)       */}
-      {/* ============================================================== */}
-      <section id="how-it-works" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-            STRUCTURED MILESTONES
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Your Journey with InterHive.
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 font-medium">
-            From initial registration to potential corporate placement, follow a proven progression sequence:
-          </p>
-        </div>
-
-        {/* Desktop Interactive Stepper (Horizontal) */}
-        <div className="hidden lg:block space-y-8">
-          <div className="grid grid-cols-7 gap-2 bg-white p-3 rounded-3xl border border-slate-200/80 shadow-xs">
-            {timelineSteps.map((step, idx) => {
-              const IconComp = step.icon;
-              const isActive = activeTimelineStep === idx;
-              return (
-                <button
-                  key={step.step}
-                  type="button"
-                  onClick={() => setActiveTimelineStep(idx)}
-                  className={`p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-102'
-                      : 'hover:bg-slate-50 text-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-[10px] font-black ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>
-                      {step.step}
-                    </span>
-                    <IconComp className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                  </div>
-                  <div>
-                    <h4 className="font-black text-xs leading-tight mb-0.5">{step.title}</h4>
-                    <span className={`text-[10px] font-medium block truncate ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
-                      {step.tag}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active Step Feature Box */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xl flex items-center justify-between gap-8">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-black text-xs border border-blue-200">
-                <span>Stage {timelineSteps[activeTimelineStep].step}</span>
-                <span>•</span>
-                <span>{timelineSteps[activeTimelineStep].tag}</span>
-              </div>
-              <h3 className="text-2xl font-black text-slate-900">
-                {timelineSteps[activeTimelineStep].title}: {timelineSteps[activeTimelineStep].tag}
-              </h3>
-              <p className="text-slate-600 text-sm leading-relaxed font-medium">
-                {timelineSteps[activeTimelineStep].desc}
+              <h3 className="text-base font-bold text-slate-900">Academic Syntax vs. Production Code</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Colleges teach outdated theory and syntax puzzles. Companies demand Git branching, TypeScript, Docker, clean APIs, and database migrations.
               </p>
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-blue-700 font-semibold">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>InterHive: Production SaaS sprints</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setActiveTimelineStep((prev) => Math.max(0, prev - 1))}
-                disabled={activeTimelineStep === 0}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
-              >
-                Previous Step
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTimelineStep((prev) => Math.min(timelineSteps.length - 1, prev + 1))}
-                disabled={activeTimelineStep === timelineSteps.length - 1}
-                className="px-5 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold disabled:opacity-40 hover:bg-blue-700 cursor-pointer"
-              >
-                Next Step
-              </button>
+
+            {/* Card 2 */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold">
+                Traditional Approach
+              </div>
+              <h3 className="text-base font-bold text-slate-900">Paper Certificates vs. Verified Repos</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Tech leads laugh at generic PDF certificates from course platforms. They want to see merged Pull Requests, clean commits, and readable architecture.
+              </p>
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-blue-700 font-semibold">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>InterHive: Verified GitHub portfolio</span>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold">
+                Traditional Approach
+              </div>
+              <h3 className="text-base font-bold text-slate-900">Getting Stuck Alone vs. Real Mentorship</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Spending days blocked on simple environment bugs causes burnout and self-doubt. You need real engineering feedback to progress quickly.
+              </p>
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-blue-700 font-semibold">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>InterHive: 1-on-1 code reviews & standups</span>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Mobile Vertical Stepper */}
-        <div className="lg:hidden space-y-4">
-          {timelineSteps.map((step) => {
-            const IconComp = step.icon;
-            return (
-              <div key={step.step} className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 font-bold">
-                  <IconComp className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                      Step {step.step}
-                    </span>
-                    <h4 className="font-black text-sm text-slate-900">{step.title}</h4>
+        {/* ============================================================ */}
+        {/* SECTION 3: THE 4-STEP PATH TO GETTING HIRED                  */}
+        {/* ============================================================ */}
+        <section className="py-16 bg-white border-y border-slate-200/80">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                Your Roadmap
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                How You Go From Student to Employable Engineer
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  step: '01',
+                  title: 'Skill Assessment & Track',
+                  desc: 'Evaluate your current foundation and get mapped to the optimal track (MERN, Python/AI, Cloud/DevOps).',
+                  icon: Terminal,
+                },
+                {
+                  step: '02',
+                  title: 'Real Production Sprints',
+                  desc: 'Work on actual features, manage GitHub branches, write unit tests, and resolve issues under agile sprints.',
+                  icon: Code2,
+                },
+                {
+                  step: '03',
+                  title: 'Code Reviews & Scorecard',
+                  desc: 'Senior mentors review your pull requests, scoring code readability, architecture, and sprint velocity.',
+                  icon: FileCheck,
+                },
+                {
+                  step: '04',
+                  title: 'Company Match & PPO',
+                  desc: 'Verified companies review your public repository dossier and interview you directly for internships & PPOs.',
+                  icon: Building2,
+                },
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black tracking-widest text-blue-600 bg-blue-100 px-2.5 py-1 rounded-md">
+                        STEP {item.step}
+                      </span>
+                      <Icon className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900">{item.title}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    {step.desc}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
-        {/* Ethical Transparency Disclaimer */}
-        <div className="mt-8 p-4 rounded-2xl bg-slate-100/80 border border-slate-200 text-center text-xs text-slate-600 font-medium max-w-3xl mx-auto">
-          <strong>Program Transparency Note:</strong> InterHive prepares candidates, tracks verified performance, and facilitates connections. Final hiring selections and PPO awards depend entirely on the partner company's internal criteria and candidate performance.
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* SECTION 5: BENEFITS FOR INTERNS                                */}
-      {/* ============================================================== */}
-      <section className="py-20 bg-white border-y border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-              STUDENT ADVANTAGES
+        {/* ============================================================ */}
+        {/* SECTION 4: THE 5 OFFICIAL INTERHIVE PROGRAMS                  */}
+        {/* ============================================================ */}
+        <section id="programs-grid" className="py-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Structured Tracks
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Everything You Need to Prepare for the Real World.
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Choose the Program Built for Your Academic Year
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 font-medium">
-              We provide concrete, measurable value designed to make you stand out to hiring managers:
-            </p>
+            <p className="text-sm text-slate-500">Every track is tailored to fit your college curriculum without overwhelming you.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Industry-Readiness Preparation</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Transition from academic problem sets to writing production-ready code with clean architecture and error handling.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Practical Project Experience</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Build multi-tier applications with real databases, auth flows, and API integrations that showcase your genuine capabilities.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Skill Development & Upskilling</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Continuous guidance across modern engineering stacks: TypeScript, React, Node.js, cloud deployment, and system design.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Attendance & Task Tracking</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Document your commitment with transparent digital proof of attendance, milestone velocity, and daily sprint engagement.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Structured Feedback & Visibility</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Constructive evaluation rubrics from industry mentors highlighting your growth trajectory and coding strengths.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Resume & Interview Preparation</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Craft an outcome-driven technical portfolio backed by actual project code rather than unverified self-claimed bullet points.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Exposure to Professional Workflows</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Work in professional sprint boards, submit PR reviews, handle mentor comments, and experience authentic agile ceremonies.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Connections with Relevant Companies</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Direct introductions to hiring partners actively seeking prepared interns matching your exact verified skill profile.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-base font-black text-slate-900">Clearer Pathway to PPO</h4>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Demonstrate continuous value during corporate internships, dramatically increasing your conversion odds into a Pre-Placement Offer.
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* SECTION 6: PLATFORM EXPERIENCE PREVIEW                          */}
-      {/* ============================================================== */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-            INSIDE INTERHIVE
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Your Progress. Your Skills. Your Next Step.
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 font-medium">
-            Experience the real intern workspace designed to showcase your development:
-          </p>
-        </div>
-
-        {/* Tab Controls */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-          {[
-            { id: 'tasks', label: 'Tasks & Sprints', icon: Code },
-            { id: 'attendance', label: 'Attendance Log', icon: Clock },
-            { id: 'skills', label: 'Skill Matrix', icon: Target },
-            { id: 'feedback', label: 'Performance Feedback', icon: Award },
-          ].map((tab) => {
-            const IconC = tab.icon;
-            const isA = previewTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setPreviewTab(tab.id as any)}
-                className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
-                  isA
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <IconC className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Dashboard Preview Shell */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl p-6 md:p-8 overflow-hidden">
-          {previewTab === 'tasks' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <div>
-                  <h4 className="text-base font-black text-slate-900">Sprint Backlog & Code Tasks</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Track active pull requests, peer reviews, and milestone deliverables</p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-black">
-                  Sprint 3 of 6
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                  <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">IN PROGRESS (1)</span>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-blue-600">
-                      <span>TASK-104</span>
-                      <span className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">High</span>
-                    </div>
-                    <div className="text-xs font-black text-slate-800">Implement JWT Authentication with Refresh Rotation</div>
-                    <div className="text-[10px] text-slate-500">PR #18 • 4 comments to resolve</div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                  <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">UNDER REVIEW (1)</span>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-indigo-600">
-                      <span>TASK-102</span>
-                      <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">Review</span>
-                    </div>
-                    <div className="text-xs font-black text-slate-800">Database Index Optimization for Job Search Queries</div>
-                    <div className="text-[10px] text-slate-500">Assigned Mentor: Senior Backend Lead</div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                  <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">COMPLETED (3)</span>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-emerald-600">
-                      <span>TASK-098</span>
-                      <span className="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">Merged</span>
-                    </div>
-                    <div className="text-xs font-black text-slate-800">Setup Dockerized Microservices Environment</div>
-                    <div className="text-[10px] text-slate-500">Verified by Automated CI Test Runner</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {previewTab === 'attendance' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <div>
-                  <h4 className="text-base font-black text-slate-900">Attendance & Punctuality Overview</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Verifiable digital proof of engagement provided to hiring partners</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-600">Sprint Compliance:</span>
-                  <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200">
-                    98.4% On-Time
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                  <div className="text-2xl font-black text-slate-900">42 / 44</div>
-                  <div className="text-xs font-bold text-slate-500 mt-1">Days Attended</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                  <div className="text-2xl font-black text-blue-600">168 hrs</div>
-                  <div className="text-xs font-bold text-slate-500 mt-1">Sprint Hours Logged</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                  <div className="text-2xl font-black text-emerald-600">0</div>
-                  <div className="text-xs font-bold text-slate-500 mt-1">Unexcused Absences</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                  <div className="text-2xl font-black text-indigo-600">100%</div>
-                  <div className="text-xs font-bold text-slate-500 mt-1">Standup Participation</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {previewTab === 'skills' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <div>
-                  <h4 className="text-base font-black text-slate-900">Verified Technical Skill Matrix</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Competencies assessed through live code tests and practical project reviews</p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-black">
-                  4 Verified Badges
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-800">Full Stack REST APIs (Node/Express/Nest)</span>
-                    <span className="text-blue-600 font-extrabold">94%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full bg-blue-600 rounded-full w-[94%]" />
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-800">React & Modern State Management</span>
-                    <span className="text-indigo-600 font-extrabold">88%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full bg-indigo-600 rounded-full w-[88%]" />
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-800">Database Schema Design & Indexing</span>
-                    <span className="text-purple-600 font-extrabold">91%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full bg-purple-600 rounded-full w-[91%]" />
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-800">Git Collaborative Branching & PR Reviews</span>
-                    <span className="text-emerald-600 font-extrabold">96%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full bg-emerald-600 rounded-full w-[96%]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {previewTab === 'feedback' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-                <div>
-                  <h4 className="text-base font-black text-slate-900">Sprint 3 Manager Evaluation Rubric</h4>
-                  <p className="text-xs text-slate-500 font-semibold">Constructive mentor feedback based on real pull request audits</p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200">
-                  Rating: 4.8 / 5.0
-                </span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
-                    ML
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-slate-800">Engineering Manager Feedback</div>
-                    <div className="text-[10px] text-slate-500 font-semibold">Reviewed 2 days ago • Sprint Milestone 3</div>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  "Demonstrated exceptional progress on the authentication microservice. Code was modular, well-commented, and unit test coverage reached 89%. Excellent handling of async error middleware. Recommended for corporate internship interview round."
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* SECTION 7: FREQUENTLY ASKED QUESTIONS                           */}
-      {/* ============================================================== */}
-      <section className="py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14 space-y-3">
-          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-            CLEAR ANSWERS
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-sm text-slate-600 font-semibold">
-            Clear, honest answers about how InterHive supports your career:
-          </p>
-        </div>
-
-        <div className="space-y-3">
-          {faqList.map((faq, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
+            {programs.map((prog, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-all duration-200 shadow-2xs"
+                className={`rounded-2xl border p-6 flex flex-col justify-between space-y-4 bg-white transition-all duration-200 shadow-xs hover:shadow-md ${
+                  prog.popular ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200'
+                }`}
               >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full px-6 py-4.5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors"
-                  aria-expanded={isOpen}
-                >
-                  <span className="font-extrabold text-slate-900 text-sm sm:text-base">
-                    {faq.q}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-blue-600' : ''
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed font-medium border-t border-slate-100">
-                    <p>{faq.a}</p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                      {prog.badge}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {prog.duration}
+                    </span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
-      {/* ============================================================== */}
-      {/* SECTION 8: STUDENT CONVERSION & INQUIRY FORM                   */}
-      {/* ============================================================== */}
-      <section id="student-inquiry" className="py-20 bg-gradient-to-b from-[#EBF3FF] via-white to-[#F0F5FA] border-t border-slate-200/80">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-            <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase">
-              TAKE THE NEXT STEP
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Your Career Deserves More Than a Certificate.
+                  <h3 className="text-lg font-bold text-slate-900">{prog.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{prog.description}</p>
+                  <p className="text-[11px] font-semibold text-slate-500">Ideal for: {prog.idealFor}</p>
+                </div>
+
+                <button
+                  onClick={() => selectProgramAndScroll(prog.id)}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5"
+                >
+                  <span>Apply for {prog.title}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* SECTION 5: COMPACT DASHBOARD SNEAK PEEK                       */}
+        {/* ============================================================ */}
+        <section className="py-16 bg-white border-y border-slate-200/80">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+                Live Student Portal
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Your Progress, Tasks & Attendance in One Place
+              </h2>
+            </div>
+
+            {/* Dashboard Mockup Card */}
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                    AS
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Aarav Sharma</h4>
+                    <p className="text-xs text-slate-500">Full Stack Track &bull; PPO Program Cohort</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                    96% Attendance
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">
+                    Velocity: 92/100
+                  </span>
+                </div>
+              </div>
+
+              {/* Active Sprint Items */}
+              <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Current Sprint Tasks & Pull Requests</p>
+                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div>
+                    <p className="font-bold text-slate-800">Implement JWT Auth Middleware & Role Guard</p>
+                    <p className="text-slate-500">Branch: <code className="bg-slate-100 px-1 py-0.5 rounded">feature/auth-guards</code> &bull; 14 tests passing</p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded bg-amber-100 text-amber-800 font-semibold self-start sm:self-center">
+                    PR In Review
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div>
+                    <p className="font-bold text-slate-800">Database Indexing & PostgreSQL Connection Pooling</p>
+                    <p className="text-slate-500">Mentor Note: Excellent query latency reduction by 64%</p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 font-semibold self-start sm:self-center">
+                    Merged to Main
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* SECTION 6: FREQUENTLY ASKED QUESTIONS                         */}
+        {/* ============================================================ */}
+        <section className="py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Frequently Asked Questions
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 font-medium">
-              Take the next step toward becoming industry-ready. Tell us about your goals, and let the InterHive team help you understand the right path forward.
-            </p>
+            <p className="text-sm text-slate-500">Clear answers for students</p>
           </div>
 
-          {/* Form Container */}
-          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-2xl">
-            {submitSuccess ? (
-              <div className="py-12 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md shadow-emerald-500/20">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900">Inquiry Received Successfully!</h3>
-                <p className="text-sm text-slate-600 max-w-md mx-auto font-medium leading-relaxed">
-                  Thank you! The InterHive career counseling team will reach out to your email and phone within 24 hours to help you choose the best program pathway.
-                </p>
-                <div className="pt-4 flex justify-center gap-3">
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs"
+                >
                   <button
-                    type="button"
-                    onClick={() => setSubmitSuccess(false)}
-                    className="px-6 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 font-bold text-slate-900 hover:text-blue-600 transition-colors text-sm sm:text-base"
                   >
-                    Submit Another Inquiry
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-blue-600' : ''
+                      }`}
+                    />
                   </button>
-                  <Link
-                    to="/programs"
-                    className="px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors"
-                  >
-                    Explore Programs
-                  </Link>
+                  {isOpen && (
+                    <div className="px-5 pb-4 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                      {faq.a}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ) : (
-              <form onSubmit={handleInquirySubmit} className="space-y-6">
-                
-                {submitError && (
-                  <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs sm:text-sm font-medium">
-                    <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* SECTION 7: 60-SECOND STUDENT APPLICATION / INQUIRY FORM       */}
+        {/* ============================================================ */}
+        <section
+          id="student-inquiry"
+          className="py-16 bg-gradient-to-b from-[#EBF3FF] via-[#F0F5FF] to-[#F8FAFC] border-t border-blue-100"
+        >
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8 space-y-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+                Apply for Next Cohort
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Start Your Industry-Readiness Journey
+              </h2>
+              <p className="text-sm text-slate-600">
+                Takes under 60 seconds. Our student advisors will review your profile and reach out with your personalized path.
+              </p>
+            </div>
+
+            {/* Form Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
+              {submitSuccess ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900">
+                    Application Received!
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
+                    Thank you, <span className="font-semibold text-slate-800">{formData.fullName}</span>. We have received your application for the <span className="font-semibold text-slate-800">{formData.preferredProgram}</span>. An InterHive advisor will contact you at <span className="font-semibold text-slate-800">{formData.email}</span> within 24 hours.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSubmitSuccess(false);
+                      setFormData({
+                        fullName: '',
+                        email: '',
+                        phone: '',
+                        college: '',
+                        degree: '',
+                        currentYear: '3rd Year',
+                        skills: '',
+                        preferredProgram: 'PPO Program',
+                        careerGoal: '',
+                        consent: false,
+                      });
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-xs transition"
+                  >
+                    <span>Submit Another Application</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleInquirySubmit} className="space-y-4">
+                  {submitError && (
+                    <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <span className="font-bold block">Submission Error:</span>
-                      {submitError}
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Full Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Rahul Sharma"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition ${
+                          formErrors.fullName
+                            ? 'border-rose-400 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-blue-500'
+                        }`}
+                      />
+                      {formErrors.fullName && (
+                        <p className="text-xs text-rose-600 mt-1">{formErrors.fullName}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Email Address <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="rahul@example.com"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition ${
+                          formErrors.email
+                            ? 'border-rose-400 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-blue-500'
+                        }`}
+                      />
+                      {formErrors.email && (
+                        <p className="text-xs text-rose-600 mt-1">{formErrors.email}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Mobile Number <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder="+91 98765 43210"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition ${
+                          formErrors.phone
+                            ? 'border-rose-400 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-blue-500'
+                        }`}
+                      />
+                      {formErrors.phone && (
+                        <p className="text-xs text-rose-600 mt-1">{formErrors.phone}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        College / University <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="college"
+                        value={formData.college}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Delhi Technological University"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition ${
+                          formErrors.college
+                            ? 'border-rose-400 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-blue-500'
+                        }`}
+                      />
+                      {formErrors.college && (
+                        <p className="text-xs text-rose-600 mt-1">{formErrors.college}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Degree & Branch <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="degree"
+                        value={formData.degree}
+                        onChange={handleInputChange}
+                        placeholder="e.g. B.Tech Computer Science"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition ${
+                          formErrors.degree
+                            ? 'border-rose-400 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-blue-500'
+                        }`}
+                      />
+                      {formErrors.degree && (
+                        <p className="text-xs text-rose-600 mt-1">{formErrors.degree}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Current Academic Year
+                      </label>
+                      <select
+                        name="currentYear"
+                        value={formData.currentYear}
+                        onChange={handleInputChange}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition bg-white"
+                      >
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year / Final Year</option>
+                        <option value="Recent Graduate">Recent Graduate</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Select Program Track <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        name="preferredProgram"
+                        value={formData.preferredProgram}
+                        onChange={handleInputChange}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition bg-white font-semibold text-blue-700"
+                      >
+                        <option value="1-Year Program">1-Year Program</option>
+                        <option value="2-Year Program">2-Year Program</option>
+                        <option value="3-Year Program">3-Year Program</option>
+                        <option value="4-Year Program">4-Year Program</option>
+                        <option value="PPO Program">PPO Program (Pre-Placement Offer)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Known Skills / Interests
+                      </label>
+                      <input
+                        type="text"
+                        name="skills"
+                        value={formData.skills}
+                        onChange={handleInputChange}
+                        placeholder="e.g. JavaScript, Python, React, None (Beginner)"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition"
+                      />
                     </div>
                   </div>
-                )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Full Name */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Full Name <span className="text-rose-500">*</span>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      Career Goal or Notes (Optional)
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="e.g. Rahul Sharma"
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.fullName ? 'border-rose-400 focus:ring-rose-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-                      }`}
-                    />
-                    {formErrors.fullName && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.fullName}</p>}
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Email Address <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="e.g. rahul.sharma@college.edu"
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.email ? 'border-rose-400 focus:ring-rose-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-                      }`}
-                    />
-                    {formErrors.email && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.email}</p>}
-                  </div>
-
-                  {/* Mobile Phone */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Mobile Number <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="e.g. 9876543210"
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.phone ? 'border-rose-400 focus:ring-rose-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-                      }`}
-                    />
-                    {formErrors.phone && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.phone}</p>}
-                  </div>
-
-                  {/* College / University */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      College / University <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.college}
-                      onChange={(e) => setFormData({ ...formData, college: e.target.value })}
-                      placeholder="e.g. Delhi Technological University"
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.college ? 'border-rose-400 focus:ring-rose-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-                      }`}
-                    />
-                    {formErrors.college && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.college}</p>}
-                  </div>
-
-                  {/* Degree / Course */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Degree / Course <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.degree}
-                      onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
-                      placeholder="e.g. B.Tech Computer Science"
-                      className={`w-full px-4 py-3 rounded-xl bg-slate-50 border text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 transition-all ${
-                        formErrors.degree ? 'border-rose-400 focus:ring-rose-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-                      }`}
-                    />
-                    {formErrors.degree && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.degree}</p>}
-                  </div>
-
-                  {/* Current Year / Semester */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Current Academic Stage <span className="text-rose-500">*</span>
-                    </label>
-                    <select
-                      value={formData.currentYear}
-                      onChange={(e) => setFormData({ ...formData, currentYear: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
-                    >
-                      <option value="1st Year">1st Year (B.Tech / BCA / Degree)</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year (Pre-Final)</option>
-                      <option value="Final Year">Final Year (Immediate Placement)</option>
-                      <option value="Recent Graduate">Recent Graduate</option>
-                    </select>
-                  </div>
-
-                  {/* Skills / Areas of Interest */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Skills or Areas of Interest
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.skills}
-                      onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                      placeholder="e.g. React, Python, Java, Cloud, DevOps"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    <textarea
+                      name="careerGoal"
+                      rows={2}
+                      value={formData.careerGoal}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Want to land a remote Full Stack developer internship or prepare for product-based company interviews..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition"
                     />
                   </div>
 
-                  {/* Preferred Program */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Preferred Program
+                  <div>
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="consent"
+                        checked={formData.consent}
+                        onChange={handleInputChange}
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-slate-600 leading-snug">
+                        I agree to InterHive’s{' '}
+                        <Link to="/privacy" className="text-blue-600 underline">Privacy Policy</Link>{' '}
+                        and consent to receiving guidance regarding my application.
+                      </span>
                     </label>
-                    <select
-                      value={formData.preferredProgram}
-                      onChange={(e) => setFormData({ ...formData, preferredProgram: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
-                    >
-                      <option value="Free">Free Foundation Assessment & Courses</option>
-                      <option value="Premium">6-Month Premium PPO Internship Track</option>
-                      <option value="Need Guidance">Need Guidance on Best Fit</option>
-                    </select>
+                    {formErrors.consent && (
+                      <p className="text-xs text-rose-600 mt-1">{formErrors.consent}</p>
+                    )}
                   </div>
-                </div>
 
-                {/* Career Goal / Message */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700">
-                    Career Goal or Specific Questions
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.careerGoal}
-                    onChange={(e) => setFormData({ ...formData, careerGoal: e.target.value })}
-                    placeholder="Tell us what role you are targeting or ask any questions about our curriculum and corporate matching..."
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  />
-                </div>
-
-                {/* Privacy Consent Checkbox */}
-                <div className="space-y-1 pt-1">
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.consent}
-                      onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-xs text-slate-600 leading-normal font-medium">
-                      I agree to the InterHive{' '}
-                      <Link to="/privacy" target="_blank" className="text-blue-600 underline font-bold">
-                        Privacy Policy
-                      </Link>{' '}
-                      and authorize the team to contact me via email or phone regarding my career guidance.
-                    </span>
-                  </label>
-                  {formErrors.consent && <p className="text-[11px] text-rose-600 font-semibold">{formErrors.consent}</p>}
-                </div>
-
-                {/* Submit Action */}
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-102 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 disabled:opacity-60"
                   >
                     {isSubmitting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Submitting Inquiry...</span>
+                        <span>Submitting Application...</span>
                       </>
                     ) : (
                       <>
-                        <span>Submit Student Inquiry</span>
+                        <span>Submit Application for Evaluation</span>
                         <Send className="w-4 h-4" />
                       </>
                     )}
                   </button>
-
-                  <Link
-                    to="/programs"
-                    className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors flex items-center gap-1"
-                  >
-                    <span>Or Explore Detailed Programs</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-
-              </form>
-            )}
+                  <p className="text-center text-[11px] text-slate-400 mt-2">
+                    Zero spam &bull; Free initial skill assessment &bull; Admissions advisor responds in 24h
+                  </p>
+                </form>
+              )}
+            </div>
           </div>
-
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* Footer */}
       <PublicFooter
@@ -1456,7 +871,7 @@ export const ForInternsPage: React.FC = () => {
         onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
       />
 
-      {/* Modals for parity */}
+      {/* Modals for header/footer quick actions */}
       <InternshipApplicationModal
         isOpen={isInternshipModalOpen}
         onClose={() => setIsInternshipModalOpen(false)}
@@ -1468,3 +883,5 @@ export const ForInternsPage: React.FC = () => {
     </div>
   );
 };
+
+export default ForInternsPage;
