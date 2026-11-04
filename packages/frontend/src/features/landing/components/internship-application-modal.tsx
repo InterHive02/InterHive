@@ -33,11 +33,11 @@ const mapSemesterToAcademicYear = (semester: string): AcademicYear => {
 
 const PROGRAM_OPTIONS = [
   { value: '', label: '-- Select Your Program (Mandatory) --' },
-  { value: ProgramType.ONE_YEAR, label: '1-Year Program (Final Year Students)' },
-  { value: ProgramType.TWO_YEAR, label: '2-Year Program (3rd & Final Year Students)' },
-  { value: ProgramType.THREE_YEAR, label: '3-Year Program (2nd Year Onwards)' },
-  { value: ProgramType.FOUR_YEAR, label: '4-Year Program (1st Year Onwards)' },
-  { value: ProgramType.PPO, label: 'PPO Program (Pre-Placement Offer Fast-Track)' },
+  { value: ProgramType.FOUR_YEAR, label: '4-Year Program (1st Year Students Only — Batch 2030)' },
+  { value: ProgramType.THREE_YEAR, label: '3-Year Program (2nd Year Students Only — Batch 2029)' },
+  { value: ProgramType.TWO_YEAR, label: '2-Year Program (3rd Year Students Only — Batch 2028)' },
+  { value: ProgramType.ONE_YEAR, label: '1-Year Program (Final Year Students Only — Batch 2027)' },
+  { value: ProgramType.PPO, label: 'PPO Program (Final Year Students Only — Batch 2027)' },
 ];
 
 interface CountryDialCode {
@@ -561,10 +561,10 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
 
     const currentAcademicYear = mapSemesterToAcademicYear(formData.semester);
     const eligibleYears = PROGRAM_ELIGIBILITY_MATRIX[formData.programType as ProgramType];
-    if (formData.programType !== 'PPO' && eligibleYears && !eligibleYears.includes(currentAcademicYear)) {
+    if (eligibleYears && !eligibleYears.includes(currentAcademicYear)) {
       const progConfig = PROGRAM_CONFIGS[formData.programType as ProgramType];
       setErrorMessage(
-        `Based on your current academic standing (${currentAcademicYear} Year), the ${progConfig?.title || 'selected program'} is recommended for ${progConfig?.targetAcademicYear}. Please select the program matching your academic level.`
+        `Based on your current academic standing (${currentAcademicYear} Year), the ${progConfig?.title || 'selected program'} is for ${progConfig?.targetAcademicYear}. Please select the program matching your academic level.`
       );
       return false;
     }

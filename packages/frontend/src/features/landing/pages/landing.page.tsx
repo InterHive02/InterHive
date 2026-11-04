@@ -178,7 +178,7 @@ export const LandingPage: React.FC = () => {
       progress: 94,
       activeStep: 5,
       currentStage: 'Corporate Matching Sprint',
-      currentStageDesc: 'Completing full-stack pull-request audits before hiring rounds.',
+      currentStageDesc: '2-Month InterHive sprint completed; ready for 6-Month corporate internship & PPO.',
       modules: '12/12',
       projects: '5/5',
       tests: '8/8',
@@ -630,11 +630,11 @@ export const LandingPage: React.FC = () => {
               <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
                 {[
                   { id: 'ALL', label: 'All 5 Programs' },
-                  { id: 'FOUR_YEAR', label: '1st Year (4-Year Track)' },
-                  { id: 'THREE_YEAR', label: '2nd Year (3-Year Track)' },
-                  { id: 'TWO_YEAR', label: '3rd Year (2-Year Track)' },
-                  { id: 'ONE_YEAR', label: 'Final Year (1-Year Track)' },
-                  { id: 'PPO', label: 'PPO Accelerator (Fast Track)' },
+                  { id: 'FOUR_YEAR', label: '1st Year (Batch 2030)' },
+                  { id: 'THREE_YEAR', label: '2nd Year (Batch 2029)' },
+                  { id: 'TWO_YEAR', label: '3rd Year (Batch 2028)' },
+                  { id: 'ONE_YEAR', label: 'Final Year (Batch 2027)' },
+                  { id: 'PPO', label: 'Final Year PPO (Batch 2027)' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -1067,7 +1067,7 @@ export const LandingPage: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  1-Year to PPO Track &bull; Real Agile Sprints &bull; Verified GitHub Portfolios
+                  Batches 2027-2030 &bull; PPO Program: 2 Mo InterHive + 6 Mo Corporate Internship
                 </p>
               </div>
               <div className="sm:hidden">

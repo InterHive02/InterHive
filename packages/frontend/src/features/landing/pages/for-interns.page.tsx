@@ -167,48 +167,48 @@ export const ForInternsPage: React.FC = () => {
   // 5 Major Programs
   const programs = [
     {
-      id: '1-Year Program',
-      title: '1-Year Program',
-      badge: 'Foundation to Product',
-      duration: '12 Months',
-      description: 'Master modern full-stack development, Git branching, unit testing, and deploy your first production SaaS application.',
-      idealFor: '1st & 2nd Year Students',
-      color: 'from-blue-600 to-indigo-600',
-    },
-    {
-      id: '2-Year Program',
-      title: '2-Year Program',
-      badge: 'Architecture & Mastery',
-      duration: '24 Months',
-      description: 'Deep dive into microservices, database optimization, cloud deployments, and collaborative open-source sprints.',
-      idealFor: '2nd & 3rd Year Students',
-      color: 'from-indigo-600 to-purple-600',
+      id: '4-Year Program',
+      title: '4-Year Program',
+      badge: '1st Year Only (Batch 2030)',
+      duration: '4 Academic Years',
+      description: 'Exclusively for 1st-year students (Batch 2030). A degree-parallel path from programming fundamentals to 4 industrial internships and full-time hiring before graduation.',
+      idealFor: '1st Year Students Only (Batch 2030)',
+      color: 'from-teal-600 to-emerald-600',
     },
     {
       id: '3-Year Program',
       title: '3-Year Program',
-      badge: 'Enterprise Engineering',
-      duration: '36 Months',
-      description: 'Comprehensive software engineering mastery, cloud infrastructure (Docker/AWS), CI/CD, and system design leadership.',
-      idealFor: 'Early College Students',
+      badge: '2nd Year Only (Batch 2029)',
+      duration: '3 Academic Years',
+      description: 'Exclusively for 2nd-year students (Batch 2029). Build full-stack microservices, cloud deployments, 4 industrial internships, and 4th-year paid corporate placement.',
+      idealFor: '2nd Year Students Only (Batch 2029)',
       color: 'from-purple-600 to-pink-600',
     },
     {
-      id: '4-Year Program',
-      title: '4-Year Program',
-      badge: 'Complete Career Path',
-      duration: '48 Months',
-      description: 'End-to-end industry readiness running parallel to your degree, transforming you into a top 1% junior tech lead.',
-      idealFor: '1st Year College Students',
-      color: 'from-teal-600 to-emerald-600',
+      id: '2-Year Program',
+      title: '2-Year Program',
+      badge: '3rd Year Only (Batch 2028)',
+      duration: '2 Academic Years',
+      description: 'Exclusively for 3rd-year students (Batch 2028). Intensive 3rd-year industrial training and internships, converting into a 4th-year high-quality paid corporate internship and PPO.',
+      idealFor: '3rd Year Students Only (Batch 2028)',
+      color: 'from-indigo-600 to-purple-600',
+    },
+    {
+      id: '1-Year Program',
+      title: '1-Year Program',
+      badge: 'Final Year Only (Batch 2027)',
+      duration: '1 Academic Year',
+      description: 'Exclusively for final-year students (Batch 2027). A focused industry-readiness and placement accelerator for graduating engineers preparing for internships, interviews, and immediate corporate hiring.',
+      idealFor: 'Final Year Students Only (Batch 2027)',
+      color: 'from-blue-600 to-indigo-600',
     },
     {
       id: 'PPO Program',
       title: 'PPO Program',
-      badge: 'Pre-Placement Fast Track',
-      duration: '6 Months Intensive',
-      description: 'Rigorous sprint training, portfolio polishing, and direct interviews targeting Pre-Placement Offers from verified companies.',
-      idealFor: 'Final & Pre-Final Year Students',
+      badge: 'Final Year PPO (Batch 2027)',
+      duration: '8 Months (2 Mo InterHive + 6 Mo Company)',
+      description: 'Exclusively for final-year students (Batch 2027). 2 months intensive training & internship at InterHive followed by a 6-month corporate internship at a hiring partner company leading directly to Pre-Placement Offers (PPO).',
+      idealFor: 'Final Year Students Only (Batch 2027)',
       color: 'from-blue-700 to-blue-900',
       popular: true,
     },
@@ -763,10 +763,10 @@ export const ForInternsPage: React.FC = () => {
                         onChange={handleInputChange}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition bg-white"
                       >
-                        <option value="1st Year">1st Year</option>
-                        <option value="2nd Year">2nd Year</option>
-                        <option value="3rd Year">3rd Year</option>
-                        <option value="4th Year">4th Year / Final Year</option>
+                        <option value="1st Year">1st Year (Batch 2030)</option>
+                        <option value="2nd Year">2nd Year (Batch 2029)</option>
+                        <option value="3rd Year">3rd Year (Batch 2028)</option>
+                        <option value="4th Year">Final Year (Batch 2027)</option>
                         <option value="Recent Graduate">Recent Graduate</option>
                       </select>
                     </div>
@@ -781,11 +781,11 @@ export const ForInternsPage: React.FC = () => {
                         onChange={handleInputChange}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-blue-500 transition bg-white font-semibold text-blue-700"
                       >
-                        <option value="1-Year Program">1-Year Program</option>
-                        <option value="2-Year Program">2-Year Program</option>
-                        <option value="3-Year Program">3-Year Program</option>
-                        <option value="4-Year Program">4-Year Program</option>
-                        <option value="PPO Program">PPO Program (Pre-Placement Offer)</option>
+                        <option value="4-Year Program">4-Year Program (1st Year Students Only — Batch 2030)</option>
+                        <option value="3-Year Program">3-Year Program (2nd Year Students Only — Batch 2029)</option>
+                        <option value="2-Year Program">2-Year Program (3rd Year Students Only — Batch 2028)</option>
+                        <option value="1-Year Program">1-Year Program (Final Year Students Only — Batch 2027)</option>
+                        <option value="PPO Program">PPO Program (Final Year Students Only — Batch 2027: 2 Mo InterHive + 6 Mo Company)</option>
                       </select>
                     </div>
 

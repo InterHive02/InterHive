@@ -231,7 +231,7 @@ export const ForCompaniesPage: React.FC = () => {
     },
     {
       q: 'Can we convert top-performing interns to full-time employees (PPO)?',
-      a: 'Yes! That is one of InterHive’s greatest strengths. You evaluate candidates over months of real sprint work, eliminating the guesswork and risk of standard full-time hiring.'
+      a: 'In our flagship PPO Program, candidates complete 2 months of intensive training & internship at InterHive, followed by a 6-month corporate internship at your company (2 Months InterHive + 6 Months Corporate Internship). You evaluate their actual code contributions, daily attendance, and sprint velocity over 6 full months before extending a PPO, completely eliminating hiring guesswork.'
     }
   ];
 
