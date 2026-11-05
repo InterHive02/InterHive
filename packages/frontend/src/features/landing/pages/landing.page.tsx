@@ -52,6 +52,7 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
+import { HiveIntroSplash } from '../components/hive-intro-splash';
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
 import {
   PROGRAM_CONFIGS,
@@ -121,6 +122,15 @@ export const LandingPage: React.FC = () => {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [showIntroSplash, setShowIntroSplash] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('nointro') === 'true') return false;
+      if (params.get('intro') === 'true') return true;
+      return sessionStorage.getItem('interhive_intro_shown') !== 'true';
+    }
+    return true;
+  });
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -329,6 +339,22 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
+      {/* 3D Kinetic Honeycomb Hive Intro Splash Animation (Plays on site visit) */}
+      {showIntroSplash && (
+        <HiveIntroSplash
+          introDuration={2.0}
+          totalDuration={3.4}
+          onComplete={() => {
+            setShowIntroSplash(false);
+            try {
+              sessionStorage.setItem('interhive_intro_shown', 'true');
+            } catch (e) {
+              // ignore
+            }
+          }}
+        />
+      )}
+
       {/* Header Navigation */}
       <PublicNavbar
         activePage="home"
@@ -350,10 +376,21 @@ export const LandingPage: React.FC = () => {
                 
                 {/* Left Column: Visionary Narrative & CTAs */}
                 <div className="lg:col-span-7 text-center lg:text-left space-y-6">
-                  {/* Category Pill */}
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 text-xs sm:text-sm font-semibold shadow-xs">
-                    <Sparkles className="w-4 h-4 text-blue-600" />
-                    <span>India’s Industry-Readiness & Talent Connect Platform</span>
+                  {/* Category Pill & 3D Intro Replay */}
+                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 text-xs sm:text-sm font-semibold shadow-xs">
+                      <Sparkles className="w-4 h-4 text-blue-600" />
+                      <span>India’s Industry-Readiness & Talent Connect Platform</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowIntroSplash(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100/80 hover:bg-amber-200/90 text-amber-900 border border-amber-300/80 text-xs font-bold shadow-xs transition-all duration-150 cursor-pointer hover:scale-105"
+                      title="Replay 3D Hive Intro Animation"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                      <span>Watch 3D Intro</span>
+                    </button>
                   </div>
 
                   {/* Headline */}
