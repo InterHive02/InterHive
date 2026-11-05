@@ -54,30 +54,30 @@ export const ProgramsPage: React.FC = () => {
     },
     {
       step: '03',
-      title: '2-Month Training at InterHive',
+      title: '2-Month Training & Readiness by InterHive',
       duration: '2 months',
       color: 'bg-emerald-500 text-white',
       badgeBg: 'bg-emerald-100 text-emerald-800',
-      description: 'Industry-focused training, real client projects, professional communication, and 1-on-1 mentorship.',
-      details: 'Master full-stack architecture, clean code standards, Git workflows, and system design before entering the company.',
+      description: 'Structured industry-readiness training, real project sprints, professional communication, and 1-on-1 mentorship done entirely by the InterHive platform.',
+      details: 'Master enterprise full-stack architecture, clean code standards, Git workflows, and system design before entering the company.',
     },
     {
       step: '04',
-      title: 'Company Matching',
-      duration: '1 week',
+      title: 'Company Matching & Placement',
+      duration: '1-2 weeks',
       color: 'bg-amber-500 text-white',
       badgeBg: 'bg-amber-100 text-amber-800',
-      description: 'Get matched with verified partner companies based on your validated skill score and performance.',
-      details: 'Interview directly with company engineering leads who already have access to your verified portfolio and scores.',
+      description: 'Assured matching and placement opportunities with verified partner companies based on your InterHive readiness scorecard.',
+      details: 'Interview directly with company engineering leads who have full access to your verified code contributions and performance metrics.',
     },
     {
       step: '05',
-      title: '4-Month Company Internship',
-      duration: '4 months',
+      title: '6-Month Corporate Internship at Partner Company',
+      duration: '6 months',
       color: 'bg-rose-500 text-white',
       badgeBg: 'bg-rose-100 text-rose-800',
-      description: 'Work on live, real-world company codebases and products, guided by an assigned company engineering mentor.',
-      details: 'Deliver sprint features, participate in daily standups, and build verifiable production contributions.',
+      description: 'Assured 6-month corporate internship at any partner company, working on live production codebases and earning a monthly stipend.',
+      details: 'Deliver real sprint features, participate in daily standups, and build verifiable production contributions under company engineering mentors.',
     },
     {
       step: '06',
@@ -145,18 +145,18 @@ export const ProgramsPage: React.FC = () => {
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-purple-800 text-xs font-extrabold shadow-2xs mb-4">
             <GraduationCap className="w-4 h-4 text-purple-600" />
-            <span>PPO Program · 6-Month Fast-Track</span>
+            <span>PPO Program · 2M InterHive Training + 6M Corporate Internship</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-            6 Months. One Clear Goal —{' '}
+            8 Months. One Clear Goal —{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
               Your PPO.
             </span>
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 font-semibold max-w-2xl mt-2 leading-relaxed">
-            A structured program that prepares you, places you with partner companies, and helps you convert your internship into a full-time career.
+            2 Months intensive training & readiness done by the InterHive platform + 6 Months assured corporate internship opportunity at any partner company leading directly to full-time Pre-Placement Offers.
           </p>
 
         </div>
@@ -312,10 +312,10 @@ export const ProgramsPage: React.FC = () => {
                 </div>
 
                 <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
-                  <span className="text-[10px] font-black text-emerald-800 uppercase tracking-wider block mb-1">Months 3 to 6 · Partner Internship</span>
-                  <h4 className="text-sm font-black text-slate-900 mb-1">Live Engineering at Partner Company</h4>
+                  <span className="text-[10px] font-black text-emerald-800 uppercase tracking-wider block mb-1">Months 3 to 8 (6 Months) · Assured Corporate Partner Internship</span>
+                  <h4 className="text-sm font-black text-slate-900 mb-1">Live Engineering & Stipend at Any Partner Company</h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    You work directly as an intern on partner company codebases with assigned company engineering mentors. Your deliverables count toward your final PPO decision.
+                    You work directly as an intern on partner company codebases with assigned company engineering mentors, earn a monthly stipend, and build production deliverables that convert directly into full-time Pre-Placement Offers.
                   </p>
                 </div>
               </div>
@@ -450,14 +450,23 @@ export const ProgramsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Main CTA */}
-              <button
-                onClick={() => setIsInternshipModalOpen(true)}
-                className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Apply for PPO Program</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              {/* Main CTAs */}
+              <div className="space-y-2">
+                <Link
+                  to="/checkout/PPO"
+                  className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Enroll in PPO Program</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setIsInternshipModalOpen(true)}
+                  className="w-full py-2.5 rounded-full border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Submit Free Inquiry</span>
+                </button>
+              </div>
 
               <p className="text-[10px] text-slate-400 text-center font-semibold">
                 Controlled intake · Free application & assessment

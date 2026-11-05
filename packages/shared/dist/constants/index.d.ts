@@ -1,4 +1,5 @@
-import { h as AcademicYear } from '../common.types-67e77b7a.js';
+import { a0 as LandingPageConfig, ab as ProgramPricingItem, ac as CouponItem, ad as DiscountCampaignItem } from '../pricing-payment.types-1ece83ef.js';
+export { aw as ALL_PROGRAM_KEYS, at as PROGRAM_ACADEMIC_YEAR_MAP, as as PROGRAM_CONFIGS, av as PROGRAM_DISCLAIMER, au as PROGRAM_ELIGIBILITY_MATRIX, ao as PROGRAM_TYPES, ar as ProgramConfig, ap as ProgramTypeKey, aq as ProgramYearDetails, ax as getProgramConfig, ay as isValidProgramType } from '../pricing-payment.types-1ece83ef.js';
 
 declare const ROLES: {
     readonly ADMIN: "admin";
@@ -201,40 +202,10 @@ declare const MANAGER_PERMISSIONS: ("view_interns" | "view_trainings" | "view_re
 declare const INTERN_PERMISSIONS: ("view_interns" | "view_assessments" | "view_trainings" | "view_projects" | "enroll_training" | "view_opportunities" | "view_users" | "take_assessment" | "manage_training_progress" | "submit_project_work" | "apply_opportunity")[];
 declare const COMPANY_PERMISSIONS: ("view_companies" | "view_reports" | "view_analytics" | "view_opportunities" | "view_applications" | "view_users" | "update_company" | "create_opportunity" | "review_application" | "schedule_interview" | "make_offer")[];
 
-declare const PROGRAM_TYPES: {
-    readonly ONE_YEAR: "ONE_YEAR";
-    readonly TWO_YEAR: "TWO_YEAR";
-    readonly THREE_YEAR: "THREE_YEAR";
-    readonly FOUR_YEAR: "FOUR_YEAR";
-    readonly PPO: "PPO";
-};
-type ProgramTypeKey = typeof PROGRAM_TYPES[keyof typeof PROGRAM_TYPES];
-interface ProgramYearDetails {
-    yearLabel: string;
-    stageName: string;
-    targetFocus: string;
-    targetCount: string;
-    activities: string[];
-}
-interface ProgramConfig {
-    id: ProgramTypeKey;
-    title: string;
-    duration: string;
-    targetAcademicYear: string;
-    allowedAcademicYears: string[];
-    shortDescription: string;
-    mainObjective: string;
-    summaryFocus: string;
-    summaryTarget: string;
-    badge: string;
-    roadmap: ProgramYearDetails[];
-}
-declare const PROGRAM_CONFIGS: Record<ProgramTypeKey, ProgramConfig>;
-declare const PROGRAM_ACADEMIC_YEAR_MAP: Record<ProgramTypeKey, AcademicYear[]>;
-declare const PROGRAM_ELIGIBILITY_MATRIX: Record<string, any>;
-declare const PROGRAM_DISCLAIMER = "Note: The specified number of internships and training opportunities are structured milestones designed to build verifiable industry readiness, and do not constitute an unconditional guarantee of placement.";
-declare const ALL_PROGRAM_KEYS: ProgramTypeKey[];
-declare const getProgramConfig: (key?: string) => ProgramConfig;
-declare const isValidProgramType: (key?: string) => boolean;
+declare const DEFAULT_LANDING_CMS_CONFIG: LandingPageConfig;
 
-export { ADMIN_PERMISSIONS, ALL_PROGRAM_KEYS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_ACADEMIC_YEAR_MAP, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType, getProgramConfig, isValidProgramType };
+declare const DEFAULT_PROGRAM_PRICINGS: Omit<ProgramPricingItem, 'id' | 'createdAt' | 'updatedAt'>[];
+declare const DEFAULT_COUPONS: Omit<CouponItem, 'id' | 'createdAt' | 'updatedAt' | 'usedCount'>[];
+declare const DEFAULT_CAMPAIGNS: Omit<DiscountCampaignItem, 'id' | 'createdAt' | 'updatedAt' | 'currentSpend'>[];
+
+export { ADMIN_PERMISSIONS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_CAMPAIGNS, DEFAULT_COUPONS, DEFAULT_LANDING_CMS_CONFIG, DEFAULT_PROGRAM_PRICINGS, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROJECT_STATUS, Permission, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType };

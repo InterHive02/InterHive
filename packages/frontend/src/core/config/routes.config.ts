@@ -17,6 +17,7 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
   admin: [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
     { path: '/profile', label: 'Profile', icon: 'User' },
+    { path: '/admin/pricing', label: 'Pricing & Revenue', icon: 'BadgePercent' },
     { path: '/admin/interns', label: 'Manage Interns', icon: 'Users' },
     { path: '/admin/applications', label: 'Applications', icon: 'FileText' },
     { path: '/admin/companies', label: 'Manage Companies', icon: 'Building2' },
@@ -33,6 +34,7 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
   hr: [
     { path: '/hr/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
     { path: '/profile', label: 'Profile', icon: 'User' },
+    { path: '/admin/pricing', label: 'Pricing & Revenue', icon: 'BadgePercent' },
     { path: '/hr/applications', label: 'Applications', icon: 'FileText' },
     { path: '/hr/leads', label: 'Company Leads', icon: 'Building2' },
     { path: '/hr/interns', label: 'Manage Interns', icon: 'Users' },
@@ -72,6 +74,7 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
   // 5. Free Registered Student (Basic Dashboard)
   student: [
     { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+    { path: '/my-programs', label: 'My Programs & Payments', icon: 'Wallet' },
     { path: '/programs', label: 'Programs', icon: 'BookOpen' },
     { path: '/training', label: 'Courses', icon: 'GraduationCap' },
     { path: '/settings', label: 'Settings', icon: 'Settings' },
@@ -80,6 +83,7 @@ export const ROLE_NAVIGATION: Record<UserRole, RouteConfig[]> = {
   // 6. Premium Intern Learning & Project Workspace
   intern: [
     { path: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+    { path: '/my-programs', label: 'My Programs & Payments', icon: 'Wallet' },
     { path: '/programs', label: 'Programs', icon: 'BookOpen' },
     { path: '/training', label: 'Courses', icon: 'GraduationCap' },
     { path: '/projects', label: 'Projects', icon: 'FolderKanban' },
@@ -101,8 +105,9 @@ export const ROUTES: RouteConfig[] = [
   { path: '/manager/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', roles: ['manager'] },
   { path: '/company/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', roles: ['company'] },
 
-  // Profile
+  // Profile & Student Programs
   { path: '/profile', label: 'Profile', icon: 'User', roles: ['intern', 'company', 'manager', 'hr', 'admin'] },
+  { path: '/my-programs', label: 'My Programs & Payments', icon: 'Wallet', roles: ['intern', 'student'] },
 
   // Intern features
   { path: '/assessments', label: 'Assessments', icon: 'Award', roles: ['intern'] },
@@ -114,6 +119,7 @@ export const ROUTES: RouteConfig[] = [
   { path: '/settings', label: 'Settings', icon: 'Settings', roles: ['intern', 'company', 'manager', 'hr', 'admin'] },
 
   // Admin & HR
+  { path: '/admin/pricing', label: 'Pricing & Revenue', icon: 'BadgePercent', roles: ['admin', 'hr'] },
   { path: '/admin/applications', label: 'Applications', icon: 'FileText', roles: ['admin'] },
   { path: '/admin/leads', label: 'Company Leads', icon: 'Building', roles: ['admin'] },
   { path: '/admin/interns', label: 'Manage Interns', icon: 'Users', roles: ['admin'] },
@@ -158,6 +164,10 @@ export const AUTH_ROUTES = [
 // Public routes (accessible without auth)
 export const PUBLIC_ROUTES = [
   '/',
+  '/programs',
+  '/for-interns',
+  '/for-companies',
+  '/checkout',
   '/health',
   ...AUTH_ROUTES,
 ];

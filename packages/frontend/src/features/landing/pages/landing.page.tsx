@@ -328,8 +328,7 @@ export const LandingPage: React.FC = () => {
   };
 
   const handleEnrollClick = (progId: string) => {
-    setSelectedProgramTypeForModal(progId);
-    setIsInternshipModalOpen(true);
+    navigate(`/checkout/${progId}`);
   };
 
   const handleRoadmapClick = (progId: string) => {
@@ -1062,8 +1061,7 @@ export const LandingPage: React.FC = () => {
         onClose={() => setIsDetailsModalOpen(false)}
         programType={activeDetailsProgramType}
         onEnroll={(progType) => {
-          setSelectedProgramTypeForModal(progType);
-          setIsInternshipModalOpen(true);
+          navigate(`/checkout/${progType}`);
         }}
       />
 

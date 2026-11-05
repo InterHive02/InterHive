@@ -29,6 +29,9 @@ import {
   Moon,
   ShieldAlert,
   LayoutTemplate,
+  BadgePercent,
+  Wallet,
+  CreditCard,
 } from 'lucide-react';
 import { getNavRoutes } from '../../../core/config/routes.config';
 import { UserRole } from '@interhive/shared';
@@ -136,6 +139,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'landingcms':
       case 'maintainlanding':
         return LayoutTemplate;
+      case 'badgepercent':
+      case 'pricing':
+      case 'revenue':
+        return BadgePercent;
+      case 'wallet':
+      case 'myprograms':
+      case 'payments':
+      case 'creditcard':
+        return Wallet;
       default:
         return Circle;
     }

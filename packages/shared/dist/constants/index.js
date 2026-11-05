@@ -27,6 +27,10 @@ __export(constants_exports, {
   AttendanceStatus: () => AttendanceStatus,
   COMPANY_PERMISSIONS: () => COMPANY_PERMISSIONS,
   COMPANY_STATUS: () => COMPANY_STATUS,
+  DEFAULT_CAMPAIGNS: () => DEFAULT_CAMPAIGNS,
+  DEFAULT_COUPONS: () => DEFAULT_COUPONS,
+  DEFAULT_LANDING_CMS_CONFIG: () => DEFAULT_LANDING_CMS_CONFIG,
+  DEFAULT_PROGRAM_PRICINGS: () => DEFAULT_PROGRAM_PRICINGS,
   DEFAULT_ROUTES: () => DEFAULT_ROUTES,
   DOMAIN_SKILLS: () => DOMAIN_SKILLS,
   HR_PERMISSIONS: () => HR_PERMISSIONS,
@@ -670,34 +674,35 @@ var PROGRAM_CONFIGS = {
     shortDescription: "Exclusively for final-year students (Batch 2027): 2 months of intensive training & readiness done by the InterHive platform, followed by an assured opportunity to get a 6-month corporate internship at any partner company leading directly to Pre-Placement Offers (PPO).",
     mainObjective: "To provide 2 months of structured training & industry readiness on the InterHive platform, followed by guaranteed opportunities to secure a 6-month corporate internship at any partner company for full-time PPO conversion.",
     summaryFocus: "2 Months Training by InterHive + 6 Months Internship Opportunity at Any Company",
-    summaryTarget: "2 Mo InterHive Readiness Training + 6 Mo Corporate Internship Opportunity -> PPO",
-    badge: "Final Year PPO (Batch 2027)",
+    summaryTarget: "2 Mo InterHive Readiness Training + 6 Mo Corporate Internship Opportunity -> Assured PPO",
+    badge: "Final Year Only (Batch 2027) \xB7 Fast-Track PPO",
     roadmap: [
       {
-        yearLabel: "Month 1\u20132 (At InterHive)",
+        yearLabel: "Stage 1 (Month 1\u20132)",
         stageName: "2 Months Training & Readiness by InterHive Platform",
-        targetFocus: "Hands-On Industry Readiness, Production Codebases & Skill Verification at InterHive",
-        targetCount: "InterHive Industry-Readiness Certification & Verified Scorecard",
+        targetFocus: "Hands-on practical training, modern software engineering workflows & industry readiness conducted entirely on the InterHive platform",
+        targetCount: "InterHive Industry-Ready Scorecard & Certified Competency Badge",
         activities: [
           "2 Months of intensive training and industry readiness conducted directly on the InterHive platform",
-          "Hands-on practical development with production codebases, Git workflows, clean code & Docker",
-          "Daily standup tracking, punch-in logs, assignment evaluation & progress monitoring",
-          "Weekly 1-on-1 code reviews & technical benchmark evaluations with senior engineering mentors",
-          "Rigorous interview preparation: mock technical rounds, system design & resume optimization",
-          "Official InterHive Industry-Readiness Certification verifying candidate readiness for company hiring"
+          "Production codebases, Git branch workflows, pull request reviews, clean code & Docker containerization",
+          "Daily attendance tracking, standups, sprint assignments, code linting & continuous progress evaluation",
+          "Weekly 1-on-1 mentor reviews with experienced engineering leads to address skill gaps",
+          "Dedicated interview preparation: mock coding rounds, data structures, system design & resume elevation",
+          "Official InterHive Industry-Readiness Certification verifying candidate is 100% prepared for corporate hiring"
         ]
       },
       {
-        yearLabel: "Month 3\u20138 (At Partner Company)",
-        stageName: "6 Months Corporate Internship Opportunity at Any Partner Company",
-        targetFocus: "Assured Corporate Internship Placement, Real-World Engineering & Direct PPO Conversion",
+        yearLabel: "Stage 2 (Month 3\u20138)",
+        stageName: "6 Months Assured Corporate Internship at Any Partner Company",
+        targetFocus: "Assured opportunity to intern at a partner company, work with real corporate teams, earn a monthly stipend & convert into a PPO",
         targetCount: "6-Month Corporate Internship + Pre-Placement Offer (PPO)",
         activities: [
-          "Assured opportunity to get matched and placed for a 6-month internship at any partner company",
-          "Direct deployment to live production engineering teams, client deliverables & agile sprints",
-          "Monthly stipend paid directly to the student by the hiring company",
-          "Continuous performance tracking and milestone feedback evaluated via the InterHive portal",
-          "Formal Pre-Placement Offer (PPO) evaluation for immediate full-time employment upon graduation"
+          "Assured opportunity to get matched and placed for a 6-month corporate internship at any partner company",
+          "Direct deployment to live corporate engineering teams, real client deliverables & production environments",
+          "Earn a competitive monthly stipend paid directly to the student by the hiring partner company",
+          "Continuous performance governance and milestone reporting evaluated through the InterHive dashboard",
+          "Direct technical & HR review loops with corporate leadership for full-time Pre-Placement Offer (PPO) conversion",
+          "Graduation transition into a permanent, full-time corporate role upon degree completion"
         ]
       }
     ]
@@ -747,6 +752,712 @@ var getProgramConfig = (key) => {
 var isValidProgramType = (key) => {
   return typeof key === "string" && key in PROGRAM_CONFIGS;
 };
+
+// src/constants/landing-cms.defaults.ts
+var DEFAULT_LANDING_CMS_CONFIG = {
+  version: 1,
+  isPublished: true,
+  publishedAt: (/* @__PURE__ */ new Date()).toISOString(),
+  publishedBy: "system@interhive.in",
+  lastEditedBy: "System Default",
+  theme: {
+    primaryColor: "#2563eb",
+    // blue-600
+    secondaryColor: "#4f46e5",
+    // indigo-600
+    accentColor: "#9333ea",
+    // purple-600
+    surfaceColor: "#F0F5FA",
+    textColor: "#0f172a",
+    fontFamily: "Inter, system-ui, sans-serif",
+    borderRadius: "rounded-2xl",
+    enableAnimations: true
+  },
+  seo: {
+    metaTitle: "InterHive \u2014 Industry-Readiness & Talent Connect Platform",
+    metaDescription: "From Campus Selection to Full-Time PPO. Practical industrial training, real projects, and paid corporate internships with direct PPO conversion.",
+    metaKeywords: "internship, ppo, campus placement, engineering internships, tech careers, interhive",
+    ogTitle: "InterHive \u2014 Talent Connect Platform",
+    ogDescription: "Accelerate your career with real-world projects and direct company placements.",
+    ogImage: "/interhive_full_bg.png",
+    canonicalUrl: "https://interhive.in"
+  },
+  navbar: {
+    brandName: "InterHive",
+    logoUrl: "",
+    links: [
+      { label: "Programs", href: "#our-programs", isExternal: false, order: 1, isVisible: true },
+      { label: "How It Works", href: "#how-it-works", isExternal: false, order: 2, isVisible: true },
+      { label: "Why InterHive", href: "#why-interhive", isExternal: false, order: 3, isVisible: true },
+      { label: "Features", href: "#features", isExternal: false, order: 4, isVisible: true },
+      { label: "Opportunities", href: "#explore-opportunities", isExternal: false, order: 5, isVisible: true },
+      { label: "FAQ", href: "#faq", isExternal: false, order: 6, isVisible: true }
+    ],
+    ctaButtonText: "Join PPO Track",
+    ctaButtonLink: "modal_application",
+    showCtaButton: true
+  },
+  footer: {
+    brandName: "InterHive",
+    tagline: "Bridging campus potential with verified industry engineering excellence.",
+    copyrightText: "\xA9 2026 InterHive.in. All rights reserved.",
+    columns: [
+      {
+        title: "Programs",
+        links: [
+          { label: "1-Year Program", href: "/programs" },
+          { label: "2-Year Program", href: "/programs" },
+          { label: "3-Year Program", href: "/programs" },
+          { label: "4-Year Program", href: "/programs" },
+          { label: "PPO Program", href: "/programs" }
+        ]
+      },
+      {
+        title: "Platform",
+        links: [
+          { label: "Assessment Diagnostic", href: "/login" },
+          { label: "Corporate Portal", href: "/login" },
+          { label: "Candidate Verification", href: "/login" }
+        ]
+      },
+      {
+        title: "Company",
+        links: [
+          { label: "About Us", href: "/about" },
+          { label: "Contact Team", href: "/contact" },
+          { label: "Privacy Policy", href: "#" },
+          { label: "Terms of Service", href: "#" }
+        ]
+      }
+    ],
+    socialLinks: [
+      { platform: "LinkedIn", url: "https://linkedin.com", icon: "Linkedin" },
+      { platform: "Twitter", url: "https://twitter.com", icon: "Twitter" },
+      { platform: "GitHub", url: "https://github.com", icon: "Github" }
+    ]
+  },
+  sectionsMeta: [
+    { id: "hero", name: "Hero Section", order: 1, isVisible: true },
+    { id: "journey", name: "PPO Journey (7-Step Stepper)", order: 2, isVisible: true },
+    { id: "timelineCalculator", name: "Placement Timeline Calculator", order: 3, isVisible: true },
+    { id: "programs", name: "Academic Readiness Programs (1-4 Yr & PPO)", order: 4, isVisible: true },
+    { id: "stats", name: "Platform Stats Strip", order: 5, isVisible: true },
+    { id: "partners", name: "Hiring Partners Ecosystem", order: 6, isVisible: true },
+    { id: "whyUs", name: "Why InterHive / Trust & Differentiation", order: 7, isVisible: true },
+    { id: "features", name: "Platform Feature Grid", order: 8, isVisible: true },
+    { id: "opportunities", name: "Featured Roles & Opportunities", order: 9, isVisible: true },
+    { id: "testimonials", name: "Verified Student Stories", order: 10, isVisible: true },
+    { id: "equalOpportunity", name: "Equal Opportunity Guarantee", order: 11, isVisible: true },
+    { id: "dualTarget", name: "For Students vs For Companies", order: 12, isVisible: true },
+    { id: "faq", name: "Frequently Asked Questions", order: 13, isVisible: true },
+    { id: "newsletter", name: "Cohort Alerts / Newsletter", order: 14, isVisible: true },
+    { id: "companyBar", name: "Company Outreach Connect Bar", order: 15, isVisible: true },
+    { id: "stickyCta", name: "Persistent Sticky Bottom CTA", order: 16, isVisible: true }
+  ],
+  hero: {
+    badgeText: "6-Month Structured PPO Track: 2 Months Training + 4 Months Paid Corporate Internship",
+    headlineMain: "From Campus Selection",
+    headlineGradient: "to Full-Time PPO.",
+    ppoDefinition: "PPO = Pre-Placement Offer: A confirmed job offer secured before your final college semester.",
+    description: "Practical 2-month industrial training followed by 4-month paid corporate internships with direct PPO conversion. 100% free for all college students.",
+    background: {
+      type: "image",
+      url: "/interhive_full_bg.png",
+      opacity: 0.8,
+      overlayGradient: "from-[#EBF3FF]/90 via-[#F4F8FC]/60 to-transparent"
+    },
+    featureBadges: [
+      { title: "Industry Training", subtitle: "by InterHive", icon: "BookOpen" },
+      { title: "Corporate", subtitle: "Matching", icon: "Building2" },
+      { title: "Mentorship", subtitle: "& Real Projects", icon: "Users" },
+      { title: "Paid Internship", subtitle: "& PPO Review", icon: "Briefcase" }
+    ],
+    ctaButtons: [
+      { text: "Join the PPO Track", action: "modal_application", variant: "primary", isVisible: true },
+      { text: "2-Min Track Quiz", action: "modal_quiz", variant: "secondary", isVisible: true },
+      { text: "Watch Walkthrough", action: "modal_video", variant: "outline", isVisible: true }
+    ],
+    showcases: [
+      {
+        id: "fullstack",
+        trackName: "PPO Track \u2014 Full Stack Engineering",
+        curriculum: "Node.js, React, Microservices & System Design",
+        badgeColor: "bg-blue-600",
+        badgeInitial: "FS",
+        progress: 60,
+        currentStage: "Corporate Matching Sprint",
+        currentStageDesc: "Completing full-stack production pull-request audits before hiring rounds.",
+        modules: "12/12",
+        projects: "5/5",
+        tests: "8/8",
+        stipend: "\u20B935,000 - \u20B945,000 / mo",
+        ppoTarget: "\u20B910 - \u20B914 LPA Target"
+      },
+      {
+        id: "cloud",
+        trackName: "PPO Track \u2014 Cloud & DevOps Engineering",
+        curriculum: "Docker, Kubernetes, AWS & CI/CD Pipelines",
+        badgeColor: "bg-purple-600",
+        badgeInitial: "CD",
+        progress: 85,
+        currentStage: "Production Internship Sprint",
+        currentStageDesc: "Deploying automated infrastructure with mentor and code reviews.",
+        modules: "10/10",
+        projects: "4/4",
+        tests: "10/10",
+        stipend: "\u20B930,000 - \u20B940,000 / mo",
+        ppoTarget: "\u20B99 - \u20B912 LPA Target"
+      },
+      {
+        id: "aids",
+        trackName: "PPO Track \u2014 Applied AI & Data Science",
+        curriculum: "Python, PyTorch, LLMs, Vector DBs & ML APIs",
+        badgeColor: "bg-emerald-600",
+        badgeInitial: "AI",
+        progress: 100,
+        currentStage: "PPO Transition & Placement",
+        currentStageDesc: "Graduation capstone submitted; preparing for full-time offer onboarding.",
+        modules: "14/14",
+        projects: "6/6",
+        tests: "12/12",
+        stipend: "\u20B940,000 - \u20B950,000 / mo",
+        ppoTarget: "\u20B912 - \u20B916 LPA Target"
+      }
+    ]
+  },
+  journey: {
+    tag: "STRUCTURED PATHWAY",
+    title: "Your Journey to a PPO",
+    subtitle: "A structured 6-month pathway designed for your success.",
+    linkText: "See Detailed Program",
+    linkUrl: "/programs",
+    steps: [
+      { stepNumber: "01", title: "Apply & Assessment", description: "Create your profile and complete AI + skill assessments.", badgeColor: "bg-blue-50", icon: "Target" },
+      { stepNumber: "02", title: "Selection", description: "Qualified students enter the PPO Track.", badgeColor: "bg-purple-50", icon: "UserCheck" },
+      { stepNumber: "03", title: "2-Month Training", description: "Industry-focused training, real projects and mentorship.", badgeColor: "bg-emerald-50", icon: "BookOpen" },
+      { stepNumber: "04", title: "Company Matching", description: "Get matched with our partner companies.", badgeColor: "bg-amber-50", icon: "Building2" },
+      { stepNumber: "05", title: "4-Month Company Internship", description: "Work on real-world projects at the partner company.", badgeColor: "bg-rose-50", icon: "Briefcase" },
+      { stepNumber: "06", title: "Performance Evaluation", description: "Ongoing reviews and final evaluation.", badgeColor: "bg-indigo-50", icon: "TrendingUp" },
+      { stepNumber: "07", title: "PPO", description: "Receive a Pre-Placement Offer based on performance.", badgeColor: "bg-blue-100", icon: "Trophy" }
+    ],
+    featurePills: [
+      { icon: "Building2", title: "Verified Partner Network", desc: "Direct corporate internship scopes" },
+      { icon: "Layers", title: "Industry-Ready Training", desc: "Hands-on, practical learning" },
+      { icon: "Code", title: "Real Project Experience", desc: "Build a strong portfolio" },
+      { icon: "Users", title: "Dedicated Mentorship", desc: "Guidance from industry experts" }
+    ]
+  },
+  whyUs: {
+    tag: "TRUST & DIFFERENTIATION",
+    title: "Why InterHive?",
+    subtitle: "Honest, outcome-driven preparation connecting motivated students with forward-thinking companies.",
+    storyLinkText: "Learn our story",
+    storyLinkUrl: "/about",
+    cards: [
+      {
+        icon: "CheckCircle2",
+        title: "Structured Readiness Assessment",
+        description: "We do not just list roles \u2014 we help you prepare for them first.",
+        iconBg: "bg-indigo-50",
+        iconColor: "text-indigo-600"
+      },
+      {
+        icon: "Layers",
+        title: "Curated, Matched Opportunities",
+        description: "Roles matched to your actual skills, not a generic job board.",
+        iconBg: "bg-blue-50",
+        iconColor: "text-blue-600"
+      },
+      {
+        icon: "Briefcase",
+        title: "Real, Project-Based Experience",
+        description: "Internships built around real work, so companies get interns who are actually ready to contribute.",
+        iconBg: "bg-purple-50",
+        iconColor: "text-purple-600"
+      }
+    ]
+  },
+  features: {
+    tag: "PLATFORM FOR A BETTER TOMORROW",
+    headlineMain: "Everything You Need to",
+    headlineGradient: "Build Your Career",
+    cursiveText: "Real Projects. Real Experience. Real Growth.",
+    cards: [
+      {
+        icon: "GraduationCap",
+        title: "Internships",
+        description: "Get hands-on experience with real-world projects from top companies.",
+        linkUrl: "#explore-opportunities",
+        iconBg: "bg-blue-50",
+        iconColor: "text-blue-600"
+      },
+      {
+        icon: "Briefcase",
+        title: "Jobs",
+        description: "Find full-time opportunities and kickstart your professional journey.",
+        linkUrl: "#explore-opportunities",
+        iconBg: "bg-purple-50",
+        iconColor: "text-purple-600"
+      },
+      {
+        icon: "Building2",
+        title: "Top Companies",
+        description: "Work with the best. From startups to global tech giants.",
+        linkUrl: "#",
+        iconBg: "bg-emerald-50",
+        iconColor: "text-emerald-600"
+      },
+      {
+        icon: "TrendingUp",
+        title: "Skill Development",
+        description: "Access curated learning paths, workshops and resources.",
+        linkUrl: "#",
+        iconBg: "bg-amber-50",
+        iconColor: "text-amber-600"
+      }
+    ]
+  },
+  equalOpportunity: {
+    title: "100% Equal Opportunity \u2022 Merit & Practical Skills First",
+    description: "Whether you are from a tier-1 institute or a tier-3 college, your practical assessment scores and demonstrated project work determine your company matching.",
+    buttonText: "Start Free Assessment \u2192"
+  },
+  dualTarget: {
+    studentCard: {
+      tag: "FOR ASPIRING TALENT",
+      title: "For Students",
+      description: "Build real, job-ready skills and get matched to internships that actually lead somewhere.",
+      buttonText: "Explore Internships",
+      buttonLink: "#explore-opportunities",
+      sublinkText: "View training tracks & programs \u2192",
+      sublinkUrl: "/programs"
+    },
+    companyCard: {
+      tag: "FOR HIRING PARTNERS",
+      title: "For Companies",
+      description: "Hire interns who have already been trained and assessed \u2014 not just resumes, but real, demonstrated skills.",
+      buttonText: "Hire Interns",
+      sublinkText: "Learn about hiring partnership \u2192",
+      sublinkUrl: "/contact"
+    }
+  },
+  faq: {
+    tag: "COMMON QUESTIONS",
+    title: "Frequently Asked Questions",
+    subtitle: "Clear, honest answers about how InterHive works.",
+    helpLinkText: "Reach out to our team",
+    helpLinkUrl: "/contact",
+    items: [
+      {
+        question: "Is InterHive free for students?",
+        answer: "Yes. Creating an account, taking our readiness assessment, and applying for internships through InterHive is completely free for students. We are committed to keeping career development accessible to all learners."
+      },
+      {
+        question: "How does the matching process work?",
+        answer: "Instead of generic keyword matching, we evaluate your practical technical readiness and connect you directly with internships and companies looking for your specific skill profile.",
+        linkText: "View our programs & tracks",
+        linkUrl: "/programs"
+      },
+      {
+        question: "What happens if I do not get placed?",
+        answer: "If you are not matched right away, you receive actionable feedback on skill gaps along with recommended learning paths on our Programs page so you can level up and re-apply for upcoming cohorts.",
+        linkText: "Explore learning paths",
+        linkUrl: "/programs"
+      },
+      {
+        question: "How are companies and interns verified on InterHive?",
+        answer: "We review company postings to verify real project scopes and fair stipends. For candidates, our practical assessments evaluate fundamental engineering skills before connecting them with hiring partners."
+      },
+      {
+        question: "Do I need prior experience to apply?",
+        answer: "No prior internship or professional work experience is required. As long as you have learned core fundamentals in your domain, our readiness assessment helps you demonstrate that ability to employers."
+      }
+    ]
+  },
+  newsletter: {
+    badge: "Placement & Batch Alerts",
+    title: "Never Miss a New Cohort or Corporate Opening",
+    subtitle: "Get instant email alerts when new internship roles, assessment windows, and hiring drives open for your college batch.",
+    placeholder: "Enter your college email address",
+    buttonText: "Get Role Alerts",
+    successMessage: "You're subscribed! We'll alert you the moment new cohort roles open."
+  },
+  stickyCta: {
+    title: "6-Month PPO Track",
+    badge: "100% Free",
+    subtitle: "2 Months Training + 4 Months Company Internship \u2022 Direct PPO Evaluation",
+    buttonText: "Apply Free",
+    isVisible: true
+  }
+};
+
+// src/constants/pricing.defaults.ts
+var DEFAULT_PROGRAM_PRICINGS = [
+  {
+    programKey: "ONE_YEAR",
+    title: "1-Year Program",
+    duration: "1 Academic Year",
+    description: "Exclusively for final-year students (Batch 2027). A focused industry-readiness and placement accelerator preparing graduating engineers for internships, interviews, and immediate corporate hiring.",
+    originalPrice: 7999,
+    promotionalPrice: 5999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "Final Year Students Only (Batch 2027)",
+    features: [
+      "1 Quality Corporate Internship opportunity with stipend",
+      "Production agile sprints & code reviews",
+      "Resume rebuild, GitHub dossier & LinkedIn audit",
+      "Direct matchmaking with partner tech companies",
+      "Mock technical & HR interview rounds"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_1y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 5999,
+        intervalMonths: 0,
+        description: "Complete program access in one single discounted payment"
+      },
+      {
+        id: "plan_1y_inst",
+        name: "2 Monthly Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 2,
+        amountPerInstallment: 3199,
+        intervalMonths: 1,
+        description: "Split into 2 flexible monthly payments (\u20B93,199 \xD7 2)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "TWO_YEAR",
+    title: "2-Year Program",
+    duration: "2 Academic Years",
+    description: "Exclusively for 3rd-year students (Batch 2028). Fast-track industrial training and internships in your 3rd year, converting into a 4th-year high-quality paid corporate internship and confirmed PPO.",
+    originalPrice: 14999,
+    promotionalPrice: 10999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "3rd Year Students Only (Batch 2028)",
+    features: [
+      "2 Industry training & internship opportunities in 3rd year",
+      "1 High-quality Paid Corporate Internship in 4th year",
+      "Real agile sprints, Jira ticketing & PR reviews",
+      "System architecture, REST APIs & database indexing",
+      "Placement drives & direct employer matchmaking"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_2y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 10999,
+        intervalMonths: 0,
+        description: "Best value for 2 full academic years"
+      },
+      {
+        id: "plan_2y_annual",
+        name: "Annual Payment",
+        type: "ANNUAL",
+        installmentsCount: 2,
+        amountPerInstallment: 5999,
+        intervalMonths: 12,
+        description: "Pay yearly at beginning of each academic year (\u20B95,999 / year)"
+      },
+      {
+        id: "plan_2y_inst",
+        name: "4 Easy Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 4,
+        amountPerInstallment: 2999,
+        intervalMonths: 3,
+        description: "Quarterly payment plan (\u20B92,999 \xD7 4)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "THREE_YEAR",
+    title: "3-Year Program",
+    duration: "3 Academic Years",
+    description: "Exclusively for 2nd-year students (Batch 2029). Progressively build corporate workflows, advanced full-stack skills, 4 industrial internships, and 4th-year paid corporate placement.",
+    originalPrice: 21999,
+    promotionalPrice: 15999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "2nd Year Students Only (Batch 2029)",
+    features: [
+      "4 Industrial Internships across 2nd & 3rd year",
+      "1 High-Quality Paid Corporate Internship in 4th year",
+      "Cloud infrastructure, Docker, CI/CD pipelines & microservices",
+      "Direct hiring drives with partner tech companies",
+      "Pre-Placement Offer (PPO) conversion support"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_3y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 15999,
+        intervalMonths: 0,
+        description: "Save maximum with one-time payment for 3 academic years"
+      },
+      {
+        id: "plan_3y_annual",
+        name: "Annual Payment",
+        type: "ANNUAL",
+        installmentsCount: 3,
+        amountPerInstallment: 5799,
+        intervalMonths: 12,
+        description: "Pay yearly at beginning of each academic year (\u20B95,799 \xD7 3)"
+      },
+      {
+        id: "plan_3y_inst",
+        name: "6 Bi-Monthly Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 6,
+        amountPerInstallment: 2999,
+        intervalMonths: 2,
+        description: "Flexible installment schedule (\u20B92,999 \xD7 6)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "FOUR_YEAR",
+    title: "4-Year Program",
+    duration: "4 Academic Years",
+    description: "Exclusively for 1st-year students (Batch 2030). A complete 4-year degree-parallel transformation from engineering foundations to 4 industrial internships and final paid placement.",
+    originalPrice: 29999,
+    promotionalPrice: 21999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "1st Year Students Only (Batch 2030)",
+    features: [
+      "Foundation + 4 Industrial Internships + 1 Paid Corporate Internship",
+      "Core algorithms, system design, microservices & cloud deployment",
+      "4 Years of continuous senior engineering mentorship",
+      "100% Guaranteed corporate interview loops",
+      "Pre-Placement Offer (PPO) finalization upon graduation"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_4y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 21999,
+        intervalMonths: 0,
+        description: "Complete 4-year degree-parallel track in one payment"
+      },
+      {
+        id: "plan_4y_annual",
+        name: "Annual Payment Plan",
+        type: "ANNUAL",
+        installmentsCount: 4,
+        amountPerInstallment: 5999,
+        intervalMonths: 12,
+        description: "Pay once per academic year (\u20B95,999 \xD7 4)"
+      },
+      {
+        id: "plan_4y_inst",
+        name: "8 Semester Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 8,
+        amountPerInstallment: 3199,
+        intervalMonths: 6,
+        description: "Pay per semester over 4 years (\u20B93,199 \xD7 8)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "PPO",
+    title: "PPO Program",
+    duration: "8 Months (2 Mo InterHive + 6 Mo Company)",
+    description: "Exclusively for final-year students (Batch 2027): 2 months intensive training & readiness done by the InterHive platform, followed by an assured opportunity to get a 6-month corporate internship at any partner company leading directly to Pre-Placement Offers (PPO).",
+    originalPrice: 4999,
+    promotionalPrice: 2999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "Final Year Students Only (Batch 2027)",
+    features: [
+      "2 Months Training & Readiness by InterHive Platform",
+      "Assured opportunity to get a 6-Month Corporate Internship at Any Partner Company",
+      "Monthly corporate internship stipend paid directly by partner company",
+      "InterHive Industry-Readiness Certification & Verified Benchmark Scorecard",
+      "Direct PPO conversion for immediate full-time employment upon graduation"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_ppo_full",
+        name: "Full One-Time Fast-Track",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 2999,
+        intervalMonths: 0,
+        description: "Immediate access to the 2-Month InterHive sprint and company matching"
+      }
+    ],
+    pricingVersion: 1
+  }
+];
+var DEFAULT_COUPONS = [
+  {
+    code: "INTERHIVE10",
+    name: "General Platform Launch Offer",
+    description: "10% discount across all program enrollments",
+    discountType: "PERCENTAGE",
+    discountValue: 10,
+    maxDiscountAmount: 2e3,
+    minOrderValue: 2e3,
+    applicablePrograms: [],
+    startDate: new Date(Date.now() - 7 * 864e5).toISOString(),
+    expiryDate: new Date(Date.now() + 180 * 864e5).toISOString(),
+    totalUsageLimit: 500,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "FIRSTBATCH",
+    name: "First Batch Launch Discount",
+    description: "20% special launch discount for early adopters",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscountAmount: 4e3,
+    minOrderValue: 3e3,
+    applicablePrograms: [],
+    startDate: new Date(Date.now() - 7 * 864e5).toISOString(),
+    expiryDate: new Date(Date.now() + 60 * 864e5).toISOString(),
+    totalUsageLimit: 200,
+    perUserLimit: 1,
+    firstTimeOnly: true,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "CAMPUS15",
+    name: "College Partnership Campus Offer",
+    description: "15% discount for partnered college students",
+    discountType: "PERCENTAGE",
+    discountValue: 15,
+    maxDiscountAmount: 3e3,
+    minOrderValue: 2500,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 90 * 864e5).toISOString(),
+    totalUsageLimit: 300,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "ANKIT500",
+    name: "Referral Campaign Flat Discount",
+    description: "Flat \u20B9500 off on any program enrollment",
+    discountType: "FIXED",
+    discountValue: 500,
+    maxDiscountAmount: 500,
+    minOrderValue: 2500,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 120 * 864e5).toISOString(),
+    totalUsageLimit: 100,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "DIWALI20",
+    name: "Festival Special Discount",
+    description: "20% festive discount on career accelerator tracks",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscountAmount: 4500,
+    minOrderValue: 4e3,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 45 * 864e5).toISOString(),
+    totalUsageLimit: 150,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "EARLY1000",
+    name: "Early Bird Registration",
+    description: "Flat \u20B91,000 instant discount on multi-year tracks",
+    discountType: "FIXED",
+    discountValue: 1e3,
+    maxDiscountAmount: 1e3,
+    minOrderValue: 7e3,
+    applicablePrograms: ["TWO_YEAR", "THREE_YEAR", "FOUR_YEAR"],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 90 * 864e5).toISOString(),
+    totalUsageLimit: 250,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  }
+];
+var DEFAULT_CAMPAIGNS = [
+  {
+    name: "Early Bird Registration Campaign",
+    description: "Automatic 15% discount for early enrollments",
+    campaignType: "EARLY_BIRD",
+    discountType: "PERCENTAGE",
+    discountValue: 15,
+    maxDiscount: 3500,
+    minOrderValue: 5e3,
+    eligiblePrograms: [],
+    startDate: new Date(Date.now() - 3 * 864e5).toISOString(),
+    endDate: new Date(Date.now() + 30 * 864e5).toISOString(),
+    budgetCap: 1e5,
+    isActive: false
+    // Inactive by default so admin can toggle
+  },
+  {
+    name: "First Batch Launch Offer",
+    description: "Automatic 20% discount on initial cohort",
+    campaignType: "LAUNCH",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscount: 5e3,
+    minOrderValue: 5e3,
+    eligiblePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    endDate: new Date(Date.now() + 45 * 864e5).toISOString(),
+    budgetCap: 15e4,
+    isActive: false
+  }
+];
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ADMIN_PERMISSIONS,
@@ -757,6 +1468,10 @@ var isValidProgramType = (key) => {
   AttendanceStatus,
   COMPANY_PERMISSIONS,
   COMPANY_STATUS,
+  DEFAULT_CAMPAIGNS,
+  DEFAULT_COUPONS,
+  DEFAULT_LANDING_CMS_CONFIG,
+  DEFAULT_PROGRAM_PRICINGS,
   DEFAULT_ROUTES,
   DOMAIN_SKILLS,
   HR_PERMISSIONS,

@@ -32,7 +32,10 @@ __export(src_exports, {
   COMPANY_PERMISSIONS: () => COMPANY_PERMISSIONS,
   COMPANY_STATUS: () => COMPANY_STATUS,
   CompanyStatus: () => CompanyStatus,
+  DEFAULT_CAMPAIGNS: () => DEFAULT_CAMPAIGNS,
+  DEFAULT_COUPONS: () => DEFAULT_COUPONS,
   DEFAULT_LANDING_CMS_CONFIG: () => DEFAULT_LANDING_CMS_CONFIG,
+  DEFAULT_PROGRAM_PRICINGS: () => DEFAULT_PROGRAM_PRICINGS,
   DEFAULT_ROUTES: () => DEFAULT_ROUTES,
   DOMAIN_SKILLS: () => DOMAIN_SKILLS,
   EmploymentType: () => EmploymentType,
@@ -868,34 +871,35 @@ var PROGRAM_CONFIGS = {
     shortDescription: "Exclusively for final-year students (Batch 2027): 2 months of intensive training & readiness done by the InterHive platform, followed by an assured opportunity to get a 6-month corporate internship at any partner company leading directly to Pre-Placement Offers (PPO).",
     mainObjective: "To provide 2 months of structured training & industry readiness on the InterHive platform, followed by guaranteed opportunities to secure a 6-month corporate internship at any partner company for full-time PPO conversion.",
     summaryFocus: "2 Months Training by InterHive + 6 Months Internship Opportunity at Any Company",
-    summaryTarget: "2 Mo InterHive Readiness Training + 6 Mo Corporate Internship Opportunity -> PPO",
-    badge: "Final Year PPO (Batch 2027)",
+    summaryTarget: "2 Mo InterHive Readiness Training + 6 Mo Corporate Internship Opportunity -> Assured PPO",
+    badge: "Final Year Only (Batch 2027) \xB7 Fast-Track PPO",
     roadmap: [
       {
-        yearLabel: "Month 1\u20132 (At InterHive)",
+        yearLabel: "Stage 1 (Month 1\u20132)",
         stageName: "2 Months Training & Readiness by InterHive Platform",
-        targetFocus: "Hands-On Industry Readiness, Production Codebases & Skill Verification at InterHive",
-        targetCount: "InterHive Industry-Readiness Certification & Verified Scorecard",
+        targetFocus: "Hands-on practical training, modern software engineering workflows & industry readiness conducted entirely on the InterHive platform",
+        targetCount: "InterHive Industry-Ready Scorecard & Certified Competency Badge",
         activities: [
           "2 Months of intensive training and industry readiness conducted directly on the InterHive platform",
-          "Hands-on practical development with production codebases, Git workflows, clean code & Docker",
-          "Daily standup tracking, punch-in logs, assignment evaluation & progress monitoring",
-          "Weekly 1-on-1 code reviews & technical benchmark evaluations with senior engineering mentors",
-          "Rigorous interview preparation: mock technical rounds, system design & resume optimization",
-          "Official InterHive Industry-Readiness Certification verifying candidate readiness for company hiring"
+          "Production codebases, Git branch workflows, pull request reviews, clean code & Docker containerization",
+          "Daily attendance tracking, standups, sprint assignments, code linting & continuous progress evaluation",
+          "Weekly 1-on-1 mentor reviews with experienced engineering leads to address skill gaps",
+          "Dedicated interview preparation: mock coding rounds, data structures, system design & resume elevation",
+          "Official InterHive Industry-Readiness Certification verifying candidate is 100% prepared for corporate hiring"
         ]
       },
       {
-        yearLabel: "Month 3\u20138 (At Partner Company)",
-        stageName: "6 Months Corporate Internship Opportunity at Any Partner Company",
-        targetFocus: "Assured Corporate Internship Placement, Real-World Engineering & Direct PPO Conversion",
+        yearLabel: "Stage 2 (Month 3\u20138)",
+        stageName: "6 Months Assured Corporate Internship at Any Partner Company",
+        targetFocus: "Assured opportunity to intern at a partner company, work with real corporate teams, earn a monthly stipend & convert into a PPO",
         targetCount: "6-Month Corporate Internship + Pre-Placement Offer (PPO)",
         activities: [
-          "Assured opportunity to get matched and placed for a 6-month internship at any partner company",
-          "Direct deployment to live production engineering teams, client deliverables & agile sprints",
-          "Monthly stipend paid directly to the student by the hiring company",
-          "Continuous performance tracking and milestone feedback evaluated via the InterHive portal",
-          "Formal Pre-Placement Offer (PPO) evaluation for immediate full-time employment upon graduation"
+          "Assured opportunity to get matched and placed for a 6-month corporate internship at any partner company",
+          "Direct deployment to live corporate engineering teams, real client deliverables & production environments",
+          "Earn a competitive monthly stipend paid directly to the student by the hiring partner company",
+          "Continuous performance governance and milestone reporting evaluated through the InterHive dashboard",
+          "Direct technical & HR review loops with corporate leadership for full-time Pre-Placement Offer (PPO) conversion",
+          "Graduation transition into a permanent, full-time corporate role upon degree completion"
         ]
       }
     ]
@@ -1283,6 +1287,374 @@ var DEFAULT_LANDING_CMS_CONFIG = {
     isVisible: true
   }
 };
+
+// src/constants/pricing.defaults.ts
+var DEFAULT_PROGRAM_PRICINGS = [
+  {
+    programKey: "ONE_YEAR",
+    title: "1-Year Program",
+    duration: "1 Academic Year",
+    description: "Exclusively for final-year students (Batch 2027). A focused industry-readiness and placement accelerator preparing graduating engineers for internships, interviews, and immediate corporate hiring.",
+    originalPrice: 7999,
+    promotionalPrice: 5999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "Final Year Students Only (Batch 2027)",
+    features: [
+      "1 Quality Corporate Internship opportunity with stipend",
+      "Production agile sprints & code reviews",
+      "Resume rebuild, GitHub dossier & LinkedIn audit",
+      "Direct matchmaking with partner tech companies",
+      "Mock technical & HR interview rounds"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_1y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 5999,
+        intervalMonths: 0,
+        description: "Complete program access in one single discounted payment"
+      },
+      {
+        id: "plan_1y_inst",
+        name: "2 Monthly Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 2,
+        amountPerInstallment: 3199,
+        intervalMonths: 1,
+        description: "Split into 2 flexible monthly payments (\u20B93,199 \xD7 2)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "TWO_YEAR",
+    title: "2-Year Program",
+    duration: "2 Academic Years",
+    description: "Exclusively for 3rd-year students (Batch 2028). Fast-track industrial training and internships in your 3rd year, converting into a 4th-year high-quality paid corporate internship and confirmed PPO.",
+    originalPrice: 14999,
+    promotionalPrice: 10999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "3rd Year Students Only (Batch 2028)",
+    features: [
+      "2 Industry training & internship opportunities in 3rd year",
+      "1 High-quality Paid Corporate Internship in 4th year",
+      "Real agile sprints, Jira ticketing & PR reviews",
+      "System architecture, REST APIs & database indexing",
+      "Placement drives & direct employer matchmaking"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_2y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 10999,
+        intervalMonths: 0,
+        description: "Best value for 2 full academic years"
+      },
+      {
+        id: "plan_2y_annual",
+        name: "Annual Payment",
+        type: "ANNUAL",
+        installmentsCount: 2,
+        amountPerInstallment: 5999,
+        intervalMonths: 12,
+        description: "Pay yearly at beginning of each academic year (\u20B95,999 / year)"
+      },
+      {
+        id: "plan_2y_inst",
+        name: "4 Easy Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 4,
+        amountPerInstallment: 2999,
+        intervalMonths: 3,
+        description: "Quarterly payment plan (\u20B92,999 \xD7 4)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "THREE_YEAR",
+    title: "3-Year Program",
+    duration: "3 Academic Years",
+    description: "Exclusively for 2nd-year students (Batch 2029). Progressively build corporate workflows, advanced full-stack skills, 4 industrial internships, and 4th-year paid corporate placement.",
+    originalPrice: 21999,
+    promotionalPrice: 15999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "2nd Year Students Only (Batch 2029)",
+    features: [
+      "4 Industrial Internships across 2nd & 3rd year",
+      "1 High-Quality Paid Corporate Internship in 4th year",
+      "Cloud infrastructure, Docker, CI/CD pipelines & microservices",
+      "Direct hiring drives with partner tech companies",
+      "Pre-Placement Offer (PPO) conversion support"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_3y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 15999,
+        intervalMonths: 0,
+        description: "Save maximum with one-time payment for 3 academic years"
+      },
+      {
+        id: "plan_3y_annual",
+        name: "Annual Payment",
+        type: "ANNUAL",
+        installmentsCount: 3,
+        amountPerInstallment: 5799,
+        intervalMonths: 12,
+        description: "Pay yearly at beginning of each academic year (\u20B95,799 \xD7 3)"
+      },
+      {
+        id: "plan_3y_inst",
+        name: "6 Bi-Monthly Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 6,
+        amountPerInstallment: 2999,
+        intervalMonths: 2,
+        description: "Flexible installment schedule (\u20B92,999 \xD7 6)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "FOUR_YEAR",
+    title: "4-Year Program",
+    duration: "4 Academic Years",
+    description: "Exclusively for 1st-year students (Batch 2030). A complete 4-year degree-parallel transformation from engineering foundations to 4 industrial internships and final paid placement.",
+    originalPrice: 29999,
+    promotionalPrice: 21999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "1st Year Students Only (Batch 2030)",
+    features: [
+      "Foundation + 4 Industrial Internships + 1 Paid Corporate Internship",
+      "Core algorithms, system design, microservices & cloud deployment",
+      "4 Years of continuous senior engineering mentorship",
+      "100% Guaranteed corporate interview loops",
+      "Pre-Placement Offer (PPO) finalization upon graduation"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_4y_full",
+        name: "Full One-Time Payment",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 21999,
+        intervalMonths: 0,
+        description: "Complete 4-year degree-parallel track in one payment"
+      },
+      {
+        id: "plan_4y_annual",
+        name: "Annual Payment Plan",
+        type: "ANNUAL",
+        installmentsCount: 4,
+        amountPerInstallment: 5999,
+        intervalMonths: 12,
+        description: "Pay once per academic year (\u20B95,999 \xD7 4)"
+      },
+      {
+        id: "plan_4y_inst",
+        name: "8 Semester Installments",
+        type: "INSTALLMENT",
+        installmentsCount: 8,
+        amountPerInstallment: 3199,
+        intervalMonths: 6,
+        description: "Pay per semester over 4 years (\u20B93,199 \xD7 8)"
+      }
+    ],
+    pricingVersion: 1
+  },
+  {
+    programKey: "PPO",
+    title: "PPO Program",
+    duration: "8 Months (2 Mo InterHive + 6 Mo Company)",
+    description: "Exclusively for final-year students (Batch 2027): 2 months intensive training & readiness done by the InterHive platform, followed by an assured opportunity to get a 6-month corporate internship at any partner company leading directly to Pre-Placement Offers (PPO).",
+    originalPrice: 4999,
+    promotionalPrice: 2999,
+    currency: "INR",
+    isActive: true,
+    taxPercentage: 18,
+    taxIncluded: false,
+    eligibilityBatch: "Final Year Students Only (Batch 2027)",
+    features: [
+      "2 Months Training & Readiness by InterHive Platform",
+      "Assured opportunity to get a 6-Month Corporate Internship at Any Partner Company",
+      "Monthly corporate internship stipend paid directly by partner company",
+      "InterHive Industry-Readiness Certification & Verified Benchmark Scorecard",
+      "Direct PPO conversion for immediate full-time employment upon graduation"
+    ],
+    paymentPlans: [
+      {
+        id: "plan_ppo_full",
+        name: "Full One-Time Fast-Track",
+        type: "FULL",
+        installmentsCount: 1,
+        amountPerInstallment: 2999,
+        intervalMonths: 0,
+        description: "Immediate access to the 2-Month InterHive sprint and company matching"
+      }
+    ],
+    pricingVersion: 1
+  }
+];
+var DEFAULT_COUPONS = [
+  {
+    code: "INTERHIVE10",
+    name: "General Platform Launch Offer",
+    description: "10% discount across all program enrollments",
+    discountType: "PERCENTAGE",
+    discountValue: 10,
+    maxDiscountAmount: 2e3,
+    minOrderValue: 2e3,
+    applicablePrograms: [],
+    startDate: new Date(Date.now() - 7 * 864e5).toISOString(),
+    expiryDate: new Date(Date.now() + 180 * 864e5).toISOString(),
+    totalUsageLimit: 500,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "FIRSTBATCH",
+    name: "First Batch Launch Discount",
+    description: "20% special launch discount for early adopters",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscountAmount: 4e3,
+    minOrderValue: 3e3,
+    applicablePrograms: [],
+    startDate: new Date(Date.now() - 7 * 864e5).toISOString(),
+    expiryDate: new Date(Date.now() + 60 * 864e5).toISOString(),
+    totalUsageLimit: 200,
+    perUserLimit: 1,
+    firstTimeOnly: true,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "CAMPUS15",
+    name: "College Partnership Campus Offer",
+    description: "15% discount for partnered college students",
+    discountType: "PERCENTAGE",
+    discountValue: 15,
+    maxDiscountAmount: 3e3,
+    minOrderValue: 2500,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 90 * 864e5).toISOString(),
+    totalUsageLimit: 300,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "ANKIT500",
+    name: "Referral Campaign Flat Discount",
+    description: "Flat \u20B9500 off on any program enrollment",
+    discountType: "FIXED",
+    discountValue: 500,
+    maxDiscountAmount: 500,
+    minOrderValue: 2500,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 120 * 864e5).toISOString(),
+    totalUsageLimit: 100,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "DIWALI20",
+    name: "Festival Special Discount",
+    description: "20% festive discount on career accelerator tracks",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscountAmount: 4500,
+    minOrderValue: 4e3,
+    applicablePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 45 * 864e5).toISOString(),
+    totalUsageLimit: 150,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  },
+  {
+    code: "EARLY1000",
+    name: "Early Bird Registration",
+    description: "Flat \u20B91,000 instant discount on multi-year tracks",
+    discountType: "FIXED",
+    discountValue: 1e3,
+    maxDiscountAmount: 1e3,
+    minOrderValue: 7e3,
+    applicablePrograms: ["TWO_YEAR", "THREE_YEAR", "FOUR_YEAR"],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    expiryDate: new Date(Date.now() + 90 * 864e5).toISOString(),
+    totalUsageLimit: 250,
+    perUserLimit: 1,
+    firstTimeOnly: false,
+    allowStacking: false,
+    isActive: true,
+    isPaused: false
+  }
+];
+var DEFAULT_CAMPAIGNS = [
+  {
+    name: "Early Bird Registration Campaign",
+    description: "Automatic 15% discount for early enrollments",
+    campaignType: "EARLY_BIRD",
+    discountType: "PERCENTAGE",
+    discountValue: 15,
+    maxDiscount: 3500,
+    minOrderValue: 5e3,
+    eligiblePrograms: [],
+    startDate: new Date(Date.now() - 3 * 864e5).toISOString(),
+    endDate: new Date(Date.now() + 30 * 864e5).toISOString(),
+    budgetCap: 1e5,
+    isActive: false
+    // Inactive by default so admin can toggle
+  },
+  {
+    name: "First Batch Launch Offer",
+    description: "Automatic 20% discount on initial cohort",
+    campaignType: "LAUNCH",
+    discountType: "PERCENTAGE",
+    discountValue: 20,
+    maxDiscount: 5e3,
+    minOrderValue: 5e3,
+    eligiblePrograms: [],
+    startDate: (/* @__PURE__ */ new Date()).toISOString(),
+    endDate: new Date(Date.now() + 45 * 864e5).toISOString(),
+    budgetCap: 15e4,
+    isActive: false
+  }
+];
 
 // src/utils/validators.ts
 var Validators = class {
@@ -1693,7 +2065,10 @@ var Helpers = class {
   COMPANY_PERMISSIONS,
   COMPANY_STATUS,
   CompanyStatus,
+  DEFAULT_CAMPAIGNS,
+  DEFAULT_COUPONS,
   DEFAULT_LANDING_CMS_CONFIG,
+  DEFAULT_PROGRAM_PRICINGS,
   DEFAULT_ROUTES,
   DOMAIN_SKILLS,
   EmploymentType,

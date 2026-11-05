@@ -4,14 +4,14 @@ import { Menu, X } from 'lucide-react';
 
 interface PublicNavbarProps {
   activePage?: 'home' | 'about' | 'programs' | 'contact' | 'for-interns' | 'for-companies';
-  onOpenInternshipModal: () => void;
-  onOpenCompanyModal: () => void;
+  onOpenInternshipModal?: () => void;
+  onOpenCompanyModal?: () => void;
 }
 
 export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   activePage = 'home',
-  onOpenInternshipModal,
-  onOpenCompanyModal,
+  onOpenInternshipModal = () => {},
+  onOpenCompanyModal = () => {},
 }) => {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const navigate = useNavigate();

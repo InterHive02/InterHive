@@ -57,6 +57,28 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
         {/* BODY */}
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
 
+          {/* PPO Specific Blueprint Highlight */}
+          {config.id === 'PPO' && (
+            <div className="p-4 rounded-[16px] bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-emerald-600/10 border-2 border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md shadow-blue-500/25">
+                  PPO
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 block">
+                    Structured 2-Phase Pathway
+                  </span>
+                  <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100">
+                    2 Months Training by InterHive + 6 Months Corporate Internship at Company = Direct PPO
+                  </p>
+                </div>
+              </div>
+              <span className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 whitespace-nowrap self-start sm:self-auto">
+                Assured Opportunity
+              </span>
+            </div>
+          )}
+
           {/* Program Overview Banner */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-[14px] bg-slate-50 dark:bg-[#12151E] border border-slate-200 dark:border-[#2D3347] flex items-start gap-3">

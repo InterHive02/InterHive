@@ -31,6 +31,7 @@ const AboutPage = lazyLoad(() => import('./features/landing/pages/about.page'), 
 const ForInternsPage = lazyLoad(() => import('./features/landing/pages/for-interns.page'), 'ForInternsPage');
 const ForCompaniesPage = lazyLoad(() => import('./features/landing/pages/for-companies.page'), 'ForCompaniesPage');
 const ProgramsPage = lazyLoad(() => import('./features/landing/pages/programs.page'), 'ProgramsPage');
+const CheckoutPage = lazyLoad(() => import('./features/landing/pages/checkout.page'), 'CheckoutPage');
 const ContactPage = lazyLoad(() => import('./features/landing/pages/contact.page'), 'ContactPage');
 const CertificatePage = lazyLoad(() => import('./features/dashboard/pages/certificate.page'), 'CertificatePage');
 const PrivacyPage = lazyLoad(() => import('./features/legal/pages/privacy.page'), 'PrivacyPage');
@@ -40,10 +41,12 @@ const RefundPolicyPage = lazyLoad(() => import('./features/legal/pages/refund.pa
 
 // Pages - Dashboard (Lazy)
 const DashboardPage = lazyLoad(() => import('./features/dashboard/pages/dashboard.page'), 'DashboardPage');
+const StudentProgramsPaymentsPage = lazyLoad(() => import('./features/dashboard/pages/student-programs-payments.page'), 'StudentProgramsPaymentsPage');
 const InternDashboardPage = lazyLoad(() => import('./features/dashboard/pages/intern-dashboard.page'), 'InternDashboardPage');
 const CompanyDashboardPage = lazyLoad(() => import('./features/dashboard/pages/company-dashboard.page'), 'CompanyDashboardPage');
 const ManagerDashboardPage = lazyLoad(() => import('./features/dashboard/pages/manager-dashboard.page'), 'ManagerDashboardPage');
 const AdminDashboardPage = lazyLoad(() => import('./features/admin/pages/admin-dashboard.page'), 'AdminDashboardPage');
+const AdminPricingPage = lazyLoad(() => import('./features/admin/pages/admin-pricing.page'), 'AdminPricingPage');
 const HrDashboardPage = lazyLoad(() => import('./features/dashboard/pages/hr-dashboard.page'), 'HrDashboardPage');
 const HrApplicationsPage = lazyLoad(() => import('./features/admin/pages/hr-applications.page'), 'HrApplicationsPage');
 const HrLeadsPage = lazyLoad(() => import('./features/admin/pages/hr-leads.page'), 'HrLeadsPage');
@@ -118,6 +121,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/programs" element={<ProgramsPage />} />
         <Route path="/our-programs" element={<ProgramsPage />} />
         <Route path="/ppo-program" element={<ProgramsPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/checkout/:programKey" element={<CheckoutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
@@ -145,6 +150,7 @@ export const AppRoutes: React.FC = () => {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/my-programs" element={<StudentProgramsPaymentsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<EditProfilePage />} />
           <Route path="/training" element={<TrainingPage />} />
@@ -184,6 +190,7 @@ export const AppRoutes: React.FC = () => {
           }
         >
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/pricing" element={<AdminPricingPage />} />
           <Route path="/admin/applications" element={<HrApplicationsPage />} />
           <Route path="/admin/leads" element={<HrLeadsPage />} />
           <Route path="/admin/landing-cms" element={<AdminLandingCmsPage />} />
@@ -204,6 +211,7 @@ export const AppRoutes: React.FC = () => {
           }
         >
           <Route path="/hr/dashboard" element={<HrDashboardPage />} />
+          <Route path="/hr/pricing" element={<AdminPricingPage />} />
           <Route path="/hr/applications" element={<HrApplicationsPage />} />
           <Route path="/hr/leads" element={<HrLeadsPage />} />
           <Route path="/hr/interns" element={<AdminInternsPage />} />

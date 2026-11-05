@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, Linkedin, Instagram, ArrowRight } from 'lucide-react';
 
 interface PublicFooterProps {
-  onOpenInternshipModal: () => void;
-  onOpenCompanyModal: () => void;
+  onOpenInternshipModal?: () => void;
+  onOpenCompanyModal?: () => void;
 }
 
 export const PublicFooter: React.FC<PublicFooterProps> = ({
-  onOpenInternshipModal,
-  onOpenCompanyModal,
+  onOpenInternshipModal = () => {},
+  onOpenCompanyModal = () => {},
 }) => {
   return (
     <footer className="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
