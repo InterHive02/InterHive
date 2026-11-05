@@ -36,19 +36,19 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
           </button>
 
           <div className="pr-10">
-            <div className="flex items-center gap-2.5 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-2.5">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold bg-primary/10 text-primary dark:text-primary-light border border-primary/20">
                 {config.badge}
               </span>
-              <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-slate-500 dark:text-slate-400">
-                <Calendar className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+                <Calendar className="w-3.5 h-3.5 text-primary" />
                 {config.duration}
               </span>
             </div>
             <h2 className="text-[26px] sm:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               {config.title} Roadmap & Details
             </h2>
-            <p className="text-[14px] text-slate-600 dark:text-slate-300 mt-1 max-w-2xl">
+            <p className="text-[14px] text-slate-600 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
               {config.shortDescription}
             </p>
           </div>
@@ -65,7 +65,7 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
               </div>
               <div>
                 <span className="text-[12px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Main Objective</span>
-                <p className="text-[14px] font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                <p className="text-[14px] font-medium text-slate-800 dark:text-slate-200 mt-0.5 leading-snug">
                   {config.mainObjective}
                 </p>
               </div>
@@ -77,17 +77,17 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
               </div>
               <div>
                 <span className="text-[12px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Roadmap Target</span>
-                <p className="text-[14px] font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                <p className="text-[14px] font-medium text-slate-800 dark:text-slate-200 mt-0.5 leading-snug">
                   {config.summaryTarget}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Year-by-Year Roadmap Timeline */}
+          {/* Progression Roadmap Timeline */}
           <div>
             <h3 className="text-[18px] font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-              <span>Year-by-Year Progression Roadmap</span>
+              <span>{config.id === 'PPO' ? 'Stage-by-Stage Progression Roadmap' : 'Year-by-Year Progression Roadmap'}</span>
             </h3>
 
             <div className="space-y-4">
@@ -98,15 +98,15 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-[#2D3347]/60">
                     <div className="flex items-center gap-2.5">
-                      <span className="px-2.5 py-1 rounded-[6px] text-[12px] font-bold bg-primary text-white">
+                      <span className="px-2.5 py-1 rounded-[6px] text-[12px] font-bold bg-primary text-white shrink-0">
                         {yearStep.yearLabel}
                       </span>
                       <h4 className="text-[16px] font-bold text-slate-900 dark:text-slate-100">
                         {yearStep.stageName}
                       </h4>
                     </div>
-                    <span className="text-[12.5px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 self-start sm:self-auto">
-                      Target: {yearStep.targetCount}
+                    <span className="text-[12.5px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 self-start sm:self-auto shrink-0">
+                      Target: {yearStep.targetCount.replace(/^Target:\s*/i, '')}
                     </span>
                   </div>
 

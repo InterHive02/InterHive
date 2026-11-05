@@ -1,3 +1,5 @@
+import { h as AcademicYear } from '../common.types-67e77b7a.js';
+
 declare const ROLES: {
     readonly ADMIN: "admin";
     readonly HR: "hr";
@@ -228,10 +230,11 @@ interface ProgramConfig {
     roadmap: ProgramYearDetails[];
 }
 declare const PROGRAM_CONFIGS: Record<ProgramTypeKey, ProgramConfig>;
-declare const PROGRAM_ELIGIBILITY_MATRIX: Record<string, ProgramTypeKey>;
-declare const PROGRAM_DISCLAIMER = "Note: The specified number of internships and training opportunities are program targets and roadmap milestones designed to build maximum industry readiness, and do not constitute an unconditional guarantee of placement.";
+declare const PROGRAM_ACADEMIC_YEAR_MAP: Record<ProgramTypeKey, AcademicYear[]>;
+declare const PROGRAM_ELIGIBILITY_MATRIX: Record<string, any>;
+declare const PROGRAM_DISCLAIMER = "Note: The specified number of internships and training opportunities are structured milestones designed to build verifiable industry readiness, and do not constitute an unconditional guarantee of placement.";
 declare const ALL_PROGRAM_KEYS: ProgramTypeKey[];
 declare const getProgramConfig: (key?: string) => ProgramConfig;
 declare const isValidProgramType: (key?: string) => boolean;
 
-export { ADMIN_PERMISSIONS, ALL_PROGRAM_KEYS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType, getProgramConfig, isValidProgramType };
+export { ADMIN_PERMISSIONS, ALL_PROGRAM_KEYS, APPLICATION_STATUS, ASSESSMENT_STATUS, ATTENDANCE_STATUS, ApplicationStatusType, AssessmentStatusType, AttendanceStatus, AttendanceStatusType, COMPANY_PERMISSIONS, COMPANY_STATUS, CompanyStatusType, DEFAULT_ROUTES, DOMAIN_SKILLS, HR_PERMISSIONS, INTERN_PERMISSIONS, INTERN_STATUS, InternStatusType, MANAGER_PERMISSIONS, MatchStatus, PERMISSIONS, PROGRAM_ACADEMIC_YEAR_MAP, PROGRAM_CONFIGS, PROGRAM_DISCLAIMER, PROGRAM_ELIGIBILITY_MATRIX, PROGRAM_TYPES, PROJECT_STATUS, Permission, ProgramConfig, ProgramTypeKey, ProgramYearDetails, ProjectStatusType, ROLES, ROLE_HIERARCHY, ROLE_PERMISSIONS, Role, SKILL_CATEGORIES, SKILL_DEFINITIONS, SkillCategory, SkillDefinition, TASK_STATUS, TaskStatusType, getProgramConfig, isValidProgramType };
