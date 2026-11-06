@@ -183,8 +183,8 @@ export class AuthController {
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify Gmail OTP code and login' })
-  async verifyOtp(@Body() body: { email: string; code: string }, @Res() response: Response) {
-    const result = await this.authService.verifyLoginOtp(body.email, body.code);
+  async verifyOtp(@Body() body: { email: string; code: string; programType?: string }, @Res() response: Response) {
+    const result = await this.authService.verifyLoginOtp(body.email, body.code, body.programType);
     
     response.cookie('refresh_token', result.refreshToken, {
       httpOnly: true,

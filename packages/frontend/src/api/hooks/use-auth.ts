@@ -120,8 +120,22 @@ export const useAuth = () => {
   // Register
   const registerMutation = useMutation({
     mutationFn: (data: RegisterData) => authApi.register(data),
-    onSuccess: () => {
-      toast.success('Registration successful! Please verify your email.');
+    onSuccess: (response: any) => {
+      const payload = response?.data || response;
+      if (payload?.accessToken) {
+        localStorage.setItem('accessToken', payload.accessToken);
+        if (payload.refreshToken) localStorage.setItem('refreshToken', payload.refreshToken);
+        if (payload.user) {
+          localStorage.setItem('user', JSON.stringify(payload.user));
+          queryClient.setQueryData(['auth', 'me'], payload.user);
+        }
+        toast.success('Registration successful! Welcome to InterHive.');
+        const role = payload.user?.role;
+        const redirectPath = role === 'admin' ? '/admin/dashboard' : role === 'hr' ? '/hr/dashboard' : role === 'manager' ? '/manager/dashboard' : role === 'company' ? '/company/dashboard' : '/dashboard';
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+      toast.success('Registration successful! Please sign in.');
       navigate('/login');
     },
     onError: (error: any) => {

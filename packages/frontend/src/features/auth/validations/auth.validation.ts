@@ -13,6 +13,7 @@ export const registerSchema = z
     lastName: z.string().min(2, 'Last name must be at least 2 characters'),
     email: z.string().email('Please enter a valid email address'),
     role: z.enum(['intern', 'company']),
+    programType: z.string().optional(),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')

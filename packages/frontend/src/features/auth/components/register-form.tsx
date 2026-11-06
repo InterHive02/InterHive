@@ -1,14 +1,62 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Mail, Lock, User, KeyRound, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, KeyRound, ShieldCheck, ArrowRight, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../../api/hooks/use-auth';
 import { registerSchema, RegisterFormData } from '../validations/auth.validation';
 import { authApi } from '../../../api/endpoints/auth.api';
 import { toast } from 'react-hot-toast';
 import { GoogleAuthModal } from './google-auth-modal';
 import { signInWithFirebaseGoogle } from '../../../core/config/firebase.config';
+
+const PROGRAM_OPTIONS = [
+  {
+    key: 'PPO',
+    title: 'PPO Program',
+    badge: 'Fast-Track PPO',
+    batchText: 'Final Year Students (Batch 2027) · 8 Months',
+    shortDesc: '2 Months InterHive Training & Readiness + 6 Months Assured Corporate Internship at Company = Direct PPO',
+    borderActive: 'border-blue-600 bg-blue-50/70',
+    badgeColor: 'bg-blue-100 text-blue-800',
+  },
+  {
+    key: 'FOUR_YEAR',
+    title: '4-Year Program',
+    badge: 'Batch 2030',
+    batchText: '1st Year Students (Batch 2030) · 4 Academic Years',
+    shortDesc: 'Complete degree-parallel engineering transformation, 4 industrial internships + paid corporate placement',
+    borderActive: 'border-purple-600 bg-purple-50/70',
+    badgeColor: 'bg-purple-100 text-purple-800',
+  },
+  {
+    key: 'THREE_YEAR',
+    title: '3-Year Program',
+    badge: 'Batch 2029',
+    batchText: '2nd Year Students (Batch 2029) · 3 Academic Years',
+    shortDesc: 'Microservices, cloud infrastructure, 3 industrial internships + campus placement conversion',
+    borderActive: 'border-indigo-600 bg-indigo-50/70',
+    badgeColor: 'bg-indigo-100 text-indigo-800',
+  },
+  {
+    key: 'TWO_YEAR',
+    title: '2-Year Program',
+    badge: 'Batch 2028',
+    batchText: '3rd Year Students (Batch 2028) · 2 Academic Years',
+    shortDesc: 'Full-stack engineering sprints, 2 industrial internships + placement conversion track',
+    borderActive: 'border-teal-600 bg-teal-50/70',
+    badgeColor: 'bg-teal-100 text-teal-800',
+  },
+  {
+    key: 'ONE_YEAR',
+    title: '1-Year Program',
+    badge: 'Batch 2027',
+    batchText: 'Final Year Students (Batch 2027) · 1 Academic Year',
+    shortDesc: 'High-speed placement accelerator, live production sprints + 1 quality corporate internship',
+    borderActive: 'border-amber-600 bg-amber-50/70',
+    badgeColor: 'bg-amber-100 text-amber-800',
+  },
+];
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
@@ -52,7 +100,7 @@ export const RegisterForm: React.FC = () => {
     setOtpError(null);
     try {
       const { confirmPassword, ...registerPayload } = data;
-      await registerUser(registerPayload as any);
+      await registerUser({ ...registerPayload, programType: selectedProgram } as any);
       toast.success('Registration successful! Please sign in.');
       navigate('/login', { state: { email: data.email } });
     } catch (error: any) {
@@ -102,7 +150,7 @@ export const RegisterForm: React.FC = () => {
     }
     setIsVerifyingOtp(true);
     try {
-      const response = await authApi.verifyOtp(otpEmail, otpCode.trim());
+      const response = await authApi.verifyOtp(otpEmail, otpCode.trim(), selectedProgram);
       const payload: any = response.data || response;
       const { user, accessToken, refreshToken } = payload;
       if (accessToken) localStorage.setItem('accessToken', accessToken);
@@ -170,6 +218,63 @@ export const RegisterForm: React.FC = () => {
         <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-medium">
           Join InterHive and start your journey to industry readiness
         </p>
+      </div>
+
+      {/* ── Target Program Selector ── */}
+      <div className="space-y-2 p-3.5 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-purple-50/60 border border-blue-200/80 rounded-2xl shadow-2xs">
+        <div className="flex items-center justify-between gap-2">
+          <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+            Target Program <span className="text-red-500">*</span>
+          </label>
+          <span className="text-[10px] font-black text-blue-700 bg-blue-100/90 px-2.5 py-0.5 rounded-full shrink-0">
+            Career Track
+          </span>
+        </div>
+
+        <div className="relative">
+          <select
+            value={selectedProgram}
+            onChange={(e) => {
+              setSelectedProgram(e.target.value);
+              setValue('programType', e.target.value);
+            }}
+            className="w-full pl-3.5 pr-8 py-2.5 bg-white border border-blue-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-xs cursor-pointer appearance-none"
+          >
+            {PROGRAM_OPTIONS.map((prog) => (
+              <option key={prog.key} value={prog.key}>
+                {prog.title} — {prog.batchText}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs font-bold">
+            ▼
+          </div>
+        </div>
+
+        {/* Selected Program Details Pill */}
+        {(() => {
+          const currentProg = PROGRAM_OPTIONS.find((p) => p.key === selectedProgram) || PROGRAM_OPTIONS[0];
+          return (
+            <div className="p-2.5 bg-white/90 rounded-xl border border-blue-100 flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">
+                IH
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-0.5">
+                  <span className="font-extrabold text-slate-900 text-xs truncate">
+                    {currentProg.title}
+                  </span>
+                  <span className={"text-[9px] font-black px-2 py-0.5 rounded-md uppercase " + currentProg.badgeColor}>
+                    {currentProg.badge}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug font-medium">
+                  {currentProg.shortDesc}
+                </p>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Google Sign Up Button */}
@@ -246,7 +351,7 @@ export const RegisterForm: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 First Name

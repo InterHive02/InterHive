@@ -67,6 +67,15 @@ export class RegisterDto {
   role?: UserRole;
 
   @ApiProperty({
+    example: 'PPO',
+    description: 'Selected program type: PPO, ONE_YEAR, TWO_YEAR, THREE_YEAR, FOUR_YEAR',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  programType?: string;
+
+  @ApiProperty({
     example: 'SecurePass123!',
     description: 'Confirm password matching password field',
     required: false,

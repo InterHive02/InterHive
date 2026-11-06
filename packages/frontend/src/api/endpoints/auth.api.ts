@@ -12,6 +12,7 @@ export interface RegisterData {
   password: string;
   role?: string;
   employeeId?: string;
+  programType?: string;
 }
 
 export interface ForgotPasswordData {
@@ -71,10 +72,10 @@ export const authApi = {
   sendOtp: (email: string) =>
     apiClient.post<{ success: boolean; message: string }>('/auth/send-otp', { email }),
 
-  verifyOtp: (email: string, code: string) =>
-    apiClient.post<AuthResponse>('/auth/verify-otp', { email, code }),
+  verifyOtp: (email: string, code: string, programType?: string) =>
+    apiClient.post<AuthResponse>('/auth/verify-otp', { email, code, programType }),
 
-  googleLogin: (data: { idToken: string }) =>
+  googleLogin: (data: { idToken: string; programType?: string }) =>
     apiClient.post<AuthResponse>('/auth/google', data),
 
   changeFirstPassword: (newPassword: string) =>

@@ -7,6 +7,7 @@ import {
   ForbiddenException,
   Inject,
   Logger,
+  forwardRef,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -28,6 +29,7 @@ import { GoogleAuthDto } from './dto/google-auth.dto';
 import { MailService } from '../../common/mail/mail.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { UserRole } from '@interhive/shared';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AuthService {
@@ -41,12 +43,84 @@ export class AuthService {
     private mailService: MailService,
     private redisService: RedisService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(forwardRef(() => NotificationsService))
+    private notificationsService: NotificationsService,
   ) {}
 
+    private async notifyAdminsAndHrsOfNewRegistration(user: any, programKey?: string) {
+    try {
+      const programNames: Record<string, string> = {
+        PPO: 'PPO Program (6-8 Months Fast-Track PPO)',
+        ONE_YEAR: '1-Year Program (Batch 2027 Placement Accelerator)',
+        TWO_YEAR: '2-Year Program (Batch 2028 Industrial Training)',
+        THREE_YEAR: '3-Year Program (Batch 2029 Progressive Mastery)',
+        FOUR_YEAR: '4-Year Program (Batch 2030 Degree-Parallel Track)',
+      };
+      const progTitle = programNames[programKey || 'PPO'] || programKey || 'PPO Program';
+
+      await this.notificationsService.broadcast({
+        title: `New Student Registration: ${user.firstName} ${user.lastName}`,
+        message: `${user.firstName} ${user.lastName} (${user.email}) registered on InterHive and selected the ${progTitle}.`,
+        type: 'STUDENT_REGISTRATION',
+        roles: ['admin', 'hr', 'manager'],
+      });
+      this.logger.log(`📢 Dispatched registration notification to Admin, HR & Manager for ${user.email} (${progTitle})`);
+    } catch (err: any) {
+      this.logger.warn(`Failed to broadcast registration notification: ${err.message}`);
+    }
+  }
+
   async register(registerDto: RegisterDto) {
-    throw new ForbiddenException(
-      'Public registration is disabled. InterHive accounts are created exclusively by the HR/Admin team upon candidate selection.',
-    );
+    const { email, password, firstName, lastName, role, programType } = registerDto;
+    const cleanEmail = (email || '').toLowerCase().trim();
+
+    const existingUser = await this.userModel.findOne({ email: cleanEmail });
+    if (existingUser) {
+      throw new ConflictException('This email is already registered. Please sign in instead.');
+    }
+
+    const assignedRole = role === UserRole.COMPANY ? UserRole.COMPANY : UserRole.STUDENT;
+    const selectedProgram = programType || 'PPO';
+    const empId = registerDto.employeeId || (await this.generateEmployeeId());
+
+    const user = new this.userModel({
+      email: cleanEmail,
+      employeeId: empId,
+      password,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      role: assignedRole,
+      accessLevel: 'BASIC',
+      internStatus: 'APPLIED',
+      programType: selectedProgram,
+      isActive: true,
+      isVerified: true,
+    });
+
+    await user.save();
+
+    const userIdStr = user._id ? user._id.toString() : user.id;
+    const payload = { id: userIdStr, email: user.email, role: user.role };
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.generateRefreshToken(userIdStr);
+
+    try {
+      await this.redisService.set(`refresh:${userIdStr}`, refreshToken, 30 * 24 * 60 * 60);
+    } catch {}
+
+    // Notify HR, Manager, and Admin roles
+    await this.notifyAdminsAndHrsOfNewRegistration(user, selectedProgram);
+
+    const userData = user.toObject();
+    delete userData.password;
+
+    return {
+      success: true,
+      message: 'Registration successful!',
+      user: userData,
+      accessToken,
+      refreshToken,
+    };
   }
 
   async firstLoginPasswordChange(userId: string, newPassword: string) {
@@ -410,7 +484,7 @@ export class AuthService {
     };
   }
 
-  async verifyLoginOtp(email: string, code: string) {
+  async verifyLoginOtp(email: string, code: string, programType?: string) {
     if (!email || !code) {
       throw new BadRequestException('Email and verification code are required');
     }
@@ -491,11 +565,13 @@ export class AuthService {
         lastName,
         role: UserRole.STUDENT,
         accessLevel: 'BASIC',
-        internStatus: 'FREE',
+        internStatus: 'APPLIED',
+        programType: programType || 'PPO',
         isActive: true,
         isVerified: true,
       });
       await user.save();
+      await this.notifyAdminsAndHrsOfNewRegistration(user, user.programType);
     } else {
       user.isVerified = true;
       user.lastLogin = new Date();
@@ -600,11 +676,13 @@ export class AuthService {
           profilePhoto: tokenInfo.picture,
           role: UserRole.STUDENT,
           accessLevel: 'BASIC',
-          internStatus: 'FREE',
+          internStatus: 'APPLIED',
+          programType: dto.programType || 'PPO',
           isActive: true,
           isVerified: true,
         });
         await user.save();
+        await this.notifyAdminsAndHrsOfNewRegistration(user, user.programType);
       } else {
         // Prevent account takeover: verify existing account's linked Google identity
         if (user.googleId && user.googleId !== googleSubjectId) {
