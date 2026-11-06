@@ -54,6 +54,8 @@ import { PlacementTimelineCalculator } from '../components/placement-timeline-ca
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
 import { HiveIntroSplash } from '../components/hive-intro-splash';
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
+import { pricingApi } from '../../../api/endpoints/pricing-revenue.api';
+import { DEFAULT_PROGRAM_PRICINGS } from '@interhive/shared';
 import {
   PROGRAM_CONFIGS,
   PROGRAM_DISCLAIMER,
@@ -119,6 +121,65 @@ export const LandingPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [selectedYearFilter, setSelectedYearFilter] = useState<string>('ALL');
+  
+  // Dynamic Program Pricing State with robust defaults
+  const [pricingMap, setPricingMap] = useState<Record<string, { originalPrice: number; promotionalPrice: number; discount: number; installmentText: string }>>(() => {
+    const map: Record<string, { originalPrice: number; promotionalPrice: number; discount: number; installmentText: string }> = {};
+    if (typeof DEFAULT_PROGRAM_PRICINGS !== 'undefined' && Array.isArray(DEFAULT_PROGRAM_PRICINGS)) {
+      DEFAULT_PROGRAM_PRICINGS.forEach((item) => {
+        const orig = item.originalPrice || 4999;
+        const promo = item.promotionalPrice || 2999;
+        let installment = 'Full One-Time Fast-Track';
+        if (item.programKey === 'FOUR_YEAR') installment = 'Or ₹3,199 / semester (8x EMI)';
+        else if (item.programKey === 'THREE_YEAR') installment = 'Or ₹2,999 / bi-monthly (6x EMI)';
+        else if (item.programKey === 'TWO_YEAR') installment = 'Or ₹2,999 / quarter (4x EMI)';
+        else if (item.programKey === 'ONE_YEAR') installment = 'Or ₹3,199 × 2 Monthly Installments';
+        map[item.programKey] = {
+          originalPrice: orig,
+          promotionalPrice: promo,
+          discount: Math.max(0, orig - promo),
+          installmentText: installment,
+        };
+      });
+    }
+    // Hardcoded fallback guarantees
+    if (!map.PPO) map.PPO = { originalPrice: 4999, promotionalPrice: 2999, discount: 2000, installmentText: 'Full One-Time Fast-Track' };
+    if (!map.ONE_YEAR) map.ONE_YEAR = { originalPrice: 7999, promotionalPrice: 5999, discount: 2000, installmentText: 'Or ₹3,199 × 2 Monthly Installments' };
+    if (!map.TWO_YEAR) map.TWO_YEAR = { originalPrice: 14999, promotionalPrice: 10999, discount: 4000, installmentText: 'Or ₹2,999 / quarter (4x EMI)' };
+    if (!map.THREE_YEAR) map.THREE_YEAR = { originalPrice: 21999, promotionalPrice: 15999, discount: 6000, installmentText: 'Or ₹2,999 / bi-monthly (6x EMI)' };
+    if (!map.FOUR_YEAR) map.FOUR_YEAR = { originalPrice: 29999, promotionalPrice: 21999, discount: 8000, installmentText: 'Or ₹3,199 / semester (8x EMI)' };
+    return map;
+  });
+
+  useEffect(() => {
+    pricingApi.getActivePrograms()
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setPricingMap((prev) => {
+            const next = { ...prev };
+            res.data.forEach((item) => {
+              const orig = item.originalPrice;
+              const promo = item.promotionalPrice;
+              let installment = prev[item.programKey]?.installmentText || 'Full One-Time Payment';
+              if (item.paymentPlans && item.paymentPlans.length > 1) {
+                const instPlan = item.paymentPlans.find((p) => p.type === 'INSTALLMENT');
+                if (instPlan) {
+                  installment = `Or ₹${instPlan.amountPerInstallment.toLocaleString('en-IN')} × ${instPlan.installmentsCount} installments`;
+                }
+              }
+              next[item.programKey] = {
+                originalPrice: orig,
+                promotionalPrice: promo,
+                discount: Math.max(0, orig - promo),
+                installmentText: installment,
+              };
+            });
+            return next;
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -646,40 +707,62 @@ export const LandingPage: React.FC = () => {
         {/* 3. THE 5 FLAGSHIP PROGRAMS SHOWCASE (THE CORE ENGINE)         */}
         {/* ============================================================ */}
         {isSectionVisible('programs') && (
-          <section id="our-programs" className="py-16 bg-white border-y border-slate-200/80">
+          <section id="our-programs" className="py-20 bg-slate-50/60 border-y border-slate-200/80">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               
-              <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200">
-                  <GraduationCap className="w-4 h-4 text-blue-600" />
-                  <span>Structured Academic Pathways</span>
+              {/* Strategic Header */}
+              <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200 shadow-xs">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Admissions Open · Batches 2027 to 2030 · Limited Cohort Intake</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-                  Our Five Flagship Programs
+                
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                  Industry-Readiness Programs &amp; Pricing{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700">
+                    That Pay for Themselves.
+                  </span>
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
-                  Every program is calibrated for your specific academic year. Progress seamlessly from software engineering foundations to production internships and full-time PPOs.
+                
+                <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                  Calibrated specifically for your academic batch. Master production codebases under senior engineers, earn verified credentials, and secure assured corporate internships with stipends.
                 </p>
+
+                {/* Trust & ROI Highlights Bar */}
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-700">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>100% Stipend-Back ROI</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                    <Users className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Max 50 Seats / Cohort (1-on-1 Mentorship)</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Razorpay 256-Bit SSL · GST Tax Invoice</span>
+                  </span>
+                </div>
               </div>
 
               {/* Year Filter Tabs */}
-              <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-12">
                 {[
                   { id: 'ALL', label: 'All 5 Programs' },
-                  { id: 'FOUR_YEAR', label: '1st Year (Batch 2030)' },
-                  { id: 'THREE_YEAR', label: '2nd Year (Batch 2029)' },
-                  { id: 'TWO_YEAR', label: '3rd Year (Batch 2028)' },
-                  { id: 'ONE_YEAR', label: 'Final Year (Batch 2027)' },
-                  { id: 'PPO', label: 'Final Year PPO (Batch 2027)' },
+                  { id: 'FOUR_YEAR', label: '1st Year (Batch 2030) · 4-Yr Track' },
+                  { id: 'THREE_YEAR', label: '2nd Year (Batch 2029) · 3-Yr Track' },
+                  { id: 'TWO_YEAR', label: '3rd Year (Batch 2028) · 2-Yr Track' },
+                  { id: 'ONE_YEAR', label: 'Final Year (Batch 2027) · 1-Yr Track' },
+                  { id: 'PPO', label: 'Final Year PPO (Batch 2027) · Fast-Track' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setSelectedYearFilter(tab.id)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-xs ${
                       selectedYearFilter === tab.id
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/20'
+                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
                     {tab.label}
@@ -688,79 +771,321 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* The 5 Program Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 {(Object.values(PROGRAM_CONFIGS) as any[])
                   .filter((prog) => selectedYearFilter === 'ALL' || prog.id === selectedYearFilter)
                   .map((prog) => {
                     const isPPO = prog.id === 'PPO';
+                    const pricing = pricingMap[prog.id] || {
+                      originalPrice: 4999,
+                      promotionalPrice: 2999,
+                      discount: 2000,
+                      installmentText: 'Full One-Time Payment',
+                    };
+                    const percentOff = Math.round((pricing.discount / pricing.originalPrice) * 100);
+
+                    // Custom business positioning per program
+                    const programMeta: Record<string, { ribbon: string; ribbonColor: string; dailyCost: string; highlights: string[] }> = {
+                      PPO: {
+                        ribbon: '🔥 MOST POPULAR · 40% OFF',
+                        ribbonColor: 'bg-amber-500 text-white',
+                        dailyCost: 'Just ₹12/day · Recover 100% in week 1 of internship stipend!',
+                        highlights: [
+                          '2 Months Training & Readiness done by InterHive',
+                          'Assured 6-Month Corporate Internship at partner company',
+                          'Competitive monthly stipend paid directly by company',
+                          'Weekly 1-on-1 engineering mentor reviews & code audits',
+                          'Pre-Placement Offer (PPO) conversion evaluation',
+                        ],
+                      },
+                      FOUR_YEAR: {
+                        ribbon: '👑 4-YEAR DEGREE MASTERY',
+                        ribbonColor: 'bg-indigo-600 text-white',
+                        dailyCost: 'Just ₹15/day for 4 years of continuous mentorship',
+                        highlights: [
+                          'Comprehensive 4-year degree-parallel engineering transformation',
+                          '4 Industrial Internships + 1 Paid Corporate Internship',
+                          'Full-stack architecture, Docker, CI/CD & microservices',
+                          'Continuous GitHub PR audits & verified skill scorecards',
+                          'Guaranteed partner placement drives with zero graduation stress',
+                        ],
+                      },
+                      THREE_YEAR: {
+                        ribbon: '⚡ HIGH GROWTH SPECIALIZATION',
+                        ribbonColor: 'bg-blue-600 text-white',
+                        dailyCost: 'Just ₹14/day across 3 academic years',
+                        highlights: [
+                          '4 Industrial Internships (Y2 & Y3) + 1 4th-Yr Paid Corporate Internship',
+                          'Modern full-stack, cloud deployments & database optimization',
+                          'Agile sprint ceremonies, ticket delivery & code standards',
+                          'Direct matchmaking drives with active partner tech companies',
+                          'Pre-Placement Offer (PPO) conversion support',
+                        ],
+                      },
+                      TWO_YEAR: {
+                        ribbon: '🎯 FAST-TRACK SPRINT',
+                        ribbonColor: 'bg-emerald-600 text-white',
+                        dailyCost: 'Just ₹15/day across 2 academic years',
+                        highlights: [
+                          '2 Industry training/internships (3rd Yr) + 1 Paid Internship (4th Yr)',
+                          'Production-grade clean code, REST/GraphQL APIs & system design',
+                          'Technical mentor code audits & portfolio milestone reviews',
+                          'Mock technical & HR interviews with senior tech leads',
+                          'PPO conversion and offer letter finalization',
+                        ],
+                      },
+                      ONE_YEAR: {
+                        ribbon: '🚀 PLACEMENT ACCELERATOR',
+                        ribbonColor: 'bg-purple-600 text-white',
+                        dailyCost: 'Just ₹16/day for final-year placement readiness',
+                        highlights: [
+                          'Immediate industry-readiness training & production sprints',
+                          '1 Quality Corporate Internship opportunity with stipend',
+                          'Resume rebuild, GitHub dossier & LinkedIn audit',
+                          'System design, DSA coding sprints & mock interview rounds',
+                          'Direct matching with partner companies hiring freshers',
+                        ],
+                      },
+                    };
+
+                    const meta = programMeta[prog.id] || {
+                      ribbon: '⭐ FEATURED PROGRAM',
+                      ribbonColor: 'bg-blue-600 text-white',
+                      dailyCost: 'High-ROI Industry Readiness',
+                      highlights: [
+                        'Structured corporate curriculum',
+                        'Real production codebase experience',
+                        'Assured partner internship opportunities',
+                        'Verified industry readiness credential',
+                      ],
+                    };
+
                     return (
                       <div
                         key={prog.id}
-                        className={`rounded-2xl p-5 border flex flex-col justify-between transition-all duration-200 shadow-xs hover:shadow-xl hover:-translate-y-1 ${
+                        className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden bg-white ${
                           isPPO
-                            ? 'bg-blue-50/50 border-blue-300 ring-2 ring-blue-500/20'
-                            : 'bg-white border-slate-200'
+                            ? 'border-blue-400 ring-2 ring-blue-500/30'
+                            : 'border-slate-200/90'
                         }`}
                       >
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-1.5">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                        {/* Top Ribbon */}
+                        <div className="absolute top-0 right-0 left-0">
+                          <div className={`text-[10px] font-black uppercase tracking-wider py-1 px-4 text-center ${meta.ribbonColor}`}>
+                            {meta.ribbon}
+                          </div>
+                        </div>
+
+                        <div className="pt-4 space-y-4">
+                          {/* Batch & Duration Tags */}
+                          <div className="flex items-center justify-between gap-1.5 pt-1">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
                               {prog.badge}
                             </span>
                             <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-400" />
+                              <Clock className="w-3.5 h-3.5 text-blue-600" />
                               {prog.duration}
                             </span>
                           </div>
 
-                          <h3 className="text-lg font-bold text-slate-900 leading-snug">
-                            {prog.title}
-                          </h3>
+                          {/* Title & Batch Target */}
+                          <div>
+                            <h3 className="text-xl font-black text-slate-900 leading-snug tracking-tight">
+                              {prog.title}
+                            </h3>
+                            <p className="text-[11px] font-bold text-indigo-700 mt-0.5">
+                              {prog.targetAcademicYear}
+                            </p>
+                          </div>
 
-                          <p className="text-[11px] font-semibold text-indigo-700">
-                            Target: {prog.targetAcademicYear}
-                          </p>
+                          {/* PRICING BLOCK (Business Mind Display) */}
+                          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-slate-200/80 space-y-1.5">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="text-xs text-slate-400 line-through font-semibold">
+                                ₹{pricing.originalPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                {percentOff}% OFF
+                              </span>
+                            </div>
 
-                          <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
-                            {prog.shortDescription}
-                          </p>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                                ₹{pricing.promotionalPrice.toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-xs font-bold text-slate-500">/ program</span>
+                            </div>
 
-                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] space-y-1">
-                            <span className="font-bold text-slate-500 uppercase tracking-wider text-[9px] block">
+                            <p className="text-[10.5px] font-bold text-emerald-700 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                              <span>Save ₹{pricing.discount.toLocaleString('en-IN')} today</span>
+                            </p>
+
+                            <div className="pt-2 mt-1 border-t border-slate-200/60 text-[10.5px] text-slate-500 flex flex-col gap-0.5">
+                              <span className="font-semibold text-slate-700">{pricing.installmentText}</span>
+                              <span className="text-[10px] text-blue-600 font-medium">{meta.dailyCost}</span>
+                            </div>
+                          </div>
+
+                          {/* PPO Specific Blueprint Highlight */}
+                          {isPPO && (
+                            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-500/20 text-[11px] space-y-1">
+                              <span className="font-extrabold text-blue-700 block text-[10px] uppercase tracking-wider">
+                                2-Phase PPO Architecture
+                              </span>
+                              <p className="font-bold text-slate-800 leading-snug">
+                                2 Mo Training at InterHive + 6 Mo Corporate Internship at Company = Direct PPO
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Career Milestone Target */}
+                          <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/70 text-[11px] space-y-1">
+                            <span className="font-bold text-emerald-800 uppercase tracking-wider text-[9px] block">
                               Career Milestone Target
                             </span>
-                            <span className="font-bold text-emerald-700 flex items-start gap-1 leading-snug">
+                            <span className="font-bold text-emerald-900 flex items-start gap-1 leading-snug">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                               <span>{prog.summaryTarget}</span>
                             </span>
                           </div>
+
+                          {/* Value Checklist (What Students Actually Get) */}
+                          <div className="space-y-2 pt-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                              What You Get:
+                            </span>
+                            <ul className="space-y-1.5 text-xs text-slate-700">
+                              {meta.highlights.map((h, i) => (
+                                <li key={i} className="flex items-start gap-2 text-[11.5px] leading-snug">
+                                  <Check className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                                  <span>{h}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         </div>
 
-                        <div className="pt-4 mt-3 border-t border-slate-100 space-y-2">
+                        {/* Card Footer CTAs */}
+                        <div className="pt-5 mt-4 border-t border-slate-100 space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEnrollClick(prog.id)}
+                            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95"
+                          >
+                            <span>Enroll Now — ₹{pricing.promotionalPrice.toLocaleString('en-IN')}</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => handleRoadmapClick(prog.id)}
                             className="w-full py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                            <span>View Roadmap</span>
+                            <span>View Detailed Roadmap</span>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleEnrollClick(prog.id)}
-                            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-1 cursor-pointer"
-                          >
-                            <span>Enroll in Program</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
+
+                          <p className="text-[10px] text-center text-slate-400 font-medium pt-1">
+                            🎁 Use coupon <strong className="text-slate-600 font-mono">FIRSTBATCH</strong> for extra discount
+                          </p>
                         </div>
                       </div>
                     );
                   })}
               </div>
 
+              {/* Strategic Business Mind ROI & Comparison Section */}
+              <div className="mt-16 bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-sm space-y-8">
+                <div className="text-center max-w-2xl mx-auto space-y-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-blue-600">The Student Advantage</span>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    Why Applying Alone Fails vs. Why InterHive Delivers
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    See why thousands of engineering students choose InterHive over cold job boards.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Traditional Way */}
+                  <div className="p-6 rounded-2xl bg-rose-50/50 border border-rose-200/80 space-y-4">
+                    <div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
+                      <X className="w-5 h-5 text-rose-600 shrink-0" />
+                      <span>Traditional Job Search (Cold Applications)</span>
+                    </div>
+                    <ul className="space-y-2.5 text-xs text-slate-700">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-600 font-bold">✗</span>
+                        <span>Sending 200+ resumes on open job boards with 99% ghosting rate</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-600 font-bold">✗</span>
+                        <span>Zero code reviews from senior developers — no idea where your skills fall short</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-600 font-bold">✗</span>
+                        <span>Unpaid, certificate-mill internships with no actual engineering or stipend</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-600 font-bold">✗</span>
+                        <span>Heavy anxiety in final year with no verified pathway to a full-time PPO</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* The InterHive Way */}
+                  <div className="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-4">
+                    <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <span>The InterHive Operating System</span>
+                    </div>
+                    <ul className="space-y-2.5 text-xs text-slate-700">
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Direct matching before 80+ vetted partner companies looking specifically for our interns</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Weekly 1-on-1 code reviews with senior engineers on live production Git workflows</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Assured corporate internships with real monthly stipends (₹15,000–₹40,000/mo)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Pre-Placement Offer (PPO) conversion supported by documented performance rubrics</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Stipend ROI Guarantee Banner */}
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-blue-500/20">
+                  <div className="space-y-1 text-center sm:text-left">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
+                      💡 The Stipend ROI Guarantee
+                    </span>
+                    <h4 className="text-base sm:text-lg font-black leading-snug">
+                      Your Program Fee Pays for Itself in Week 1 of Your Internship
+                    </h4>
+                    <p className="text-xs text-blue-100 max-w-xl">
+                      Partner corporate internships pay monthly stipends ranging from ₹15,000 to ₹40,000+. Your enrollment is a high-return career asset that pays back multiple times over.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleEnrollClick('PPO')}
+                    className="px-6 py-3 rounded-xl bg-white text-blue-700 font-black text-xs hover:bg-blue-50 transition shadow-md whitespace-nowrap cursor-pointer shrink-0"
+                  >
+                    Enroll in PPO Track →
+                  </button>
+                </div>
+              </div>
+
               {/* Program Disclaimer */}
-              <div className="mt-10 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 text-center max-w-3xl mx-auto leading-relaxed">
+              <div className="mt-10 p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-600 text-center max-w-3xl mx-auto leading-relaxed shadow-xs">
                 {PROGRAM_DISCLAIMER}
               </div>
 
@@ -768,7 +1093,6 @@ export const LandingPage: React.FC = () => {
           </section>
         )}
 
-        {/* ============================================================ */}
         {/* 4. THE 4-STAGE TALENT OPERATING PIPELINE                     */}
         {/* ============================================================ */}
         <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
