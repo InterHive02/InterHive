@@ -411,21 +411,12 @@ export const LandingPage: React.FC = () => {
                 
                 {/* Left Column: Visionary Narrative & CTAs */}
                 <div className="lg:col-span-7 text-center lg:text-left space-y-6">
-                  {/* Category Pill & 3D Intro Replay */}
+                  {/* Category Pill */}
                   <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 text-xs sm:text-sm font-semibold shadow-xs">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-800 text-xs sm:text-sm font-semibold shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                       <span>India’s Industry-Readiness & Talent Connect Platform</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowIntroSplash(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100/80 hover:bg-amber-200/90 text-amber-900 border border-amber-300/80 text-xs font-bold shadow-xs transition-all duration-150 cursor-pointer hover:scale-105"
-                      title="Replay 3D Hive Intro Animation"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
-                      <span>Watch 3D Intro</span>
-                    </button>
                   </div>
 
                   {/* Headline */}
