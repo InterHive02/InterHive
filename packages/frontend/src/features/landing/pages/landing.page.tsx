@@ -52,9 +52,6 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
-const HiveIntroSplash = React.lazy(() =>
-  import('../components/hive-intro-splash').then((m) => ({ default: m.HiveIntroSplash }))
-);
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
 import { pricingApi } from '../../../api/endpoints/pricing-revenue.api';
 import { DEFAULT_PROGRAM_PRICINGS } from '@interhive/shared';
@@ -185,16 +182,7 @@ export const LandingPage: React.FC = () => {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const [showIntroSplash, setShowIntroSplash] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('nointro') === 'true') return false;
-      if (params.get('intro') === 'true') return true;
-      return sessionStorage.getItem('interhive_intro_shown') !== 'true';
-    }
-    return true;
-  });
-
+  
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
@@ -401,24 +389,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      {/* 3D Kinetic Honeycomb Hive Intro Splash Animation (Plays on site visit) */}
-      {showIntroSplash && (
-        <React.Suspense fallback={null}>
-          <HiveIntroSplash
-          introDuration={2.0}
-          totalDuration={3.4}
-          onComplete={() => {
-            setShowIntroSplash(false);
-            try {
-              sessionStorage.setItem('interhive_intro_shown', 'true');
-            } catch (e) {
-              // ignore
-            }
-          }}
-        />
-        </React.Suspense>
-      )}
-
+      
       {/* Header Navigation */}
       <PublicNavbar
         activePage="home"
@@ -716,8 +687,8 @@ export const LandingPage: React.FC = () => {
               
               {/* Strategic Header */}
               <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200 shadow-xs">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-200 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span>Admissions Open · Batches 2027 to 2030 · Limited Cohort Intake</span>
                 </div>
                 
@@ -733,18 +704,18 @@ export const LandingPage: React.FC = () => {
                 </p>
 
                 {/* Trust & ROI Highlights Bar */}
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-700">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-slate-600">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>100% Stipend-Back ROI</span>
+                    <span>Direct Corporate Partner Network</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                     <Users className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Max 50 Seats / Cohort (1-on-1 Mentorship)</span>
+                    <span>Senior Engineer 1-on-1 Code Audits</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
-                    <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
-                    <span>Razorpay 256-Bit SSL · GST Tax Invoice</span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Verified Production Workflows &amp; Stipends</span>
                   </span>
                 </div>
               </div>
@@ -791,9 +762,9 @@ export const LandingPage: React.FC = () => {
                     // Custom business positioning per program
                     const programMeta: Record<string, { ribbon: string; ribbonColor: string; dailyCost: string; highlights: string[] }> = {
                       PPO: {
-                        ribbon: '🔥 MOST POPULAR · 40% OFF',
-                        ribbonColor: 'bg-amber-500 text-white',
-                        dailyCost: 'Just ₹12/day · Recover 100% in week 1 of internship stipend!',
+                        ribbon: 'PRE-PLACEMENT OFFER TRACK · BATCH 2027',
+                        ribbonColor: 'bg-blue-600 text-white',
+                        dailyCost: 'Structured 8-month trajectory with partner company',
                         highlights: [
                           '2 Months Training & Readiness done by InterHive',
                           'Assured 6-Month Corporate Internship at partner company',
@@ -803,9 +774,9 @@ export const LandingPage: React.FC = () => {
                         ],
                       },
                       FOUR_YEAR: {
-                        ribbon: '👑 4-YEAR DEGREE MASTERY',
-                        ribbonColor: 'bg-indigo-600 text-white',
-                        dailyCost: 'Just ₹15/day for 4 years of continuous mentorship',
+                        ribbon: 'DEGREE-PARALLEL TRACK · BATCH 2030',
+                        ribbonColor: 'bg-slate-900 text-white',
+                        dailyCost: 'Comprehensive 4-year engineering transformation',
                         highlights: [
                           'Comprehensive 4-year degree-parallel engineering transformation',
                           '4 Industrial Internships + 1 Paid Corporate Internship',
@@ -815,9 +786,9 @@ export const LandingPage: React.FC = () => {
                         ],
                       },
                       THREE_YEAR: {
-                        ribbon: '⚡ HIGH GROWTH SPECIALIZATION',
-                        ribbonColor: 'bg-blue-600 text-white',
-                        dailyCost: 'Just ₹14/day across 3 academic years',
+                        ribbon: 'ENGINEERING SPECIALIZATION · BATCH 2029',
+                        ribbonColor: 'bg-slate-800 text-white',
+                        dailyCost: 'Rigorous 3-year production skill track',
                         highlights: [
                           '4 Industrial Internships (Y2 & Y3) + 1 4th-Yr Paid Corporate Internship',
                           'Modern full-stack, cloud deployments & database optimization',
@@ -827,9 +798,9 @@ export const LandingPage: React.FC = () => {
                         ],
                       },
                       TWO_YEAR: {
-                        ribbon: '🎯 FAST-TRACK SPRINT',
-                        ribbonColor: 'bg-emerald-600 text-white',
-                        dailyCost: 'Just ₹15/day across 2 academic years',
+                        ribbon: 'ACCELERATED SPRINT · BATCH 2028',
+                        ribbonColor: 'bg-slate-800 text-white',
+                        dailyCost: '2-year intensive production track',
                         highlights: [
                           '2 Industry training/internships (3rd Yr) + 1 Paid Internship (4th Yr)',
                           'Production-grade clean code, REST/GraphQL APIs & system design',
@@ -839,9 +810,9 @@ export const LandingPage: React.FC = () => {
                         ],
                       },
                       ONE_YEAR: {
-                        ribbon: '🚀 PLACEMENT ACCELERATOR',
-                        ribbonColor: 'bg-purple-600 text-white',
-                        dailyCost: 'Just ₹16/day for final-year placement readiness',
+                        ribbon: 'PLACEMENT ACCELERATOR · BATCH 2027',
+                        ribbonColor: 'bg-indigo-700 text-white',
+                        dailyCost: 'Direct corporate placement readiness',
                         highlights: [
                           'Immediate industry-readiness training & production sprints',
                           '1 Quality Corporate Internship opportunity with stipend',
@@ -920,9 +891,9 @@ export const LandingPage: React.FC = () => {
                               <span className="text-xs font-bold text-slate-500">/ program</span>
                             </div>
 
-                            <p className="text-[10.5px] font-bold text-emerald-700 flex items-center gap-1">
-                              <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
-                              <span>Save ₹{pricing.discount.toLocaleString('en-IN')} today</span>
+                            <p className="text-[10.5px] font-semibold text-emerald-700 flex items-center gap-1">
+                              <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span>Save ₹{pricing.discount.toLocaleString('en-IN')} on launch pricing</span>
                             </p>
 
                             <div className="pt-2 mt-1 border-t border-slate-200/60 text-[10.5px] text-slate-500 flex flex-col gap-0.5">
@@ -990,8 +961,8 @@ export const LandingPage: React.FC = () => {
                             <span>View Detailed Roadmap</span>
                           </button>
 
-                          <p className="text-[10px] text-center text-slate-400 font-medium pt-1">
-                            🎁 Use coupon <strong className="text-slate-600 font-mono">FIRSTBATCH</strong> for extra discount
+                          <p className="text-[11px] text-center text-slate-500 font-medium pt-1">
+                            Institutional scholarship code: <span className="text-slate-800 font-semibold font-mono">FIRSTBATCH</span>
                           </p>
                         </div>
                       </div>
@@ -1323,9 +1294,9 @@ export const LandingPage: React.FC = () => {
         {/* ============================================================ */}
         <section className="py-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
-              <Sparkles className="w-4 h-4" />
-              <span>Next Cohort Starting Soon</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-400/30">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              <span>Admissions Open · Limited Seats per Cohort</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">

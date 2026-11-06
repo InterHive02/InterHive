@@ -265,7 +265,7 @@ export const ProgramsPage: React.FC = () => {
                         </p>
 
                         <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1.5 pt-1.5 border-t border-slate-200/60">
-                          💡 <span className="font-semibold">{stage.details}</span>
+                          <span className="font-semibold text-slate-600">{stage.details}</span>
                         </p>
                       </div>
 

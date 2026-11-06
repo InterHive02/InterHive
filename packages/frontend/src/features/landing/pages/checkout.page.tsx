@@ -172,7 +172,7 @@ export const CheckoutPage: React.FC = () => {
     setAppliedCoupon(null);
     setCouponCodeInput('');
     setCouponError(null);
-    toast('Coupon removed', { icon: '🏷️' });
+    toast('Coupon removed');
   };
 
   // Apply Referral Handler
@@ -866,7 +866,7 @@ export const CheckoutPage: React.FC = () => {
               {/* Total Savings Badge */}
               {totalDiscount > 0 && (
                 <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-center text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                  🎉 You are saving ₹{totalDiscount.toLocaleString('en-IN')} on this enrollment!
+                  Total Savings Applied: ₹{totalDiscount.toLocaleString('en-IN')}
                 </div>
               )}
 
@@ -894,7 +894,7 @@ export const CheckoutPage: React.FC = () => {
               <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500 font-semibold pt-1">
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Razorpay Secure 256-Bit SSL</span>
+                  <span>256-Bit Encrypted Payment Processing</span>
                 </span>
                 <span>•</span>
                 <span>UPI, NetBanking, Cards &amp; EMI</span>

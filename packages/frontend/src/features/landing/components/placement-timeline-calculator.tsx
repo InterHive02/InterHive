@@ -218,7 +218,7 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <p className="text-[10.5px] text-slate-400 text-center font-medium">
-                  ⚡ 100% Free initial evaluation · Direct corporate matching
+                  Complimentary initial benchmark evaluation · Direct corporate matching
                 </p>
               </div>
             </div>

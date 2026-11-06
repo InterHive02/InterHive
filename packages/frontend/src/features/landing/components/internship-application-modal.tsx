@@ -430,7 +430,7 @@ export const InternshipApplicationModal: React.FC<InternshipApplicationModalProp
           educationDetected: `${formData.degree || 'B.Tech / B.E.'} (${formData.branch || 'CSE'})`,
         });
         setIsAnalyzingResume(false);
-        toast.success(`⚡ Resume parsed: 97% InterHive ATS match!`);
+        toast.success(`Resume parsed: Technical profile successfully verified.`);
       }, 2200);
     };
     reader.readAsDataURL(file);
