@@ -107,6 +107,23 @@
         <div class="tagline">From Selection to PPO.</div>
       </div>
     </div>
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('InterHive Startup Notice:', e.error || e.message);
+        var splash = document.getElementById('ih-splash');
+        if (splash) {
+          var tag = splash.querySelector('.tagline');
+          if (tag) tag.innerHTML = 'Connecting to InterHive... If stuck, <a href="javascript:location.reload()" style="color:#4F46E5;font-weight:600;text-decoration:underline;">click here to refresh</a>';
+        }
+      });
+      setTimeout(function() {
+        var splash = document.getElementById('ih-splash');
+        if (splash && document.getElementById('root') && document.getElementById('root').contains(splash)) {
+          var tag = splash.querySelector('.tagline');
+          if (tag) tag.innerHTML = 'Still loading? <a href="javascript:location.reload()" style="color:#4F46E5;font-weight:600;text-decoration:underline;">Click here to reload</a>';
+        }
+      }, 6000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

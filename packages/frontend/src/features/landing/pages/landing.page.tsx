@@ -52,7 +52,9 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
-import { HiveIntroSplash } from '../components/hive-intro-splash';
+const HiveIntroSplash = React.lazy(() =>
+  import('../components/hive-intro-splash').then((m) => ({ default: m.HiveIntroSplash }))
+);
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
 import { pricingApi } from '../../../api/endpoints/pricing-revenue.api';
 import { DEFAULT_PROGRAM_PRICINGS } from '@interhive/shared';
@@ -401,7 +403,8 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
       {/* 3D Kinetic Honeycomb Hive Intro Splash Animation (Plays on site visit) */}
       {showIntroSplash && (
-        <HiveIntroSplash
+        <React.Suspense fallback={null}>
+          <HiveIntroSplash
           introDuration={2.0}
           totalDuration={3.4}
           onComplete={() => {
@@ -413,6 +416,7 @@ export const LandingPage: React.FC = () => {
             }
           }}
         />
+        </React.Suspense>
       )}
 
       {/* Header Navigation */}
