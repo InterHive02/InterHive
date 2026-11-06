@@ -52,6 +52,9 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
+const HiveIntroSplash = React.lazy(() =>
+  import('../components/hive-intro-splash').then((m) => ({ default: m.HiveIntroSplash }))
+);
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
 import { pricingApi } from '../../../api/endpoints/pricing-revenue.api';
 import { DEFAULT_PROGRAM_PRICINGS } from '@interhive/shared';
@@ -182,6 +185,15 @@ export const LandingPage: React.FC = () => {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [showIntroSplash, setShowIntroSplash] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('nointro') === 'true') return false;
+      if (params.get('intro') === 'true') return true;
+      return sessionStorage.getItem('interhive_intro_shown') !== 'true';
+    }
+    return true;
+  });
   
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -389,7 +401,24 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      
+      {/* 3D Kinetic Honeycomb Hive Intro Splash Animation with Circulating Points */}
+      {showIntroSplash && (
+        <React.Suspense fallback={null}>
+          <HiveIntroSplash
+            introDuration={2.0}
+            totalDuration={3.4}
+            onComplete={() => {
+              setShowIntroSplash(false);
+              try {
+                sessionStorage.setItem('interhive_intro_shown', 'true');
+              } catch (e) {
+                // ignore
+              }
+            }}
+          />
+        </React.Suspense>
+      )}
+
       {/* Header Navigation */}
       <PublicNavbar
         activePage="home"
