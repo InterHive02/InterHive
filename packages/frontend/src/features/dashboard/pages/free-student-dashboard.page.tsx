@@ -371,8 +371,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedProgramTypeForModal(prog.id);
-                    setIsModalOpen(true);
+                    navigate(`/checkout/${prog.id}`);
                   }}
                   className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
@@ -675,8 +674,7 @@ export const FreeStudentDashboardPage: React.FC = () => {
         onClose={() => setIsDetailsModalOpen(false)}
         programType={activeDetailsProgramType}
         onEnroll={(progType) => {
-          setSelectedProgramTypeForModal(progType);
-          setIsModalOpen(true);
+          navigate(`/checkout/${progType}`);
         }}
       />
       {/* Free Resources Interactive Modal */}

@@ -1367,8 +1367,7 @@ export const LandingPage: React.FC = () => {
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         onEnroll={() => {
-          setSelectedProgramTypeForModal('PPO');
-          setIsInternshipModalOpen(true);
+          navigate('/checkout/PPO');
         }}
       />
 

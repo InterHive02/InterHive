@@ -43,6 +43,11 @@ export const CheckoutPage: React.FC = () => {
   const initialKey = (paramProgramKey || searchParams.get('program') || 'PPO').toUpperCase();
   const [selectedKey, setSelectedKey] = useState<string>(initialKey);
 
+  // Scroll to top on mount or when program changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [selectedKey]);
+
   // Program details from API / fallback to shared constants
   const [availablePrograms, setAvailablePrograms] = useState<ProgramPricingItem[]>([]);
   const [isLoadingPrograms, setIsLoadingPrograms] = useState(true);
@@ -128,10 +133,9 @@ export const CheckoutPage: React.FC = () => {
   const totalDiscount = baseDiscount + couponDiscount + referralDiscount;
   const discountedSubtotal = Math.max(0, originalPrice - totalDiscount);
 
-  // Tax calculation (18% GST)
-  const gstRate = 0.18;
-  const taxAmount = Math.round(discountedSubtotal * gstRate);
-  const finalPayable = discountedSubtotal + taxAmount;
+  // Fixed fee inclusive of all taxes (all program fees include all taxes, no extra tax markup)
+  const taxAmount = 0;
+  const finalPayable = discountedSubtotal;
 
   // Apply Coupon Handler
   const handleApplyCoupon = async (codeToTry?: string) => {
@@ -839,7 +843,7 @@ export const CheckoutPage: React.FC = () => {
                 )}
 
                 <div className="flex justify-between text-slate-600 dark:text-slate-400 pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
-                  <span>Taxable Subtotal:</span>
+                  <span>Subtotal Fee:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">
                     ₹{discountedSubtotal.toLocaleString('en-IN')}
                   </span>
@@ -847,19 +851,25 @@ export const CheckoutPage: React.FC = () => {
 
                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                   <span className="flex items-center gap-1">
-                    <span>GST (18% Govt. Tax):</span>
-                    <HelpCircle className="w-3 h-3 text-slate-400" />
+                    <span>Taxes &amp; GST:</span>
                   </span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    ₹{taxAmount.toLocaleString('en-IN')}
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    Included in fee (₹0 extra)
                   </span>
                 </div>
 
-                <div className="flex justify-between pt-3 border-t border-slate-200 dark:border-[#2D3347] text-base font-black">
-                  <span className="text-slate-900 dark:text-white">Total Amount Payable:</span>
-                  <span className="text-2xl text-blue-600 dark:text-blue-400 font-black">
-                    ₹{finalPayable.toLocaleString('en-IN')}
-                  </span>
+                <div className="pt-3 border-t border-slate-200 dark:border-[#2D3347]">
+                  <div className="flex justify-between items-baseline text-base font-black">
+                    <span className="text-slate-900 dark:text-white">Total Amount Payable:</span>
+                    <span className="text-2xl text-blue-600 dark:text-blue-400 font-black">
+                      ₹{finalPayable.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="text-right mt-0.5">
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      Including all taxes
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -885,7 +895,7 @@ export const CheckoutPage: React.FC = () => {
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Pay ₹{finalPayable.toLocaleString('en-IN')} via Razorpay</span>
+                    <span>Pay ₹{finalPayable.toLocaleString('en-IN')} (All Taxes Included) via Razorpay</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
