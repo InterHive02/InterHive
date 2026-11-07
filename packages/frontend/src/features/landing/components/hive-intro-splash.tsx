@@ -27,14 +27,24 @@ export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
   const [phase, setPhase] = useState<'animating-hive' | 'text-reveal' | 'fading-out'>('animating-hive');
   const [isDismissed, setIsDismissed] = useState(false);
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  const onFadeOutStartRef = useRef(onFadeOutStart);
+  onFadeOutStartRef.current = onFadeOutStart;
+  const hasStartedRef = useRef(false);
+
   useEffect(() => {
+    // Strictly prevent the 3D animation from running a second time
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     const container = containerRef.current;
     if (!container) return;
 
     // Hard fallback safety timer: guarantee dismissal after 4.5s under all circumstances
     const safetyTimer = setTimeout(() => {
       setIsDismissed(true);
-      onComplete();
+      onCompleteRef.current();
     }, 4500);
 
     let renderer: THREE.WebGLRenderer | null = null;
@@ -401,15 +411,15 @@ export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
 
       animate();
 
-      // Timeline timers
+      // Timeline timers: Exactly ONE execution from start to finish
       const fadeOutTimer = setTimeout(() => {
         setPhase('fading-out');
-        onFadeOutStart?.();
+        onFadeOutStartRef.current?.();
       }, totalDuration * 1000);
 
       const finishTimer = setTimeout(() => {
         setIsDismissed(true);
-        onComplete();
+        onCompleteRef.current();
       }, (totalDuration + 0.6) * 1000);
 
       return () => {
@@ -443,17 +453,17 @@ export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
     } catch (err) {
       console.warn('Three.js initialization skipped, proceeding to site:', err);
       setIsDismissed(true);
-      onComplete();
+      onCompleteRef.current();
     }
-  }, [introDuration, totalDuration, onComplete]);
+  }, []);
 
   // Immediate skip function
   const handleSkip = () => {
     setPhase('fading-out');
-    onFadeOutStart?.();
+    onFadeOutStartRef.current?.();
     setTimeout(() => {
       setIsDismissed(true);
-      onComplete();
+      onCompleteRef.current();
     }, 200);
   };
 

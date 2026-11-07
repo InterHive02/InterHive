@@ -225,6 +225,20 @@ export const LandingPage: React.FC = () => {
     }
     return false;
   });
+
+  const handleFadeOutStart = React.useCallback(() => {
+    setIsLandingPageRevealed(true);
+  }, []);
+
+  const handleIntroComplete = React.useCallback(() => {
+    setShowIntroSplash(false);
+    setIsLandingPageRevealed(true);
+    try {
+      sessionStorage.setItem('interhive_intro_shown', 'true');
+    } catch (e) {
+      // ignore
+    }
+  }, []);
   
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -439,16 +453,8 @@ export const LandingPage: React.FC = () => {
         <HiveIntroSplash
           introDuration={2.0}
           totalDuration={3.4}
-          onFadeOutStart={() => setIsLandingPageRevealed(true)}
-          onComplete={() => {
-            setShowIntroSplash(false);
-            setIsLandingPageRevealed(true);
-            try {
-              sessionStorage.setItem('interhive_intro_shown', 'true');
-            } catch (e) {
-              // ignore
-            }
-          }}
+          onFadeOutStart={handleFadeOutStart}
+          onComplete={handleIntroComplete}
         />
       )}
 
