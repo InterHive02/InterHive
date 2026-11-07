@@ -52,9 +52,7 @@ import { CompanyInquiryModal } from '../components/company-inquiry-modal';
 import { VideoModal } from '../components/video-modal';
 import { PlacementTimelineCalculator } from '../components/placement-timeline-calculator';
 import { QuickReadinessQuizModal } from '../components/quick-readiness-quiz-modal';
-const HiveIntroSplash = React.lazy(() =>
-  import('../components/hive-intro-splash').then((m) => ({ default: m.HiveIntroSplash }))
-);
+import { HiveIntroSplash } from '../components/hive-intro-splash';
 import { landingCmsApi } from '../../../api/endpoints/landing-cms.api';
 import { pricingApi } from '../../../api/endpoints/pricing-revenue.api';
 import { DEFAULT_PROGRAM_PRICINGS } from '@interhive/shared';
@@ -193,6 +191,14 @@ export const LandingPage: React.FC = () => {
       return sessionStorage.getItem('interhive_intro_shown') !== 'true';
     }
     return true;
+  });
+  const [isLandingPageRevealed, setIsLandingPageRevealed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('nointro') === 'true') return true;
+      return sessionStorage.getItem('interhive_intro_shown') === 'true';
+    }
+    return false;
   });
   
   // FAQ Accordion State
@@ -400,27 +406,33 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white overflow-x-hidden">
+    <div className={`min-h-screen bg-[#F8FAFC] font-sans antialiased text-slate-800 selection:bg-blue-600 selection:text-white ${
+      showIntroSplash ? 'h-screen overflow-hidden' : 'overflow-x-hidden'
+    }`}>
       {/* 3D Kinetic Honeycomb Hive Intro Splash Animation with Circulating Points */}
       {showIntroSplash && (
-        <React.Suspense fallback={null}>
-          <HiveIntroSplash
-            introDuration={2.0}
-            totalDuration={3.4}
-            onComplete={() => {
-              setShowIntroSplash(false);
-              try {
-                sessionStorage.setItem('interhive_intro_shown', 'true');
-              } catch (e) {
-                // ignore
-              }
-            }}
-          />
-        </React.Suspense>
+        <HiveIntroSplash
+          introDuration={2.0}
+          totalDuration={3.4}
+          onFadeOutStart={() => setIsLandingPageRevealed(true)}
+          onComplete={() => {
+            setShowIntroSplash(false);
+            setIsLandingPageRevealed(true);
+            try {
+              sessionStorage.setItem('interhive_intro_shown', 'true');
+            } catch (e) {
+              // ignore
+            }
+          }}
+        />
       )}
 
-      {/* Header Navigation */}
-      <PublicNavbar
+      {/* Landing Page Content: Strictly hidden until 3D animation begins fading out */}
+      <div className={`transition-opacity duration-700 ease-in-out ${
+        isLandingPageRevealed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}>
+        {/* Header Navigation */}
+        <PublicNavbar
         activePage="home"
         onOpenInternshipModal={() => setIsInternshipModalOpen(true)}
         onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
@@ -1356,6 +1368,7 @@ export const LandingPage: React.FC = () => {
         onOpenInternshipModal={() => setIsInternshipModalOpen(true)}
         onOpenCompanyModal={() => setIsCompanyModalOpen(true)}
       />
+      </div>
 
       {/* ============================================================== */}
       {/* MODALS & PERSISTENT WIDGETS                                    */}

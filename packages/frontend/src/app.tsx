@@ -15,8 +15,11 @@ export const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
+      <div className="flex items-center justify-center min-h-screen bg-[#030712] text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 border-3 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+          <span className="text-[11px] font-bold tracking-widest text-amber-400 uppercase">Entering The Hive</span>
+        </div>
       </div>
     );
   }

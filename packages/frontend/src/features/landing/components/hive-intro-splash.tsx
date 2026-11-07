@@ -4,6 +4,7 @@ import { Sparkles, X } from 'lucide-react';
 
 interface HiveIntroSplashProps {
   onComplete: () => void;
+  onFadeOutStart?: () => void;
   /**
    * Duration in seconds before the "InterHive" text emerges from the center.
    * Defaults to 2.0 seconds.
@@ -18,6 +19,7 @@ interface HiveIntroSplashProps {
 
 export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
   onComplete,
+  onFadeOutStart,
   introDuration = 2.0,
   totalDuration = 3.4,
 }) => {
@@ -402,6 +404,7 @@ export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
       // Timeline timers
       const fadeOutTimer = setTimeout(() => {
         setPhase('fading-out');
+        onFadeOutStart?.();
       }, totalDuration * 1000);
 
       const finishTimer = setTimeout(() => {
@@ -447,6 +450,7 @@ export const HiveIntroSplash: React.FC<HiveIntroSplashProps> = ({
   // Immediate skip function
   const handleSkip = () => {
     setPhase('fading-out');
+    onFadeOutStart?.();
     setTimeout(() => {
       setIsDismissed(true);
       onComplete();
