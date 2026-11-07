@@ -381,7 +381,7 @@ export const CheckoutPage: React.FC = () => {
                   <span className="font-medium text-slate-800 dark:text-slate-200">{email}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-[#2D3347] font-bold text-base">
-                  <span className="text-slate-900 dark:text-white">Total Amount Paid (inc. 18% GST):</span>
+                  <span className="text-slate-900 dark:text-white">Total Amount Paid (including all taxes):</span>
                   <span className="text-emerald-600 dark:text-emerald-400">
                     ₹{(completedOrder.finalPayableAmount || finalPayable).toLocaleString('en-IN')}
                   </span>
@@ -395,11 +395,11 @@ export const CheckoutPage: React.FC = () => {
                 to="/my-programs"
                 className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
               >
-                <span>View My Programs & Receipts</span>
+                <span>View My Programs &amp; Receipts</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to={isAuthenticated ? '/student/dashboard' : '/login'}
+                to={isAuthenticated ? '/dashboard' : '/login'}
                 className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm flex items-center justify-center gap-2"
               >
                 <span>Go to Student Portal</span>

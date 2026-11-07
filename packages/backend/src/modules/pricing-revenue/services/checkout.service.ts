@@ -91,13 +91,9 @@ export class CheckoutService {
     // Subtotal after discounts
     const subtotalAfterDiscounts = Math.max(0, baseAmount - automaticDiscount - couponDiscount - referralDiscount);
 
-    // 4. Tax (GST)
-    let taxAmount = 0;
-    if (!program.taxIncluded && program.taxPercentage > 0) {
-      taxAmount = Math.round((subtotalAfterDiscounts * program.taxPercentage) / 100);
-    }
-
-    const finalPayableAmount = Math.max(0, subtotalAfterDiscounts + taxAmount);
+    // 4. Tax (GST) - All program fees are fixed and inclusive of all taxes
+    const taxAmount = 0;
+    const finalPayableAmount = Math.max(0, subtotalAfterDiscounts);
 
     return {
       programKey: program.programKey,

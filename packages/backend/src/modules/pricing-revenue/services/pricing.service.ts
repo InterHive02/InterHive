@@ -14,12 +14,13 @@ export class PricingService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // Auto-seed default program pricings if collection is empty
+    // Auto-seed default program pricings if collection is empty and ensure all programs include taxes
     try {
+      await this.pricingModel.updateMany({}, { $set: { taxIncluded: true, taxPercentage: 0 } });
       const count = await this.pricingModel.countDocuments();
       if (count === 0) {
         for (const item of DEFAULT_PROGRAM_PRICINGS) {
-          await this.pricingModel.create(item);
+          await this.pricingModel.create({ ...item, taxIncluded: true, taxPercentage: 0 });
         }
         console.log('[PricingService] Seeded default program pricing configurations.');
       }

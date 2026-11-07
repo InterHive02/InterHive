@@ -926,7 +926,7 @@ export const LandingPage: React.FC = () => {
 
                               <p className="text-[10.5px] font-semibold text-emerald-700 flex items-center gap-1">
                                 <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                                <span>Save ₹{pricing.discount.toLocaleString('en-IN')} on launch pricing</span>
+                                <span>Save ₹{pricing.discount.toLocaleString('en-IN')} · Including all taxes</span>
                               </p>
 
                               <div className="pt-2 mt-1 border-t border-slate-200/60 text-[10.5px] text-slate-500 flex flex-col gap-0.5">
