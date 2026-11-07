@@ -492,7 +492,7 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   {/* Headline */}
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.18] sm:leading-[1.15]">
                     {cmsConfig.hero?.headlineMain || 'Transforming Academic Learning into'}{' '}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
                       {cmsConfig.hero?.headlineGradient || 'Production-Ready Engineering.'}
@@ -616,18 +616,18 @@ export const LandingPage: React.FC = () => {
                       </div>
 
                       {/* Micro Metric Gauges */}
-                      <div className="grid grid-cols-3 gap-2 pt-1 text-center text-xs">
-                        <div className="p-2 rounded-lg bg-white border border-slate-200">
-                          <p className="font-black text-slate-900">{currentTrack.projects || '5/5'} Projects</p>
-                          <p className="text-[10px] text-slate-400">Verified Code</p>
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1 text-center text-xs">
+                        <div className="p-1.5 sm:p-2 rounded-lg bg-white border border-slate-200">
+                          <p className="font-black text-slate-900 text-[11px] sm:text-xs">{currentTrack.projects || '5/5'} Projects</p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">Verified Code</p>
                         </div>
-                        <div className="p-2 rounded-lg bg-white border border-slate-200">
-                          <p className="font-black text-blue-600">{currentTrack.tests || '8/8'} Tests</p>
-                          <p className="text-[10px] text-slate-400">Unit Tests Passing</p>
+                        <div className="p-1.5 sm:p-2 rounded-lg bg-white border border-slate-200">
+                          <p className="font-black text-blue-600 text-[11px] sm:text-xs">{currentTrack.tests || '8/8'} Tests</p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">Passing Tests</p>
                         </div>
-                        <div className="p-2 rounded-lg bg-white border border-slate-200">
-                          <p className="font-black text-purple-600">{currentTrack.stipend || '₹35k/mo'}</p>
-                          <p className="text-[10px] text-slate-400">Target Stipend</p>
+                        <div className="p-1.5 sm:p-2 rounded-lg bg-white border border-slate-200">
+                          <p className="font-black text-purple-600 text-[11px] sm:text-xs">{currentTrack.stipend || '₹35k/mo'}</p>
+                          <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">Target Stipend</p>
                         </div>
                       </div>
 
@@ -783,8 +783,8 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Year Filter Tabs */}
-              <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
+              {/* Year Filter Tabs: Touch-scrollable horizontally on mobile, centered flex-wrap on desktop */}
+              <div className="flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 overflow-x-auto sm:flex-wrap pb-2 sm:pb-0 scrollbar-none px-2 mb-8">
                 {[
                   { id: 'ALL', label: 'All 5 Programs', mobileLabel: 'All', desktopOnly: true },
                   { id: 'PPO', label: 'Final Year PPO (Batch 2027) · Fast-Track', mobileLabel: 'PPO (2027)' },
@@ -1049,7 +1049,7 @@ export const LandingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleEnrollClick('PPO')}
-                    className="px-6 py-3 rounded-xl bg-white text-blue-700 font-black text-xs hover:bg-blue-50 transition shadow-md whitespace-nowrap cursor-pointer shrink-0"
+                    className="w-full sm:w-auto px-6 py-3 min-h-[44px] rounded-xl bg-white text-blue-700 font-black text-xs hover:bg-blue-50 transition shadow-md whitespace-nowrap cursor-pointer shrink-0 flex items-center justify-center"
                   >
                     Enroll in PPO Track →
                   </button>
@@ -1385,26 +1385,26 @@ export const LandingPage: React.FC = () => {
 
       {/* Sticky Persistent CTA Bar */}
       {showStickyCta && isSectionVisible('stickyCta') && (
-        <aside aria-label="Quick application" className="fixed bottom-4 left-0 right-0 z-40 px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="max-w-3xl mx-auto bg-slate-900/95 backdrop-blur-xl text-white rounded-2xl p-3 sm:p-3.5 shadow-2xl border border-slate-700/60 flex items-center justify-between gap-3 pointer-events-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/30">
-                <GraduationCap className="w-5 h-5 text-white" />
+        <aside aria-label="Quick application" className="fixed bottom-3 sm:bottom-4 left-0 right-0 z-40 px-2.5 sm:px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="max-w-3xl mx-auto bg-slate-900/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3.5 shadow-2xl border border-slate-700/60 flex items-center justify-between gap-2.5 sm:gap-3 pointer-events-auto">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/30">
+                <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:block min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-xs sm:text-sm text-white">InterHive Admissions Open</span>
                   <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
                     5 Major Programs
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300">
+                <p className="text-[11px] text-slate-300 truncate">
                   Batches 2027-2030 &bull; PPO Program: 2 Mo InterHive + 6 Mo Corporate Internship
                 </p>
               </div>
-              <div className="sm:hidden">
-                <span className="font-extrabold text-xs text-white block">Admissions Open</span>
-                <span className="text-[10px] text-slate-300 block">1-Year to PPO Track</span>
+              <div className="sm:hidden min-w-0">
+                <span className="font-extrabold text-xs text-white block truncate">Admissions Open</span>
+                <span className="text-[10px] text-slate-300 block truncate">Batches 2027–2030 &bull; PPO Track</span>
               </div>
             </div>
 
@@ -1415,7 +1415,7 @@ export const LandingPage: React.FC = () => {
                   setSelectedProgramTypeForModal('PPO');
                   setIsInternshipModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition cursor-pointer"
+                className="px-3.5 sm:px-4 py-2 min-h-[40px] rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center justify-center"
               >
                 Apply Now
               </button>

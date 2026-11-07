@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 
 interface PublicNavbarProps {
   activePage?: 'home' | 'about' | 'programs' | 'contact' | 'for-interns' | 'for-companies';
@@ -104,19 +104,19 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
         </nav>
 
         {/* Actions & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             to="/login"
-            className="px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-slate-700 hover:text-blue-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center"
+            className="hidden sm:inline-flex px-4 sm:px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-slate-700 hover:text-blue-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all items-center justify-center"
           >
             Login
           </Link>
 
           <button
             onClick={() => navigate('/register')}
-            className="px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+            className="px-3.5 sm:px-5 py-2 min-h-[40px] rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
           >
-            Get Started
+            <span>Apply Now</span>
           </button>
 
           {/* Mobile Hamburger Button */}
@@ -141,7 +141,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'home'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -155,7 +155,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/programs"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'programs'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -169,7 +169,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/for-interns"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'for-interns'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -185,7 +185,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/for-companies"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'for-companies'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -201,7 +201,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/about"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'about'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -215,7 +215,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <Link
               to="/contact"
               onClick={() => setIsMobileNavOpen(false)}
-              className={`px-3 py-2.5 rounded-xl flex items-center justify-between ${
+              className={`px-3 py-2.5 rounded-xl flex items-center justify-between min-h-[44px] ${
                 activePage === 'contact'
                   ? 'bg-blue-50 text-blue-600 font-extrabold'
                   : 'hover:bg-slate-50 hover:text-blue-600 transition-colors'
@@ -225,6 +225,29 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
               {activePage === 'contact' && (
                 <span className="text-xs text-blue-600 font-extrabold">Active</span>
               )}
+            </Link>
+          </div>
+
+          {/* Prominent Action Buttons on Mobile */}
+          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileNavOpen(false);
+                navigate('/register');
+              }}
+              className="w-full py-3 min-h-[44px] rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Apply for Program / Register</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <Link
+              to="/login"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="w-full py-2.5 min-h-[44px] rounded-xl font-bold text-sm text-slate-700 border border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors"
+            >
+              Student &amp; Partner Login
             </Link>
           </div>
         </div>

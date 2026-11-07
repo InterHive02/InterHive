@@ -456,7 +456,7 @@ export const CheckoutPage: React.FC = () => {
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">
                 Selected Program Category
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="flex sm:grid sm:grid-cols-5 gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                 {Object.keys(PROGRAM_CONFIGS).map((progId) => {
                   const item = (PROGRAM_CONFIGS as any)[progId];
                   const isSelected = selectedKey === progId;
@@ -469,7 +469,7 @@ export const CheckoutPage: React.FC = () => {
                         setAppliedCoupon(null);
                         setCouponError(null);
                       }}
-                      className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
+                      className={`min-w-[130px] sm:min-w-0 flex-1 p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
                         isSelected
                           ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20'
                           : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'

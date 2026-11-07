@@ -26,6 +26,7 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
   const plans = {
     '1st': {
       label: '1st Year (Batch 2030)',
+      mobileLabel: '1st Yr (2030)',
       shortBadge: 'Exclusively 1st Year Students',
       targetSemester: '1st & 2nd Semester',
       programKey: 'FOUR_YEAR',
@@ -44,6 +45,7 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
     },
     '2nd': {
       label: '2nd Year (Batch 2029)',
+      mobileLabel: '2nd Yr (2029)',
       shortBadge: 'Exclusively 2nd Year Students',
       targetSemester: '3rd & 4th Semester',
       programKey: 'THREE_YEAR',
@@ -61,6 +63,7 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
     },
     '3rd': {
       label: '3rd Year (Batch 2028)',
+      mobileLabel: '3rd Yr (2028)',
       shortBadge: 'Exclusively 3rd Year Students',
       targetSemester: '5th & 6th Semester',
       programKey: 'TWO_YEAR',
@@ -77,6 +80,7 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
     },
     'final': {
       label: 'Final Year (Batch 2027) — PPO Program',
+      mobileLabel: 'PPO (2027)',
       shortBadge: '2 Mo InterHive + 6 Mo Company',
       targetSemester: '7th & 8th Semester',
       programKey: 'PPO',
@@ -100,19 +104,20 @@ export const PlacementTimelineCalculator: React.FC<PlacementTimelineCalculatorPr
       <div className="space-y-6">
 
         {/* 4 Interactive Year Tab Selector */}
-        <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-slate-200/70 rounded-2xl max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 p-1.5 bg-slate-200/70 rounded-2xl max-w-3xl mx-auto">
           {(['1st', '2nd', '3rd', 'final'] as const).map((year) => (
             <button
               key={year}
               type="button"
               onClick={() => setSelectedYear(year)}
-              className={`flex-1 min-w-[140px] sm:min-w-[160px] py-3 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
+              className={`flex-1 sm:min-w-[150px] py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer min-h-[44px] flex items-center justify-center ${
                 selectedYear === year
                   ? 'bg-white text-blue-700 shadow-md shadow-slate-300/50 scale-[1.02]'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              {plans[year].label}
+              <span className="sm:hidden">{plans[year].mobileLabel}</span>
+              <span className="hidden sm:inline">{plans[year].label}</span>
             </button>
           ))}
         </div>

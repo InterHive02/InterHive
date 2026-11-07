@@ -45,7 +45,7 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
                 {config.duration}
               </span>
             </div>
-            <h2 className="text-[26px] sm:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
+            <h2 className="text-xl sm:text-2xl md:text-[28px] font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               {config.title} Roadmap & Details
             </h2>
             <p className="text-[14px] text-slate-600 dark:text-slate-300 mt-1 max-w-2xl leading-relaxed">
@@ -167,11 +167,11 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
             <span>Official InterHive Industry Readiness Program</span>
           </div>
 
-          <div className="flex gap-3 w-full sm:w-auto justify-end">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 w-full sm:w-auto justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-[12px] border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-[14px] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-[12px] border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-[14px] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer flex items-center justify-center"
             >
               Close
             </button>
@@ -181,9 +181,10 @@ export const ProgramDetailsModal: React.FC<ProgramDetailsModalProps> = ({
                 onClose();
                 onEnroll(config.id);
               }}
-              className="px-6 py-2.5 rounded-[12px] bg-primary hover:bg-primary-dark text-white font-semibold text-[14px] transition-colors duration-150 cursor-pointer shadow-lg flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-2.5 min-h-[44px] rounded-[12px] bg-primary hover:bg-primary-dark text-white font-semibold text-[14px] transition-colors duration-150 cursor-pointer shadow-lg flex items-center justify-center gap-2"
             >
-              <span>Enroll in {config.title}</span>
+              <span className="sm:hidden">Enroll in Program</span>
+              <span className="hidden sm:inline">Enroll in {config.title}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
