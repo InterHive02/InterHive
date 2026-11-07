@@ -120,7 +120,32 @@ export const LandingPage: React.FC = () => {
   const [activeDetailsProgramType, setActiveDetailsProgramType] = useState<ProgramTypeKey | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
-  const [selectedYearFilter, setSelectedYearFilter] = useState<string>('ALL');
+  // Responsive year filter: On phone/mobile, default to a single year ('PPO') so only 1 program card is shown
+  const [selectedYearFilter, setSelectedYearFilter] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return 'PPO';
+    }
+    return 'ALL';
+  });
+
+  const [isMobileView, setIsMobileView] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobileView(mobile);
+      if (mobile && selectedYearFilter === 'ALL') {
+        setSelectedYearFilter('PPO');
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [selectedYearFilter]);
   
   // Dynamic Program Pricing State with robust defaults
   const [pricingMap, setPricingMap] = useState<Record<string, { originalPrice: number; promotionalPrice: number; discount: number; installmentText: string }>>(() => {
@@ -753,254 +778,188 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* Year Filter Tabs */}
-              <div className="flex items-center justify-center gap-2 flex-wrap mb-12">
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
                 {[
-                  { id: 'ALL', label: 'All 5 Programs' },
-                  { id: 'FOUR_YEAR', label: '1st Year (Batch 2030) · 4-Yr Track' },
-                  { id: 'THREE_YEAR', label: '2nd Year (Batch 2029) · 3-Yr Track' },
-                  { id: 'TWO_YEAR', label: '3rd Year (Batch 2028) · 2-Yr Track' },
-                  { id: 'ONE_YEAR', label: 'Final Year (Batch 2027) · 1-Yr Track' },
-                  { id: 'PPO', label: 'Final Year PPO (Batch 2027) · Fast-Track' },
+                  { id: 'ALL', label: 'All 5 Programs', mobileLabel: 'All', desktopOnly: true },
+                  { id: 'PPO', label: 'Final Year PPO (Batch 2027) · Fast-Track', mobileLabel: 'PPO (2027)' },
+                  { id: 'ONE_YEAR', label: 'Final Year (Batch 2027) · 1-Yr Track', mobileLabel: 'Final Yr' },
+                  { id: 'TWO_YEAR', label: '3rd Year (Batch 2028) · 2-Yr Track', mobileLabel: '3rd Yr' },
+                  { id: 'THREE_YEAR', label: '2nd Year (Batch 2029) · 3-Yr Track', mobileLabel: '2nd Yr' },
+                  { id: 'FOUR_YEAR', label: '1st Year (Batch 2030) · 4-Yr Track', mobileLabel: '1st Yr' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setSelectedYearFilter(tab.id)}
-                    className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-xs ${
-                      selectedYearFilter === tab.id
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-xs ${
+                      tab.desktopOnly ? 'hidden md:inline-flex' : 'inline-flex'
+                    } ${
+                      (isMobileView && selectedYearFilter === 'ALL' ? 'PPO' : selectedYearFilter) === tab.id
                         ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/20'
                         : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
-                    {tab.label}
+                    <span className="md:hidden">{tab.mobileLabel}</span>
+                    <span className="hidden md:inline">{tab.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* The 5 Program Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                {(Object.values(PROGRAM_CONFIGS) as any[])
-                  .filter((prog) => selectedYearFilter === 'ALL' || prog.id === selectedYearFilter)
-                  .map((prog) => {
-                    const isPPO = prog.id === 'PPO';
-                    const pricing = pricingMap[prog.id] || {
-                      originalPrice: 4999,
-                      promotionalPrice: 2999,
-                      discount: 2000,
-                      installmentText: 'Full One-Time Payment',
-                    };
-                    const percentOff = Math.round((pricing.discount / pricing.originalPrice) * 100);
+              {/* The Program Cards Grid: On phone/mobile, ONLY the program of the selected year is shown */}
+              {(() => {
+                const activeYear = isMobileView && selectedYearFilter === 'ALL' ? 'PPO' : selectedYearFilter;
+                const filteredPrograms = (Object.values(PROGRAM_CONFIGS) as any[])
+                  .filter((prog) => activeYear === 'ALL' || prog.id === activeYear);
 
-                    // Custom business positioning per program
-                    const programMeta: Record<string, { ribbon: string; ribbonColor: string; dailyCost: string; highlights: string[] }> = {
-                      PPO: {
-                        ribbon: 'PRE-PLACEMENT OFFER TRACK · BATCH 2027',
+                return (
+                  <div className={`grid gap-6 ${
+                    activeYear === 'ALL'
+                      ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+                      : 'grid-cols-1 max-w-sm sm:max-w-md mx-auto w-full'
+                  }`}>
+                    {filteredPrograms.map((prog) => {
+                      const isPPO = prog.id === 'PPO';
+                      const pricing = pricingMap[prog.id] || {
+                        originalPrice: 4999,
+                        promotionalPrice: 2999,
+                        discount: 2000,
+                        installmentText: 'Full One-Time Payment',
+                      };
+                      const percentOff = Math.round((pricing.discount / pricing.originalPrice) * 100);
+
+                      // Concise cohort ribbon & positioning per program
+                      const programMeta: Record<string, { ribbon: string; ribbonColor: string; dailyCost: string }> = {
+                        PPO: {
+                          ribbon: 'PRE-PLACEMENT OFFER TRACK · BATCH 2027',
+                          ribbonColor: 'bg-blue-600 text-white',
+                          dailyCost: 'Structured 8-month trajectory with partner company',
+                        },
+                        FOUR_YEAR: {
+                          ribbon: 'DEGREE-PARALLEL TRACK · BATCH 2030',
+                          ribbonColor: 'bg-slate-900 text-white',
+                          dailyCost: 'Comprehensive 4-year engineering transformation',
+                        },
+                        THREE_YEAR: {
+                          ribbon: 'ENGINEERING SPECIALIZATION · BATCH 2029',
+                          ribbonColor: 'bg-slate-800 text-white',
+                          dailyCost: 'Rigorous 3-year production skill track',
+                        },
+                        TWO_YEAR: {
+                          ribbon: 'ACCELERATED SPRINT · BATCH 2028',
+                          ribbonColor: 'bg-slate-800 text-white',
+                          dailyCost: '2-year intensive production track',
+                        },
+                        ONE_YEAR: {
+                          ribbon: 'PLACEMENT ACCELERATOR · BATCH 2027',
+                          ribbonColor: 'bg-indigo-700 text-white',
+                          dailyCost: 'Direct corporate placement readiness',
+                        },
+                      };
+
+                      const meta = programMeta[prog.id] || {
+                        ribbon: 'FEATURED TRACK',
                         ribbonColor: 'bg-blue-600 text-white',
-                        dailyCost: 'Structured 8-month trajectory with partner company',
-                        highlights: [
-                          '2 Months Training & Readiness done by InterHive',
-                          'Assured 6-Month Corporate Internship at partner company',
-                          'Competitive monthly stipend paid directly by company',
-                          'Weekly 1-on-1 engineering mentor reviews & code audits',
-                          'Pre-Placement Offer (PPO) conversion evaluation',
-                        ],
-                      },
-                      FOUR_YEAR: {
-                        ribbon: 'DEGREE-PARALLEL TRACK · BATCH 2030',
-                        ribbonColor: 'bg-slate-900 text-white',
-                        dailyCost: 'Comprehensive 4-year engineering transformation',
-                        highlights: [
-                          'Comprehensive 4-year degree-parallel engineering transformation',
-                          '4 Industrial Internships + 1 Paid Corporate Internship',
-                          'Full-stack architecture, Docker, CI/CD & microservices',
-                          'Continuous GitHub PR audits & verified skill scorecards',
-                          'Guaranteed partner placement drives with zero graduation stress',
-                        ],
-                      },
-                      THREE_YEAR: {
-                        ribbon: 'ENGINEERING SPECIALIZATION · BATCH 2029',
-                        ribbonColor: 'bg-slate-800 text-white',
-                        dailyCost: 'Rigorous 3-year production skill track',
-                        highlights: [
-                          '4 Industrial Internships (Y2 & Y3) + 1 4th-Yr Paid Corporate Internship',
-                          'Modern full-stack, cloud deployments & database optimization',
-                          'Agile sprint ceremonies, ticket delivery & code standards',
-                          'Direct matchmaking drives with active partner tech companies',
-                          'Pre-Placement Offer (PPO) conversion support',
-                        ],
-                      },
-                      TWO_YEAR: {
-                        ribbon: 'ACCELERATED SPRINT · BATCH 2028',
-                        ribbonColor: 'bg-slate-800 text-white',
-                        dailyCost: '2-year intensive production track',
-                        highlights: [
-                          '2 Industry training/internships (3rd Yr) + 1 Paid Internship (4th Yr)',
-                          'Production-grade clean code, REST/GraphQL APIs & system design',
-                          'Technical mentor code audits & portfolio milestone reviews',
-                          'Mock technical & HR interviews with senior tech leads',
-                          'PPO conversion and offer letter finalization',
-                        ],
-                      },
-                      ONE_YEAR: {
-                        ribbon: 'PLACEMENT ACCELERATOR · BATCH 2027',
-                        ribbonColor: 'bg-indigo-700 text-white',
-                        dailyCost: 'Direct corporate placement readiness',
-                        highlights: [
-                          'Immediate industry-readiness training & production sprints',
-                          '1 Quality Corporate Internship opportunity with stipend',
-                          'Resume rebuild, GitHub dossier & LinkedIn audit',
-                          'System design, DSA coding sprints & mock interview rounds',
-                          'Direct matching with partner companies hiring freshers',
-                        ],
-                      },
-                    };
+                        dailyCost: 'High-ROI Industry Readiness',
+                      };
 
-                    const meta = programMeta[prog.id] || {
-                      ribbon: '⭐ FEATURED PROGRAM',
-                      ribbonColor: 'bg-blue-600 text-white',
-                      dailyCost: 'High-ROI Industry Readiness',
-                      highlights: [
-                        'Structured corporate curriculum',
-                        'Real production codebase experience',
-                        'Assured partner internship opportunities',
-                        'Verified industry readiness credential',
-                      ],
-                    };
-
-                    return (
-                      <div
-                        key={prog.id}
-                        className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden bg-white ${
-                          isPPO
-                            ? 'border-blue-400 ring-2 ring-blue-500/30'
-                            : 'border-slate-200/90'
-                        }`}
-                      >
-                        {/* Top Ribbon */}
-                        <div className="absolute top-0 right-0 left-0">
-                          <div className={`text-[10px] font-black uppercase tracking-wider py-1 px-4 text-center ${meta.ribbonColor}`}>
-                            {meta.ribbon}
-                          </div>
-                        </div>
-
-                        <div className="pt-4 space-y-4">
-                          {/* Batch & Duration Tags */}
-                          <div className="flex items-center justify-between gap-1.5 pt-1">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                              {prog.badge}
-                            </span>
-                            <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5 text-blue-600" />
-                              {prog.duration}
-                            </span>
-                          </div>
-
-                          {/* Title & Batch Target */}
-                          <div>
-                            <h3 className="text-xl font-black text-slate-900 leading-snug tracking-tight">
-                              {prog.title}
-                            </h3>
-                            <p className="text-[11px] font-bold text-indigo-700 mt-0.5">
-                              {prog.targetAcademicYear}
-                            </p>
-                          </div>
-
-                          {/* PRICING BLOCK (Business Mind Display) */}
-                          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-slate-200/80 space-y-1.5">
-                            <div className="flex items-baseline justify-between gap-2">
-                              <span className="text-xs text-slate-400 line-through font-semibold">
-                                ₹{pricing.originalPrice.toLocaleString('en-IN')}
-                              </span>
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                {percentOff}% OFF
-                              </span>
-                            </div>
-
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                                ₹{pricing.promotionalPrice.toLocaleString('en-IN')}
-                              </span>
-                              <span className="text-xs font-bold text-slate-500">/ program</span>
-                            </div>
-
-                            <p className="text-[10.5px] font-semibold text-emerald-700 flex items-center gap-1">
-                              <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                              <span>Save ₹{pricing.discount.toLocaleString('en-IN')} on launch pricing</span>
-                            </p>
-
-                            <div className="pt-2 mt-1 border-t border-slate-200/60 text-[10.5px] text-slate-500 flex flex-col gap-0.5">
-                              <span className="font-semibold text-slate-700">{pricing.installmentText}</span>
-                              <span className="text-[10px] text-blue-600 font-medium">{meta.dailyCost}</span>
+                      return (
+                        <div
+                          key={prog.id}
+                          className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-xl relative overflow-hidden bg-white ${
+                            isPPO
+                              ? 'border-blue-400 ring-2 ring-blue-500/30'
+                              : 'border-slate-200/90'
+                          }`}
+                        >
+                          {/* Top Ribbon */}
+                          <div className="absolute top-0 right-0 left-0">
+                            <div className={`text-[10px] font-black uppercase tracking-wider py-1 px-4 text-center ${meta.ribbonColor}`}>
+                              {meta.ribbon}
                             </div>
                           </div>
 
-                          {/* PPO Specific Blueprint Highlight */}
-                          {isPPO && (
-                            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-500/20 text-[11px] space-y-1">
-                              <span className="font-extrabold text-blue-700 block text-[10px] uppercase tracking-wider">
-                                2-Phase PPO Architecture
+                          <div className="pt-4 space-y-4">
+                            {/* Batch & Duration Tags */}
+                            <div className="flex items-center justify-between gap-1.5 pt-1">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                {prog.badge}
                               </span>
-                              <p className="font-bold text-slate-800 leading-snug">
-                                2 Mo Training at InterHive + 6 Mo Corporate Internship at Company = Direct PPO
+                              <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-blue-600" />
+                                {prog.duration}
+                              </span>
+                            </div>
+
+                            {/* Title & Batch Target */}
+                            <div>
+                              <h3 className="text-xl font-black text-slate-900 leading-snug tracking-tight">
+                                {prog.title}
+                              </h3>
+                              <p className="text-[11px] font-bold text-indigo-700 mt-0.5">
+                                {prog.targetAcademicYear}
                               </p>
                             </div>
-                          )}
 
-                          {/* Career Milestone Target */}
-                          <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/70 text-[11px] space-y-1">
-                            <span className="font-bold text-emerald-800 uppercase tracking-wider text-[9px] block">
-                              Career Milestone Target
-                            </span>
-                            <span className="font-bold text-emerald-900 flex items-start gap-1 leading-snug">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                              <span>{prog.summaryTarget}</span>
-                            </span>
+                            {/* Clean Pricing Block */}
+                            <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-slate-200/80 space-y-1.5">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <span className="text-xs text-slate-400 line-through font-semibold">
+                                  ₹{pricing.originalPrice.toLocaleString('en-IN')}
+                                </span>
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  {percentOff}% OFF
+                                </span>
+                              </div>
+
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                                  ₹{pricing.promotionalPrice.toLocaleString('en-IN')}
+                                </span>
+                                <span className="text-xs font-bold text-slate-500">/ program</span>
+                              </div>
+
+                              <p className="text-[10.5px] font-semibold text-emerald-700 flex items-center gap-1">
+                                <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span>Save ₹{pricing.discount.toLocaleString('en-IN')} on launch pricing</span>
+                              </p>
+
+                              <div className="pt-2 mt-1 border-t border-slate-200/60 text-[10.5px] text-slate-500 flex flex-col gap-0.5">
+                                <span className="font-semibold text-slate-700">{pricing.installmentText}</span>
+                                <span className="text-[10px] text-blue-600 font-medium">{meta.dailyCost}</span>
+                              </div>
+                            </div>
                           </div>
 
-                          {/* Value Checklist (What Students Actually Get) */}
-                          <div className="space-y-2 pt-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                              What You Get:
-                            </span>
-                            <ul className="space-y-1.5 text-xs text-slate-700">
-                              {meta.highlights.map((h, i) => (
-                                <li key={i} className="flex items-start gap-2 text-[11.5px] leading-snug">
-                                  <Check className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
-                                  <span>{h}</span>
-                                </li>
-                              ))}
-                            </ul>
+                          {/* Card Footer CTAs */}
+                          <div className="pt-5 mt-4 border-t border-slate-100 space-y-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEnrollClick(prog.id)}
+                              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95"
+                            >
+                              <span>Enroll Now — ₹{pricing.promotionalPrice.toLocaleString('en-IN')}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRoadmapClick(prog.id)}
+                              className="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                              <span>View Detailed Roadmap</span>
+                            </button>
+
+                            <p className="text-[11px] text-center text-slate-500 font-medium pt-1">
+                              Institutional scholarship code: <span className="text-slate-800 font-semibold font-mono">FIRSTBATCH</span>
+                            </p>
                           </div>
                         </div>
-
-                        {/* Card Footer CTAs */}
-                        <div className="pt-5 mt-4 border-t border-slate-100 space-y-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEnrollClick(prog.id)}
-                            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95"
-                          >
-                            <span>Enroll Now — ₹{pricing.promotionalPrice.toLocaleString('en-IN')}</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRoadmapClick(prog.id)}
-                            className="w-full py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1 cursor-pointer"
-                          >
-                            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                            <span>View Detailed Roadmap</span>
-                          </button>
-
-                          <p className="text-[11px] text-center text-slate-500 font-medium pt-1">
-                            Institutional scholarship code: <span className="text-slate-800 font-semibold font-mono">FIRSTBATCH</span>
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {/* Strategic Business Mind ROI & Comparison Section */}
               <div className="mt-16 bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-sm space-y-8">
